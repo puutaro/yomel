@@ -1,0 +1,20 @@
+// {
+//     "emeraldwalk.runonsave": {
+//         "commands": [
+//             {
+//                 "match": "\\.(go|rs|py|json|md)$",
+//                 "cmd": "${userHome}/Desktop/share/shell/cmdclick/full_use/prj2zip.sh ${workspaceFolder}",
+//                 "isAsync": true
+//             }
+//         ]
+//     },
+//     "vim.commandLineModeKeyBindingsNonRecursive": [
+//         {
+//             "before": ["w"],
+//             "after": [],
+//             "commands": [
+//                 "workbench.action.files.save"
+//             ]
+//         }
+//     ]
+// }
