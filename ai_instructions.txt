@@ -1,0 +1,2 @@
+[Gemini rule]
+- All english in code. comment, code, and etc are english.
