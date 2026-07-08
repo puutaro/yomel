@@ -97,13 +97,16 @@ yomel \
   --log \
   --log-filter "grep 'Exception'" \
   stage "fetch-cloud-logs" \
-    -cmd "aws" \
-      --lop "region" --val --s "us-east-1" \
-    -svc "logs" \
-    -act "filter-log-events" \
-      --lop "log-group-name" --val --s "/aws/lambda/my-prod-service" \
-      --lop "limit" --val --n "100" \
+  -cmd "aws" \
+  --lop "region" \
+  --val --s "us-east-1" \
+  -svc "logs" \
+  -act "filter-log-events" \
+  --lop "log-group-name" \
+  --val --s "/aws/lambda/my-prod-service" \
+  --lop "limit" \
+  --val --n "100" \
   stage "mask-sensitive-data" \
-    -cmd "sed" \
-      --opt "e" \
-      --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+  -cmd "sed" \
+  --opt "e" \
+  --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
