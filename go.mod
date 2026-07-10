@@ -3,6 +3,7 @@ module github.com/puutaro/yomel
 go 1.24.7
 
 require (
+	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/alecthomas/kong v1.15.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/k0kubun/pp v3.0.1+incompatible // indirect

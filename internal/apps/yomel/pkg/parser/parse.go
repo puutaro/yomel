@@ -1,4 +1,4 @@
-package sh
+package parser
 
 import (
 	"fmt"
@@ -63,6 +63,7 @@ type Control struct {
 	IsLog        bool
 	LogFilter    string
 	ErrLogFilter string
+	IsVersion    bool
 }
 
 type Yomel struct {
@@ -71,11 +72,11 @@ type Yomel struct {
 }
 
 func Parse(argTables []args.ArgTable) Yomel {
-	ctrl, stModels := ParseStageModels(argTables)
-	return ParseStage(ctrl, stModels)
+	ctrl, stModels := parseStageModels(argTables)
+	return parseStage(ctrl, stModels)
 }
 
-func ParseStage(ctrl Control, stModels []stageModel) Yomel {
+func parseStage(ctrl Control, stModels []stageModel) Yomel {
 	yomel := Yomel{Ctrl: ctrl}
 	stages := make([]Stage, len(stModels))
 	for i, stModel := range stModels {
@@ -118,7 +119,7 @@ func ParseStage(ctrl Control, stModels []stageModel) Yomel {
 	return yomel
 }
 
-func ParseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
+func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 	var curCtrlArgTables []args.ArgTable
 	for _, argTable := range argTables {
 		if argTable.StageNo > 0 {
@@ -130,6 +131,12 @@ func ParseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		)
 	}
 	ctrl := Control{}
+	ctrl.IsVersion = getFlag(
+		0,
+		curCtrlArgTables,
+		func(t args.ArgTable) bool { return t.IsVersion },
+		false,
+	)
 	ctrl.IsLog = getFlag(
 		0,
 		curCtrlArgTables,

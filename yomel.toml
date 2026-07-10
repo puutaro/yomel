@@ -1,0 +1,4 @@
+[yomel]
+version = "0.0.1"
+name = "yomel"
+description = "YAML-like shellscript pipeline runner"

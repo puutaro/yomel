@@ -1,17 +1,35 @@
+//go:generate sh -c "cd ../.. && ./gen_yomel_info.sh"
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/sh"
 )
 
+const (
+	normalExitSignal = 0
+	errorExitSignal  = 1
+)
+
 func main() {
+
 	argTables := args.GenArgTable()
-	// pp.Printf("argTables stages: %+v\n", argTables)
-	chain := sh.Parse(argTables)
-	// pp.Printf("stages stages: %+v\n", chain)
-	chainStr := sh.Gen(chain)
-	// pp.Printf("chain \n%v\n", chainStr)
+	yomel := parser.Parse(argTables)
+	version, versionErr := info.GetVersion(yomel.Ctrl)
+	if versionErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", versionErr)
+		os.Exit(errorExitSignal)
+	}
+	if version != nil {
+		fmt.Fprintf(os.Stdout, "%s\n", *version)
+		os.Exit(normalExitSignal)
+	}
+	chainStr := sh.Gen(yomel)
 	sh.Exec(chainStr)
 
 }

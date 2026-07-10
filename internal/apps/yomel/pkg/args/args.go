@@ -20,6 +20,7 @@ const (
 	SingleShortOpName  = "s"
 	NoQuoteOpName      = "no-quote"
 	NoQuoteShortOpName = "n"
+	Version            = "version"
 )
 const (
 	cmdOpSignal          = "-" + CmdOpName
@@ -36,6 +37,7 @@ const (
 	singleShortOpSignal  = "--" + SingleShortOpName
 	noQuoteOpSignal      = "--" + NoQuoteOpName
 	noQuoteShortOpSignal = "--" + NoQuoteShortOpName
+	versionOpSignal      = "--" + Version
 )
 
 type QuoteType int
@@ -48,11 +50,12 @@ const (
 
 type ArgTable struct {
 	No              int
+	IsVersion       bool
+	IsLogFilter     bool
+	IsErrLogFilter  bool
 	StageNo         int
 	IsStage         bool
 	IsLog           bool
-	IsLogFilter     bool
-	IsErrLogFilter  bool
 	IsCmd           bool
 	IsSvc           bool
 	IsAct           bool
@@ -78,6 +81,8 @@ func GenArgTable() []ArgTable {
 			StageNo: stageNum,
 		}
 		switch inputArg {
+		case versionOpSignal:
+			argTable.IsVersion = true
 		case logOpSignal:
 			argTable.IsLog = true
 		case logFilterOpSignal:

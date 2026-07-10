@@ -2,6 +2,8 @@ package sh
 
 import (
 	"strings"
+
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
 )
 
 const (
@@ -23,16 +25,16 @@ type YomelInfo struct {
 	CmdStrs      string
 }
 
-func Gen(chain Yomel) []YomelInfo {
-	stages := chain.Stages
-	chainInfos := make([]YomelInfo, len(stages))
-	globalLogFilter := chain.Ctrl.LogFilter
-	globalErrLogFilter := chain.Ctrl.ErrLogFilter
+func Gen(yomel parser.Yomel) []YomelInfo {
+	stages := yomel.Stages
+	yomelInfos := make([]YomelInfo, len(stages))
+	globalLogFilter := yomel.Ctrl.LogFilter
+	globalErrLogFilter := yomel.Ctrl.ErrLogFilter
 	for i, stage := range stages {
-		chainInfo := YomelInfo{
+		yomelInfo := YomelInfo{
 			No:           stage.No,
 			Desc:         stage.Desc,
-			IsLog:        chain.Ctrl.IsLog,
+			IsLog:        yomel.Ctrl.IsLog,
 			LogFilter:    insertFilterShellStr(globalLogFilter, stage.LogFilter),
 			ErrLogFilter: insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
 		}
@@ -62,18 +64,18 @@ func Gen(chain Yomel) []YomelInfo {
 			backslashNewlineOpArgPrefix,
 		)
 
-		chainInfo.CmdStrs =
+		yomelInfo.CmdStrs =
 			strings.Trim(string(stageCmd), backslashNewlineOpArgPrefix)
-		chainInfos[i] = chainInfo
+		yomelInfos[i] = yomelInfo
 	}
-	return chainInfos
+	return yomelInfos
 }
 
-func (tChainStr *stageCommand) insertStageEl(insertStrs []string, prefix string) {
+func (tYomelStr *stageCommand) insertStageEl(insertStrs []string, prefix string) {
 	if len(insertStrs) == 0 {
 		return
 	}
-	*tChainStr += stageCommand(
+	*tYomelStr += stageCommand(
 		prefix +
 			strings.Join(
 				insertStrs,
