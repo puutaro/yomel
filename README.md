@@ -1,3 +1,9 @@
+<!-- <img width="512" height="474" alt="yomel4_1024" src="https://github.com/user-attachments/assets/880acff6-4e01-4869-8fd9-6a8582a74fd6" /> -->
+
+<img width="512" height="474" alt="yomel4_siro_1024" src="https://github.com/user-attachments/assets/c90f8341-7ed6-4dde-a35a-1a64db71bf23" />
+
+
+
 # yomel
 
 `yomel` is a command-line utility designed to write multi-stage shell script pipelines using a structured, flat, and human-readable argument layout—inspired by the clear, nested visual style of YAML configuration files.
@@ -91,13 +97,16 @@ yomel \
   --log \
   --log-filter "grep 'Exception'" \
   stage "fetch-cloud-logs" \
-    -cmd "aws" \
-      --lop "region" --val --s "us-east-1" \
-    -svc "logs" \
-    -act "filter-log-events" \
-      --lop "log-group-name" --val --s "/aws/lambda/my-prod-service" \
-      --lop "limit" --val --n "100" \
+  -cmd "aws" \
+  --lop "region" \
+  --val --s "us-east-1" \
+  -svc "logs" \
+  -act "filter-log-events" \
+  --lop "log-group-name" \
+  --val --s "/aws/lambda/my-prod-service" \
+  --lop "limit" \
+  --val --n "100" \
   stage "mask-sensitive-data" \
-    -cmd "sed" \
-      --opt "e" \
-      --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+  -cmd "sed" \
+  --opt "e" \
+  --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
