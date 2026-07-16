@@ -9,9 +9,7 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
 )
 
-const detail = `yomel - YAML-like shellscript pipeline runner
-
-Usage:
+const detail = `Usage:
   yomel [global flags] stage <stage-name> [stage flags...] [stage <stage-name> [stage flags...] ...]
 
 Global Flags:
