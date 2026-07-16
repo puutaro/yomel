@@ -20,6 +20,15 @@ func main() {
 
 	argTables := args.GenArgTable()
 	yomel := parser.Parse(argTables)
+	helpCon, helpErr := info.GetHelp(yomel.Ctrl)
+	if helpErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", helpErr)
+		os.Exit(errorExitSignal)
+	}
+	if helpCon != nil {
+		fmt.Fprintf(os.Stdout, "%s\n", *helpCon)
+		os.Exit(normalExitSignal)
+	}
 	version, versionErr := info.GetVersion(yomel.Ctrl)
 	if versionErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", versionErr)

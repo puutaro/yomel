@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	Version            = "version"
+	Help               = "help"
 	StageArgName       = "stage"
 	LogOpName          = "log"
 	LogFilter          = "log-filter"
@@ -20,9 +22,10 @@ const (
 	SingleShortOpName  = "s"
 	NoQuoteOpName      = "no-quote"
 	NoQuoteShortOpName = "n"
-	Version            = "version"
 )
 const (
+	versionOpSignal      = "--" + Version
+	helpOpSignal         = "--" + Help
 	cmdOpSignal          = "-" + CmdOpName
 	logOpSignal          = "--" + LogOpName
 	logFilterOpSignal    = "--" + LogFilter
@@ -37,7 +40,6 @@ const (
 	singleShortOpSignal  = "--" + SingleShortOpName
 	noQuoteOpSignal      = "--" + NoQuoteOpName
 	noQuoteShortOpSignal = "--" + NoQuoteShortOpName
-	versionOpSignal      = "--" + Version
 )
 
 type QuoteType int
@@ -51,6 +53,7 @@ const (
 type ArgTable struct {
 	No              int
 	IsVersion       bool
+	IsHelp          bool
 	IsLogFilter     bool
 	IsErrLogFilter  bool
 	StageNo         int
@@ -83,6 +86,8 @@ func GenArgTable() []ArgTable {
 		switch inputArg {
 		case versionOpSignal:
 			argTable.IsVersion = true
+		case helpOpSignal:
+			argTable.IsHelp = true
 		case logOpSignal:
 			argTable.IsLog = true
 		case logFilterOpSignal:

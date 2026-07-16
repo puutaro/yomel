@@ -64,6 +64,7 @@ type Control struct {
 	LogFilter    string
 	ErrLogFilter string
 	IsVersion    bool
+	IsHelp       bool
 }
 
 type Yomel struct {
@@ -135,6 +136,12 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		0,
 		curCtrlArgTables,
 		func(t args.ArgTable) bool { return t.IsVersion },
+		false,
+	)
+	ctrl.IsHelp = getFlag(
+		0,
+		curCtrlArgTables,
+		func(t args.ArgTable) bool { return t.IsHelp },
 		false,
 	)
 	ctrl.IsLog = getFlag(

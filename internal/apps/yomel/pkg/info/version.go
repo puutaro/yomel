@@ -1,21 +1,12 @@
 package info
 
 import (
-	_ "embed"
 	"errors"
 	"fmt"
 
 	"github.com/BurntSushi/toml"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
 )
-
-type YomelInfo struct {
-	Yomel struct {
-		Version     string `toml:"version"`
-		Name        string `toml:"name"`
-		Description string `toml:"description"`
-	} `toml:"yomel"`
-}
 
 func GetVersion(ctrl parser.Control) (*string, error) {
 	if !ctrl.IsVersion {
