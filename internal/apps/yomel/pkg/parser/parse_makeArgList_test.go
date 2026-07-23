@@ -54,6 +54,80 @@ func Test_makeArgList(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "empty input slice should return empty opArgType slice",
+			input: []argParam{},
+			want:  nil,
+		},
+		{
+			name: "argument with nil string should produce empty string",
+			input: []argParam{
+				{
+					index: 5,
+					param: paramType{
+						str:       nil,
+						quoteType: args.NoQuote,
+					},
+				},
+			},
+			want: []opArgType{
+				{
+					index: 5,
+					str:   "",
+				},
+			},
+		},
+		{
+			name: "mix of various quote types and nil string",
+			input: []argParam{
+				{
+					index: 1,
+					param: paramType{
+						str:       nil,
+						quoteType: args.DoubleQuote,
+					},
+				},
+				{
+					index: 3,
+					param: paramType{
+						str:       testutil.Ptr("raw-arg"),
+						quoteType: args.NoQuote,
+					},
+				},
+				{
+					index: 7,
+					param: paramType{
+						str:       testutil.Ptr("single-quoted-arg"),
+						quoteType: args.SingleQuote,
+					},
+				},
+				{
+					index: 9,
+					param: paramType{
+						str:       testutil.Ptr("double-quoted-arg"),
+						quoteType: args.DoubleQuote,
+					},
+				},
+			},
+			want: []opArgType{
+				{
+					index: 1,
+					str:   "",
+				},
+				{
+					index: 3,
+					str:   "raw-arg",
+				},
+				{
+					index: 7,
+					str:   "'single-quoted-arg'",
+				},
+				{
+					index: 9,
+					str:   `"double-quoted-arg"`,
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
