@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,7 +28,7 @@ func Test_getOneStr(t *testing.T) {
 				tCmd(), tStr("aws"),
 			},
 			isCheckFn: func(a args.ArgTable) bool { return a.IsCmd },
-			want:      ptr("aws"),
+			want:      testutil.Ptr("aws"),
 		},
 		{
 			name:           "should skip elements before nextStartIndex",
@@ -37,7 +38,7 @@ func Test_getOneStr(t *testing.T) {
 				tStage(), tStr("target-stage"),
 			},
 			isCheckFn: func(a args.ArgTable) bool { return a.IsStage },
-			want:      ptr("target-stage"),
+			want:      testutil.Ptr("target-stage"),
 		},
 		{
 			name:           "should return nil when matched flag is at the end of the slice",

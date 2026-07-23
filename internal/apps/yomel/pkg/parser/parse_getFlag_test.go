@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func ptr(s string) *string { return &s }
-
 func Test_getFlag(t *testing.T) {
 	tests := []struct {
 		name           string                   // English test case description
