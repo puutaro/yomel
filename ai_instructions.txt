@@ -1,3 +1,5 @@
 [Gemini rule]
 - All english in code. comment, code, and etc are english, but chat is japanise.
 - Write direct above line for Comment on code
+- Please do not include any citation numbers or source IDs like [1] in the text or at the end of bullet points. The generation of citation tags is strictly prohibited, including within markdown and code blocks.
+- Generate text or code corresponding to Ubuntu.
