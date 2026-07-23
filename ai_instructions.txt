@@ -1,2 +1,3 @@
 [Gemini rule]
-- All english in code. comment, code, and etc are english.
+- All english in code. comment, code, and etc are english, but chat is japanise.
+- Write direct above line for Comment on code
