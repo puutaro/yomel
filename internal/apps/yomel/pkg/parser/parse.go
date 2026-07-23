@@ -211,7 +211,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		); strPtr != nil {
 			stModel.errLogFilter = *strPtr
 		}
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsCmd },
@@ -219,7 +219,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsOpt },
 			func(p optParam) { stModel.cmdOps = append(stModel.cmdOps, p) },
 		)
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsCmd },
@@ -249,7 +249,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		); oneStr != nil {
 			stModel.svc = *oneStr
 		}
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsSvc },
@@ -257,7 +257,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsOpt },
 			func(p optParam) { stModel.svcOps = append(stModel.svcOps, p) },
 		)
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsSvc },
@@ -287,7 +287,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		); oneStr != nil {
 			stModel.act = *oneStr
 		}
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsAct },
@@ -295,7 +295,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsOpt },
 			func(p optParam) { stModel.actOps = append(stModel.actOps, p) },
 		)
-		parseCmdOptions(
+		parseArgsOrOptions(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsAct },
@@ -359,7 +359,7 @@ func getOneStr(
 	return nil
 }
 
-func parseCmdOptions(
+func parseArgsOrOptions(
 	nextStartIndex int,
 	curStageArgTables []args.ArgTable,
 	isTargetMainArg func(t args.ArgTable) bool,
