@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_parseStageModels verifies that control flags and various stage models are parsed correctly.
 func Test_parseStageModels(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -95,6 +96,58 @@ func Test_parseStageModels(t *testing.T) {
 					no:   2,
 					desc: "process",
 					cmd:  "cat",
+				},
+			},
+		},
+		{
+			name: "should handle control version, help, no-log, err-log-filter, and comprehensive stage parameters with service/action options and lopts",
+			input: []args.ArgTable{
+				{No: 1, StageNo: 0, IsVersion: true},
+				{No: 2, StageNo: 0, IsHelp: true},
+				{No: 3, StageNo: 0, IsNoLog: true},
+				{No: 4, StageNo: 0, IsErrLogFilter: true},
+				{No: 5, StageNo: 0, Str: testutil.Ptr("global-err-filter")},
+				{No: 6, StageNo: 1, IsStage: true},
+				{No: 7, StageNo: 1, Str: testutil.Ptr("stage-comprehensive")},
+				{No: 8, StageNo: 1, IsNoLog: true},
+				{No: 9, StageNo: 1, IsErrLogFilter: true},
+				{No: 10, StageNo: 1, Str: testutil.Ptr("stage-err-filter")},
+				{No: 11, StageNo: 1, IsCmd: true},
+				{No: 12, StageNo: 1, Str: testutil.Ptr("aws")},
+				{No: 13, StageNo: 1, IsLopt: true},
+				{No: 14, StageNo: 1, Str: testutil.Ptr("profile")},
+				{No: 15, StageNo: 1, IsSvc: true},
+				{No: 16, StageNo: 1, Str: testutil.Ptr("s3")},
+				{No: 17, StageNo: 1, IsOpt: true},
+				{No: 18, StageNo: 1, Str: testutil.Ptr("r")},
+				{No: 19, StageNo: 1, IsAct: true},
+				{No: 20, StageNo: 1, Str: testutil.Ptr("cp")},
+				{No: 21, StageNo: 1, IsLopt: true},
+				{No: 22, StageNo: 1, Str: testutil.Ptr("recursive")},
+				{No: 23, StageNo: 1, IsArg: true},
+				{No: 24, StageNo: 1, QuoteTypeSignal: args.SingleQuote},
+				{No: 25, StageNo: 1, Str: testutil.Ptr("arg-val")},
+			},
+			wantCtrl: Control{
+				IsVersion:    true,
+				IsHelp:       true,
+				IsLog:        testutil.Ptr(false),
+				LogFilter:    "",
+				ErrLogFilter: "global-err-filter",
+			},
+			wantStMod: []stageModel{
+				{
+					no:           1,
+					desc:         "stage-comprehensive",
+					cmd:          "aws",
+					cmdLops:      []optParam{{index: 8, optStr: "profile", param: paramType{}}},
+					svc:          "s3",
+					svcOps:       []optParam{{index: 12, optStr: "r", param: paramType{}}},
+					act:          "cp",
+					actLops:      []optParam{{index: 16, optStr: "recursive", param: paramType{}}},
+					actArgs:      []argParam{{index: 19, param: paramType{str: testutil.Ptr("arg-val"), quoteType: args.SingleQuote}}},
+					isLog:        testutil.Ptr(false),
+					errLogFilter: "stage-err-filter",
 				},
 			},
 		},
