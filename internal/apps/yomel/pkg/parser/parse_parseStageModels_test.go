@@ -28,7 +28,7 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 8, StageNo: 1, Str: testutil.Ptr("hello")},
 			},
 			wantCtrl: Control{
-				IsLog:        true,
+				IsLog:        testutil.Ptr(true),
 				LogFilter:    "",
 				ErrLogFilter: "",
 				IsVersion:    false,
@@ -75,7 +75,7 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 19, StageNo: 2, Str: testutil.Ptr("cat")},
 			},
 			wantCtrl: Control{
-				IsLog:        true,
+				IsLog:        testutil.Ptr(true),
 				LogFilter:    "global-filter",
 				ErrLogFilter: "",
 				IsVersion:    false,

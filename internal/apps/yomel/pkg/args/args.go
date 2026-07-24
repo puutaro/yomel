@@ -9,6 +9,7 @@ const (
 	Help               = "help"
 	StageArgName       = "stage"
 	LogOpName          = "log"
+	NoLogOpName        = "no-log"
 	LogFilter          = "log-filter"
 	ErrLogFilter       = "err-log-filter"
 	CmdOpName          = "cmd"
@@ -28,6 +29,7 @@ const (
 	helpOpSignal         = "--" + Help
 	cmdOpSignal          = "-" + CmdOpName
 	logOpSignal          = "--" + LogOpName
+	noLogOpSignal        = "--" + NoLogOpName
 	logFilterOpSignal    = "--" + LogFilter
 	errLogFilterOpSignal = "--" + ErrLogFilter
 	svcOpSignal          = "-" + SvcOpName
@@ -59,6 +61,7 @@ type ArgTable struct {
 	StageNo         int
 	IsStage         bool
 	IsLog           bool
+	IsNoLog         bool
 	IsCmd           bool
 	IsSvc           bool
 	IsAct           bool
@@ -90,6 +93,8 @@ func GenArgTable() []ArgTable {
 			argTable.IsHelp = true
 		case logOpSignal:
 			argTable.IsLog = true
+		case noLogOpSignal:
+			argTable.IsNoLog = true
 		case logFilterOpSignal:
 			argTable.IsLogFilter = true
 		case errLogFilterOpSignal:

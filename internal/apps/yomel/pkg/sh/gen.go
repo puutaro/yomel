@@ -30,11 +30,19 @@ func Gen(yomel parser.Yomel) []YomelInfo {
 	yomelInfos := make([]YomelInfo, len(stages))
 	globalLogFilter := yomel.Ctrl.LogFilter
 	globalErrLogFilter := yomel.Ctrl.ErrLogFilter
+	// default stdout log don't display
+	isLog := false
+	if ctrlIsLog := yomel.Ctrl.IsLog; ctrlIsLog != nil {
+		isLog = *ctrlIsLog
+	}
 	for i, stage := range stages {
+		if stageIsLog := stage.IsLog; stageIsLog != nil {
+			isLog = *stageIsLog
+		}
 		yomelInfo := YomelInfo{
 			No:           stage.No,
 			Desc:         stage.Desc,
-			IsLog:        yomel.Ctrl.IsLog,
+			IsLog:        isLog,
 			LogFilter:    insertFilterShellStr(globalLogFilter, stage.LogFilter),
 			ErrLogFilter: insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
 		}

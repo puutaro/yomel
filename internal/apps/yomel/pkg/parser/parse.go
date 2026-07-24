@@ -24,7 +24,6 @@ type argParam struct {
 type stageModel struct {
 	no           int
 	desc         string
-	log          string
 	cmd          string
 	cmdOps       []optParam
 	cmdLops      []optParam
@@ -37,6 +36,7 @@ type stageModel struct {
 	actOps       []optParam
 	actLops      []optParam
 	actArgs      []argParam
+	isLog        *bool
 	logFilter    string
 	errLogFilter string
 	// Arg    []Param
@@ -56,11 +56,12 @@ type Stage struct {
 	SvcOpArgs    []string
 	Act          string
 	ActOpArgs    []string
+	IsLog        *bool
 	LogFilter    string
 	ErrLogFilter string
 }
 type Control struct {
-	IsLog        bool
+	IsLog        *bool
 	LogFilter    string
 	ErrLogFilter string
 	IsVersion    bool
@@ -87,6 +88,7 @@ func parseStage(ctrl Control, stModels []stageModel) Yomel {
 			Cmd:          stModel.cmd,
 			Svc:          stModel.svc,
 			Act:          stModel.act,
+			IsLog:        stModel.isLog,
 			LogFilter:    stModel.logFilter,
 			ErrLogFilter: stModel.errLogFilter,
 		}
@@ -144,12 +146,22 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 		func(t args.ArgTable) bool { return t.IsHelp },
 		false,
 	)
-	ctrl.IsLog = getFlag(
+	if flagBool := getFlagByPtr(
 		0,
 		curCtrlArgTables,
 		func(t args.ArgTable) bool { return t.IsLog },
+		true,
+	); flagBool != nil {
+		ctrl.IsLog = flagBool
+	}
+	if flagBool := getFlagByPtr(
+		0,
+		curCtrlArgTables,
+		func(t args.ArgTable) bool { return t.IsNoLog },
 		false,
-	)
+	); flagBool != nil {
+		ctrl.IsLog = flagBool
+	}
 	if strPtr := getOneStr(
 		0,
 		curCtrlArgTables,
@@ -197,6 +209,22 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsCmd },
 		)
+		if flagBool := getFlagByPtr(
+			nextStartIndex,
+			curStageArgTables,
+			func(t args.ArgTable) bool { return t.IsLog },
+			true,
+		); flagBool != nil {
+			stModel.isLog = flagBool
+		}
+		if flagBool := getFlagByPtr(
+			nextStartIndex,
+			curStageArgTables,
+			func(t args.ArgTable) bool { return t.IsNoLog },
+			false,
+		); flagBool != nil {
+			stModel.isLog = flagBool
+		}
 		if strPtr := getOneStr(
 			0,
 			curStageArgTables,
@@ -338,6 +366,22 @@ func getFlag(
 		return !defaultBool
 	}
 	return defaultBool
+}
+func getFlagByPtr(
+	nextStartIndex int,
+	curStageArgTables []args.ArgTable,
+	isCheckFn func(args.ArgTable) bool,
+	returnBool bool,
+) *bool {
+	argTablesLen := len(curStageArgTables)
+	for i := nextStartIndex; i < argTablesLen; i++ {
+		argTable := curStageArgTables[i]
+		if !isCheckFn(argTable) {
+			continue
+		}
+		return &returnBool
+	}
+	return nil
 }
 
 func getOneStr(

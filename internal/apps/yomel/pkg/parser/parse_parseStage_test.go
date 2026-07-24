@@ -17,7 +17,7 @@ func Test_parseStage(t *testing.T) {
 	}{
 		{
 			name:      "should parse single stage model with command options and arguments correctly",
-			inputCtrl: Control{IsLog: true},
+			inputCtrl: Control{IsLog: testutil.Ptr(true)},
 			inputSts: []stageModel{
 				{
 					no:   1,
@@ -35,7 +35,7 @@ func Test_parseStage(t *testing.T) {
 				},
 			},
 			want: Yomel{
-				Ctrl: Control{IsLog: true},
+				Ctrl: Control{IsLog: testutil.Ptr(true)},
 				Stages: []Stage{
 					{
 						No:        1,

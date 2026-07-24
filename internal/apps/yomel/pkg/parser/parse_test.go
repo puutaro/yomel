@@ -29,7 +29,7 @@ func Test_Parse(t *testing.T) {
 			},
 			want: Yomel{
 				Ctrl: Control{
-					IsLog:        true,
+					IsLog:        testutil.Ptr(true),
 					LogFilter:    "",
 					ErrLogFilter: "",
 					IsVersion:    false,
