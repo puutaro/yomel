@@ -139,28 +139,26 @@ func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string)
 		return
 	}
 	fmt.Fprint(w, label)
-	cmd := exec.Command("bash", "-c", filterShell)
-
-	// yomelが持っているログバッファを、headコマンドの標準入力としてセット
-	cmd.Stdin = buf
-	// headコマンドの標準出力を、yomelのエラー出力（ログの出力先）に直接繋ぐ
-	cmd.Stdout = w
-	cmdStderrBuf := new(bytes.Buffer)
-	cmd.Stderr = cmdStderrBuf
-
-	switch true {
-	case filterShell != "":
-		// コマンドを実行して終了を待つ
-		if err := cmd.Run(); err == nil || cmdStderrBuf.Len() <= 0 {
-			break
-		}
-		fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, redEnd)
-		w.Write(cmdStderrBuf.Bytes())
-		addNewline(w, cmdStderrBuf)
-	default:
+	if filterShell == "" {
 		w.Write(buf.Bytes())
 		addNewline(w, buf)
+		return
 	}
+
+	filterShellCmd := exec.Command("bash", "-c", filterShell)
+	filterShellCmd.Stdin = buf
+	filterShellCmdStdoutBuf := new(bytes.Buffer)
+	filterShellCmd.Stdout = filterShellCmdStdoutBuf
+	filterShellCmdStderrBuf := new(bytes.Buffer)
+	filterShellCmd.Stderr = filterShellCmdStderrBuf
+	if err := filterShellCmd.Run(); err == nil || filterShellCmdStderrBuf.Len() <= 0 {
+		w.Write(filterShellCmdStdoutBuf.Bytes())
+		addNewline(w, filterShellCmdStdoutBuf)
+		return
+	}
+	fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, redEnd)
+	w.Write(filterShellCmdStderrBuf.Bytes())
+	addNewline(w, filterShellCmdStderrBuf)
 }
 
 func addNewline(w io.Writer, buf *bytes.Buffer) {
