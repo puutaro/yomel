@@ -13,8 +13,8 @@ func Test_parseStageModels(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     []args.ArgTable
-		wantCtrl  Control
-		wantStMod []stageModel
+		wantCtrl  ControlModel
+		wantStMod []StageModel
 	}{
 		{
 			name: "should parse control flags and single stage model correctly",
@@ -28,24 +28,24 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 7, StageNo: 1, QuoteTypeSignal: args.NoQuote},
 				{No: 8, StageNo: 1, Str: testutil.Ptr("hello")},
 			},
-			wantCtrl: Control{
+			wantCtrl: ControlModel{
 				IsLog:        testutil.Ptr(true),
 				LogFilter:    "",
 				ErrLogFilter: "",
 				IsVersion:    false,
 				IsHelp:       false,
 			},
-			wantStMod: []stageModel{
+			wantStMod: []StageModel{
 				{
-					no:   1,
-					desc: "stage1",
-					cmd:  "echo",
-					cmdArgs: []argParam{
+					No:   1,
+					Desc: "stage1",
+					Cmd:  "echo",
+					CmdArgs: []ArgParam{
 						{
-							index: 6,
-							param: paramType{
-								str:       testutil.Ptr("hello"),
-								quoteType: args.NoQuote,
+							Index: 6,
+							Param: ParamType{
+								Str:       testutil.Ptr("hello"),
+								QuoteType: args.NoQuote,
 							},
 						},
 					},
@@ -75,27 +75,27 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 18, StageNo: 2, IsCmd: true},
 				{No: 19, StageNo: 2, Str: testutil.Ptr("cat")},
 			},
-			wantCtrl: Control{
+			wantCtrl: ControlModel{
 				IsLog:        testutil.Ptr(true),
 				LogFilter:    "global-filter",
 				ErrLogFilter: "",
 				IsVersion:    false,
 				IsHelp:       false,
 			},
-			wantStMod: []stageModel{
+			wantStMod: []StageModel{
 				{
-					no:        1,
-					desc:      "fetch",
-					cmd:       "curl",
-					cmdOps:    []optParam{{index: 7, optStr: "s", param: paramType{}}},
-					svc:       "api",
-					act:       "get",
-					logFilter: "stage-filter",
+					No:        1,
+					Desc:      "fetch",
+					Cmd:       "curl",
+					CmdOps:    []OptParam{{Index: 7, OptStr: "s", Param: ParamType{}}},
+					Svc:       "api",
+					Act:       "get",
+					LogFilter: "stage-filter",
 				},
 				{
-					no:   2,
-					desc: "process",
-					cmd:  "cat",
+					No:   2,
+					Desc: "process",
+					Cmd:  "cat",
 				},
 			},
 		},
@@ -128,26 +128,26 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 24, StageNo: 1, QuoteTypeSignal: args.SingleQuote},
 				{No: 25, StageNo: 1, Str: testutil.Ptr("arg-val")},
 			},
-			wantCtrl: Control{
+			wantCtrl: ControlModel{
 				IsVersion:    true,
 				IsHelp:       true,
 				IsLog:        testutil.Ptr(false),
 				LogFilter:    "",
 				ErrLogFilter: "global-err-filter",
 			},
-			wantStMod: []stageModel{
+			wantStMod: []StageModel{
 				{
-					no:           1,
-					desc:         "stage-comprehensive",
-					cmd:          "aws",
-					cmdLops:      []optParam{{index: 8, optStr: "profile", param: paramType{}}},
-					svc:          "s3",
-					svcOps:       []optParam{{index: 12, optStr: "r", param: paramType{}}},
-					act:          "cp",
-					actLops:      []optParam{{index: 16, optStr: "recursive", param: paramType{}}},
-					actArgs:      []argParam{{index: 19, param: paramType{str: testutil.Ptr("arg-val"), quoteType: args.SingleQuote}}},
-					isLog:        testutil.Ptr(false),
-					errLogFilter: "stage-err-filter",
+					No:           1,
+					Desc:         "stage-comprehensive",
+					Cmd:          "aws",
+					CmdLops:      []OptParam{{Index: 8, OptStr: "profile", Param: ParamType{}}},
+					Svc:          "s3",
+					SvcOps:       []OptParam{{Index: 12, OptStr: "r", Param: ParamType{}}},
+					Act:          "cp",
+					ActLops:      []OptParam{{Index: 16, OptStr: "recursive", Param: ParamType{}}},
+					ActArgs:      []ArgParam{{Index: 19, Param: ParamType{Str: testutil.Ptr("arg-val"), QuoteType: args.SingleQuote}}},
+					IsLog:        testutil.Ptr(false),
+					ErrLogFilter: "stage-err-filter",
 				},
 			},
 		},
@@ -155,7 +155,7 @@ func Test_parseStageModels(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCtrl, gotStModels := parseStageModels(tt.input)
+			gotCtrl, gotStModels := Parse(tt.input)
 			assert.Equal(t, tt.wantCtrl, gotCtrl)
 			assert.Equal(t, tt.wantStMod, gotStModels)
 		})

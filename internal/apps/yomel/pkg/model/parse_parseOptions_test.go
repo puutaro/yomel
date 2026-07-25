@@ -26,7 +26,7 @@ func Test_parseOptions(t *testing.T) {
 		isTargetMainArg func(args.ArgTable) bool
 		isNextMainArg   func(args.ArgTable) bool
 		isTargetOpt     func(args.ArgTable) bool
-		want            []optParam
+		want            []OptParam
 	}{
 		{
 			name:           "should parse short options with values correctly",
@@ -39,13 +39,13 @@ func Test_parseOptions(t *testing.T) {
 			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
 			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
-			want: []optParam{
+			want: []OptParam{
 				{
-					index:  2,
-					optStr: "f",
-					param: paramType{
-						str:       testutil.Ptr("file.txt"),
-						quoteType: args.SingleQuote,
+					Index:  2,
+					OptStr: "f",
+					Param: ParamType{
+						Str:       testutil.Ptr("file.txt"),
+						QuoteType: args.SingleQuote,
 					},
 				},
 			},
@@ -60,11 +60,11 @@ func Test_parseOptions(t *testing.T) {
 			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
 			isTargetOpt:     func(a args.ArgTable) bool { return a.IsLopt },
-			want: []optParam{
+			want: []OptParam{
 				{
-					index:  2,
-					optStr: "verbose",
-					param:  paramType{},
+					Index:  2,
+					OptStr: "verbose",
+					Param:  ParamType{},
 				},
 			},
 		},
@@ -81,13 +81,13 @@ func Test_parseOptions(t *testing.T) {
 			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
 			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
-			want: []optParam{
+			want: []OptParam{
 				{
-					index:  2,
-					optStr: "f",
-					param: paramType{
-						str:       testutil.Ptr("file1"),
-						quoteType: args.NoQuote,
+					Index:  2,
+					OptStr: "f",
+					Param: ParamType{
+						Str:       testutil.Ptr("file1"),
+						QuoteType: args.NoQuote,
 					},
 				},
 			},
@@ -114,13 +114,13 @@ func Test_parseOptions(t *testing.T) {
 			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a args.ArgTable) bool { return a.IsAct },
 			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
-			want: []optParam{
+			want: []OptParam{
 				{
-					index:  7,
-					optStr: "b",
-					param: paramType{
-						str:       testutil.Ptr("val-target"),
-						quoteType: args.NoQuote,
+					Index:  7,
+					OptStr: "b",
+					Param: ParamType{
+						Str:       testutil.Ptr("val-target"),
+						QuoteType: args.NoQuote,
 					},
 				},
 			},
@@ -129,14 +129,14 @@ func Test_parseOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got []optParam
+			var got []OptParam
 			parseOptions(
 				tt.nextStartIndex,
 				tt.input,
 				tt.isTargetMainArg,
 				tt.isNextMainArg,
 				tt.isTargetOpt,
-				func(p optParam) {
+				func(p OptParam) {
 					got = append(got, p)
 				},
 			)

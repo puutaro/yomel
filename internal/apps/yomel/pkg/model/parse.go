@@ -1,66 +1,46 @@
 package model
 
 import (
-	"fmt"
-	"slices"
-
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
 )
 
-type paramType struct {
-	str       *string
-	quoteType args.QuoteType
+type ParamType struct {
+	Str       *string
+	QuoteType args.QuoteType
 }
 
-type optParam struct {
-	index  int
-	optStr string
-	param  paramType
+type OptParam struct {
+	Index  int
+	OptStr string
+	Param  ParamType
 }
-type argParam struct {
-	index int
-	param paramType
+type ArgParam struct {
+	Index int
+	Param ParamType
 }
-type stageModel struct {
-	no           int
-	desc         string
-	cmd          string
-	cmdOps       []optParam
-	cmdLops      []optParam
-	cmdArgs      []argParam
-	svc          string
-	svcOps       []optParam
-	svcLops      []optParam
-	svcArgs      []argParam
-	act          string
-	actOps       []optParam
-	actLops      []optParam
-	actArgs      []argParam
-	isLog        *bool
-	logFilter    string
-	errLogFilter string
+type StageModel struct {
+	No           int
+	Desc         string
+	Cmd          string
+	CmdOps       []OptParam
+	CmdLops      []OptParam
+	CmdArgs      []ArgParam
+	Svc          string
+	SvcOps       []OptParam
+	SvcLops      []OptParam
+	SvcArgs      []ArgParam
+	Act          string
+	ActOps       []OptParam
+	ActLops      []OptParam
+	ActArgs      []ArgParam
+	IsLog        *bool
+	LogFilter    string
+	ErrLogFilter string
 	// Arg    []Param
 	// Opt    []Param
 }
 
-type opArgType struct {
-	index int
-	str   string
-}
-type Stage struct {
-	No           int
-	Desc         string
-	Cmd          string
-	CmdOpArgs    []string
-	Svc          string
-	SvcOpArgs    []string
-	Act          string
-	ActOpArgs    []string
-	IsLog        *bool
-	LogFilter    string
-	ErrLogFilter string
-}
-type Control struct {
+type ControlModel struct {
 	IsLog        *bool
 	LogFilter    string
 	ErrLogFilter string
@@ -68,61 +48,7 @@ type Control struct {
 	IsHelp       bool
 }
 
-type Yomel struct {
-	Ctrl   Control
-	Stages []Stage
-}
-
-func Parse(argTables []args.ArgTable) Yomel {
-	ctrl, stModels := parseStageModels(argTables)
-	return parseStage(ctrl, stModels)
-}
-
-func parseStage(ctrl Control, stModels []stageModel) Yomel {
-	yomel := Yomel{Ctrl: ctrl}
-	stages := make([]Stage, len(stModels))
-	for i, stModel := range stModels {
-		var stage = Stage{
-			No:           stModel.no,
-			Desc:         stModel.desc,
-			Cmd:          stModel.cmd,
-			Svc:          stModel.svc,
-			Act:          stModel.act,
-			IsLog:        stModel.isLog,
-			LogFilter:    stModel.logFilter,
-			ErrLogFilter: stModel.errLogFilter,
-		}
-		pushOpArgs(
-			stModel.cmdOps,
-			stModel.cmdLops,
-			stModel.cmdArgs,
-			func(opArgList []string) {
-				stage.CmdOpArgs = opArgList
-			},
-		)
-		pushOpArgs(
-			stModel.svcOps,
-			stModel.svcLops,
-			stModel.svcArgs,
-			func(opArgList []string) {
-				stage.SvcOpArgs = opArgList
-			},
-		)
-		pushOpArgs(
-			stModel.actOps,
-			stModel.actLops,
-			stModel.actArgs,
-			func(opArgList []string) {
-				stage.ActOpArgs = opArgList
-			},
-		)
-		stages[i] = stage
-	}
-	yomel.Stages = stages
-	return yomel
-}
-
-func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
+func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 	var curCtrlArgTables []args.ArgTable
 	for _, argTable := range argTables {
 		if argTable.StageNo > 0 {
@@ -133,7 +59,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			argTable,
 		)
 	}
-	ctrl := Control{}
+	ctrl := ControlModel{}
 	ctrl.IsVersion = getFlag(
 		0,
 		curCtrlArgTables,
@@ -179,11 +105,11 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 
 	argTablesLen := len(argTables)
 	totalStageLen := argTables[argTablesLen-1].StageNo
-	stModels := make([]stageModel, totalStageLen)
+	stModels := make([]StageModel, totalStageLen)
 	for stageNo := 1; stageNo <= totalStageLen; stageNo++ {
 		nextStartIndex := 0
-		stModel := stageModel{
-			no: stageNo,
+		stModel := StageModel{
+			No: stageNo,
 		}
 		var curStageArgTables []args.ArgTable
 		for i := nextStartIndex; i < argTablesLen; i++ {
@@ -199,12 +125,12 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 				argTable,
 			)
 		}
-		stModel.desc = *getOneStr(
+		stModel.Desc = *getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsStage },
 		)
-		stModel.cmd = *getOneStr(
+		stModel.Cmd = *getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsCmd },
@@ -215,7 +141,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsLog },
 			true,
 		); flagBool != nil {
-			stModel.isLog = flagBool
+			stModel.IsLog = flagBool
 		}
 		if flagBool := getFlagByPtr(
 			nextStartIndex,
@@ -223,21 +149,21 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsNoLog },
 			false,
 		); flagBool != nil {
-			stModel.isLog = flagBool
+			stModel.IsLog = flagBool
 		}
 		if strPtr := getOneStr(
 			0,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsLogFilter },
 		); strPtr != nil {
-			stModel.logFilter = *strPtr
+			stModel.LogFilter = *strPtr
 		}
 		if strPtr := getOneStr(
 			0,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsErrLogFilter },
 		); strPtr != nil {
-			stModel.errLogFilter = *strPtr
+			stModel.ErrLogFilter = *strPtr
 		}
 		parseOptions(
 			nextStartIndex,
@@ -245,7 +171,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsCmd },
 			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
 			func(t args.ArgTable) bool { return t.IsOpt },
-			func(p optParam) { stModel.cmdOps = append(stModel.cmdOps, p) },
+			func(p OptParam) { stModel.CmdOps = append(stModel.CmdOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
@@ -253,19 +179,19 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsCmd },
 			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
 			func(t args.ArgTable) bool { return t.IsLopt },
-			func(p optParam) { stModel.cmdLops = append(stModel.cmdLops, p) },
+			func(p OptParam) { stModel.CmdLops = append(stModel.CmdLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
 			func(t args.ArgTable) bool { return t.IsCmd },
-			func(ind int, p paramType) {
-				stModel.cmdArgs = append(
-					stModel.cmdArgs,
-					argParam{
-						index: ind,
-						param: p,
+			func(ind int, p ParamType) {
+				stModel.CmdArgs = append(
+					stModel.CmdArgs,
+					ArgParam{
+						Index: ind,
+						Param: p,
 					},
 				)
 			},
@@ -275,7 +201,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsSvc },
 		); oneStr != nil {
-			stModel.svc = *oneStr
+			stModel.Svc = *oneStr
 		}
 		parseOptions(
 			nextStartIndex,
@@ -283,7 +209,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsSvc },
 			func(t args.ArgTable) bool { return t.IsAct },
 			func(t args.ArgTable) bool { return t.IsOpt },
-			func(p optParam) { stModel.svcOps = append(stModel.svcOps, p) },
+			func(p OptParam) { stModel.SvcOps = append(stModel.SvcOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
@@ -291,19 +217,19 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsSvc },
 			func(t args.ArgTable) bool { return t.IsAct },
 			func(t args.ArgTable) bool { return t.IsLopt },
-			func(p optParam) { stModel.svcLops = append(stModel.svcLops, p) },
+			func(p OptParam) { stModel.SvcLops = append(stModel.SvcLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsAct },
 			func(t args.ArgTable) bool { return t.IsSvc },
-			func(ind int, p paramType) {
-				stModel.svcArgs = append(
-					stModel.svcArgs,
-					argParam{
-						index: ind,
-						param: p,
+			func(ind int, p ParamType) {
+				stModel.SvcArgs = append(
+					stModel.SvcArgs,
+					ArgParam{
+						Index: ind,
+						Param: p,
 					},
 				)
 			},
@@ -313,7 +239,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsAct },
 		); oneStr != nil {
-			stModel.act = *oneStr
+			stModel.Act = *oneStr
 		}
 		parseOptions(
 			nextStartIndex,
@@ -321,7 +247,7 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsAct },
 			func(t args.ArgTable) bool { return t.IsArg },
 			func(t args.ArgTable) bool { return t.IsOpt },
-			func(p optParam) { stModel.actOps = append(stModel.actOps, p) },
+			func(p OptParam) { stModel.ActOps = append(stModel.ActOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
@@ -329,19 +255,19 @@ func parseStageModels(argTables []args.ArgTable) (Control, []stageModel) {
 			func(t args.ArgTable) bool { return t.IsAct },
 			func(t args.ArgTable) bool { return t.IsArg },
 			func(t args.ArgTable) bool { return t.IsLopt },
-			func(p optParam) { stModel.actLops = append(stModel.actLops, p) },
+			func(p OptParam) { stModel.ActLops = append(stModel.ActLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return false },
 			func(t args.ArgTable) bool { return t.IsAct },
-			func(ind int, p paramType) {
-				stModel.actArgs = append(
-					stModel.actArgs,
-					argParam{
-						index: ind,
-						param: p,
+			func(ind int, p ParamType) {
+				stModel.ActArgs = append(
+					stModel.ActArgs,
+					ArgParam{
+						Index: ind,
+						Param: p,
 					},
 				)
 			},
@@ -409,7 +335,7 @@ func parseOptions(
 	isTargetMainArg func(t args.ArgTable) bool,
 	isNextMainArg func(t args.ArgTable) bool,
 	isTargetOpt func(args.ArgTable) bool,
-	appendFn func(optParam),
+	appendFn func(OptParam),
 ) {
 	curStageArgTablesLen := len(curStageArgTables)
 	curStageArgTablesLastIndex := curStageArgTablesLen - 1
@@ -435,9 +361,9 @@ func parseOptions(
 			continue
 		}
 		optStrIndex := j + 1
-		optParam := optParam{
-			index:  optStrIndex,
-			optStr: *curStageArgTables[optStrIndex].Str,
+		optParam := OptParam{
+			Index:  optStrIndex,
+			OptStr: *curStageArgTables[optStrIndex].Str,
 		}
 		valueOpIndex := j + 2
 		if valueOpIndex >= curStageArgTablesLen ||
@@ -449,7 +375,7 @@ func parseOptions(
 		param, updateIndex :=
 			getQuoteStr(curStageArgTables, valueOpIndex)
 		j = updateIndex
-		optParam.param = param
+		optParam.Param = param
 
 		appendFn(optParam)
 	}
@@ -460,7 +386,7 @@ func parseArg(
 	curStageArgTables []args.ArgTable,
 	isNextMainArg func(t args.ArgTable) bool,
 	isTargetMainArg func(t args.ArgTable) bool,
-	appendFn func(int, paramType),
+	appendFn func(int, ParamType),
 ) int {
 	curStageArgTablesLen := len(curStageArgTables)
 	returnNextStartIndex := nextStartIndex
@@ -490,104 +416,15 @@ func parseArg(
 	return returnNextStartIndex
 }
 
-func getQuoteStr(curStageArgTables []args.ArgTable, curIndex int) (paramType, int) {
-	param := paramType{}
+func getQuoteStr(curStageArgTables []args.ArgTable, curIndex int) (ParamType, int) {
+	param := ParamType{}
 	afterFirstIndex := curIndex + 1
 	if curStageArgTables[afterFirstIndex].QuoteTypeSignal == args.DoubleQuote {
-		param.str = curStageArgTables[afterFirstIndex].Str
+		param.Str = curStageArgTables[afterFirstIndex].Str
 		return param, afterFirstIndex
 	}
 	afterNextIndex := curIndex + 2
-	param.quoteType = curStageArgTables[afterFirstIndex].QuoteTypeSignal
-	param.str = curStageArgTables[afterNextIndex].Str
+	param.QuoteType = curStageArgTables[afterFirstIndex].QuoteTypeSignal
+	param.Str = curStageArgTables[afterNextIndex].Str
 	return param, afterNextIndex
-}
-
-func pushOpArgs(
-	ops []optParam,
-	lOps []optParam,
-	args []argParam,
-	insertFn func([]string),
-) {
-	shortOpPrefix := "-"
-	longOpPrefix := "--"
-	var opArgStrs []string
-	opTypes := makeOptList(ops, shortOpPrefix)
-	lOpTypes := makeOptList(lOps, longOpPrefix)
-	argTypes := makeArgList(args)
-	totalArgOpLen := len(opTypes) +
-		len(lOpTypes) +
-		len(argTypes)
-	opArgTypeList := make([]opArgType, 0, totalArgOpLen)
-
-	opArgTypeList = append(opArgTypeList, opTypes...)
-	opArgTypeList = append(opArgTypeList, lOpTypes...)
-	opArgTypeList = append(opArgTypeList, argTypes...)
-	slices.SortFunc(opArgTypeList, func(a, b opArgType) int {
-		return a.index - b.index
-	})
-	for _, cmdLOpArgType := range opArgTypeList {
-		opArgStrs = append(opArgStrs, cmdLOpArgType.str)
-	}
-	insertFn(opArgStrs)
-}
-
-func makeOptList(
-	optPs []optParam,
-	opPrefix string,
-) []opArgType {
-	var cmdLOpTypes []opArgType
-	for _, op := range optPs {
-		optStr := op.optStr
-		p := op.param
-		strP := p.str
-		oat := opArgType{
-			index: op.index,
-		}
-		if strP == nil {
-			oat.str = fmt.Sprintf(`%s%s`, opPrefix, optStr)
-			cmdLOpTypes = append(cmdLOpTypes, oat)
-			continue
-		}
-		str := *strP
-		switch p.quoteType {
-		case args.DoubleQuote:
-			oat.str = fmt.Sprintf(`%s%s "%s"`, opPrefix, optStr, str)
-		case args.SingleQuote:
-			oat.str = fmt.Sprintf(`%s%s '%s'`, opPrefix, optStr, str)
-		case args.NoQuote:
-			oat.str = fmt.Sprintf(`%s%s %s`, opPrefix, optStr, str)
-		}
-		cmdLOpTypes = append(cmdLOpTypes, oat)
-	}
-	return cmdLOpTypes
-}
-
-func makeArgList(
-	argPs []argParam,
-) []opArgType {
-	var cmdArgTypes []opArgType
-	for _, arg := range argPs {
-		p := arg.param
-		strP := p.str
-		oat := opArgType{
-			index: arg.index,
-		}
-		if strP == nil {
-			oat.str = ""
-			cmdArgTypes = append(cmdArgTypes, oat)
-			continue
-		}
-		str := *strP
-		switch p.quoteType {
-		case args.DoubleQuote:
-			oat.str = fmt.Sprintf(`"%s"`, str)
-		case args.SingleQuote:
-			oat.str = fmt.Sprintf(`'%s'`, str)
-		case args.NoQuote:
-			oat.str = fmt.Sprintf(`%s`, str)
-		}
-		cmdArgTypes = append(cmdArgTypes, oat)
-	}
-	return cmdArgTypes
 }

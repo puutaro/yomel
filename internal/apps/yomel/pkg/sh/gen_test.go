@@ -3,7 +3,7 @@ package sh
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,18 +12,18 @@ import (
 func Test_Gen(t *testing.T) {
 	tests := []struct {
 		name  string
-		input model.Yomel
+		input domain.Yomel
 		want  []YomelInfo
 	}{
 		{
 			name: "should generate single stage YomelInfo with command and arguments correctly",
-			input: model.Yomel{
-				Ctrl: model.Control{
+			input: domain.Yomel{
+				Ctrl: domain.Control{
 					IsLog:        testutil.Ptr(true),
 					LogFilter:    "global-filter",
 					ErrLogFilter: "global-err-filter",
 				},
-				Stages: []model.Stage{
+				Stages: []domain.Stage{
 					{
 						No:        1,
 						Desc:      "echo-stage",
@@ -45,13 +45,13 @@ func Test_Gen(t *testing.T) {
 		},
 		{
 			name: "should override global filters and log settings with stage-specific configurations",
-			input: model.Yomel{
-				Ctrl: model.Control{
+			input: domain.Yomel{
+				Ctrl: domain.Control{
 					IsLog:        testutil.Ptr(false),
 					LogFilter:    "global-filter",
 					ErrLogFilter: "global-err-filter",
 				},
-				Stages: []model.Stage{
+				Stages: []domain.Stage{
 					{
 						No:           1,
 						Desc:         "complex-stage",
@@ -80,9 +80,9 @@ func Test_Gen(t *testing.T) {
 		},
 		{
 			name: "should return empty slice when stages are empty",
-			input: model.Yomel{
-				Ctrl:   model.Control{},
-				Stages: []model.Stage{},
+			input: domain.Yomel{
+				Ctrl:   domain.Control{},
+				Stages: []domain.Stage{},
 			},
 			want: []YomelInfo{},
 		},

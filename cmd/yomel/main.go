@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/sh"
@@ -19,7 +20,8 @@ const (
 func main() {
 
 	argTables := args.GenArgTable()
-	yomel := model.Parse(argTables)
+	ctrl, stageModels := model.Parse(argTables)
+	yomel := domain.Convert(ctrl, stageModels)
 	helpCon, helpErr := info.GetHelp(yomel.Ctrl)
 	if helpErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", helpErr)

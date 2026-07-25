@@ -3,7 +3,7 @@ package sh
 import (
 	"strings"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 )
 
 const (
@@ -25,7 +25,7 @@ type YomelInfo struct {
 	CmdStrs      string
 }
 
-func Gen(yomel model.Yomel) []YomelInfo {
+func Gen(yomel domain.Yomel) []YomelInfo {
 	stages := yomel.Stages
 	yomelInfos := make([]YomelInfo, len(stages))
 	globalLogFilter := yomel.Ctrl.LogFilter

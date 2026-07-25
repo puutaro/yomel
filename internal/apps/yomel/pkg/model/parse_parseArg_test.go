@@ -21,8 +21,8 @@ func Test_parseArg(t *testing.T) {
 		input              []args.ArgTable
 		isNextMainArg      func(t args.ArgTable) bool
 		isTargetMainArg    func(t args.ArgTable) bool
-		appendFn           func(ind int, p paramType) // Added appendFn to table test items
-		wantParam          []paramType
+		appendFn           func(ind int, p ParamType) // Added appendFn to table test items
+		wantParam          []ParamType
 		wantIndices        []int
 		wantNextStartIndex int
 	}{
@@ -40,12 +40,12 @@ func Test_parseArg(t *testing.T) {
 			},
 			isNextMainArg:   func(t args.ArgTable) bool { return false },
 			isTargetMainArg: func(t args.ArgTable) bool { return t.IsAct },
-			appendFn: func(ind int, p paramType) {
+			appendFn: func(ind int, p ParamType) {
 				// Default append logic can be placed here or handled dynamically
 			},
-			wantParam: []paramType{
-				{str: testutil.Ptr("arg1"), quoteType: args.SingleQuote},
-				{str: testutil.Ptr("arg2"), quoteType: args.NoQuote},
+			wantParam: []ParamType{
+				{Str: testutil.Ptr("arg1"), QuoteType: args.SingleQuote},
+				{Str: testutil.Ptr("arg2"), QuoteType: args.NoQuote},
 			},
 			wantIndices:        []int{3, 6},
 			wantNextStartIndex: 6,
@@ -61,10 +61,10 @@ func Test_parseArg(t *testing.T) {
 			},
 			isNextMainArg:   func(t args.ArgTable) bool { return t.IsSvc },
 			isTargetMainArg: func(t args.ArgTable) bool { return t.IsAct },
-			appendFn: func(ind int, p paramType) {
+			appendFn: func(ind int, p ParamType) {
 			},
-			wantParam: []paramType{
-				{str: testutil.Ptr("arg1"), quoteType: args.NoQuote},
+			wantParam: []ParamType{
+				{Str: testutil.Ptr("arg1"), QuoteType: args.NoQuote},
 			},
 			wantIndices:        []int{3},
 			wantNextStartIndex: 3,
@@ -73,20 +73,20 @@ func Test_parseArg(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var gotParams []paramType
+			var gotParams []ParamType
 			var gotIndices []int
 
 			// Use tt.appendFn if provided, otherwise fall back to local collectors
 			appendFn := tt.appendFn
 			if appendFn == nil {
-				appendFn = func(ind int, p paramType) {
+				appendFn = func(ind int, p ParamType) {
 					gotIndices = append(gotIndices, ind)
 					gotParams = append(gotParams, p)
 				}
 			} else {
 				// Wrap to capture for assertions if table-defined appendFn is used
 				origAppendFn := tt.appendFn
-				appendFn = func(ind int, p paramType) {
+				appendFn = func(ind int, p ParamType) {
 					origAppendFn(ind, p)
 					gotIndices = append(gotIndices, ind)
 					gotParams = append(gotParams, p)

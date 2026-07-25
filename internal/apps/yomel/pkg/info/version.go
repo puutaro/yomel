@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 )
 
-func GetVersion(ctrl model.Control) (*string, error) {
+func GetVersion(ctrl domain.Control) (*string, error) {
 	if !ctrl.IsVersion {
 		return nil, nil
 	}

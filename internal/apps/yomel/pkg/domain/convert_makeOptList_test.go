@@ -1,9 +1,10 @@
-package model
+package domain
 
 import (
 	"testing"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +13,7 @@ func Test_makeOptList(t *testing.T) {
 	tests := []struct {
 		name  string
 		input struct {
-			optPs    []optParam
+			optPs    []model.OptParam
 			opPrefix string
 		}
 		want []opArgType
@@ -20,16 +21,16 @@ func Test_makeOptList(t *testing.T) {
 		{
 			name: "normal single-quoted option",
 			input: struct {
-				optPs    []optParam
+				optPs    []model.OptParam
 				opPrefix string
 			}{
-				optPs: []optParam{
+				optPs: []model.OptParam{
 					{
-						index:  5,
-						optStr: "e",
-						param: paramType{
-							str:       testutil.Ptr("s/aa/bb/g"),
-							quoteType: args.SingleQuote,
+						Index:  5,
+						OptStr: "e",
+						Param: model.ParamType{
+							Str:       testutil.Ptr("s/aa/bb/g"),
+							QuoteType: args.SingleQuote,
 						},
 					},
 				},
@@ -37,18 +38,18 @@ func Test_makeOptList(t *testing.T) {
 			},
 			want: []opArgType{
 				{
-					index: 5,
-					str:   `--e 's/aa/bb/g'`,
+					Index: 5,
+					Str:   `--e 's/aa/bb/g'`,
 				},
 			},
 		},
 		{
 			name: "empty input slice should return nil or empty slice",
 			input: struct {
-				optPs    []optParam
+				optPs    []model.OptParam
 				opPrefix string
 			}{
-				optPs:    []optParam{},
+				optPs:    []model.OptParam{},
 				opPrefix: "--",
 			},
 			want: nil,
@@ -56,16 +57,16 @@ func Test_makeOptList(t *testing.T) {
 		{
 			name: "option with nil string should produce prefix and option string only",
 			input: struct {
-				optPs    []optParam
+				optPs    []model.OptParam
 				opPrefix string
 			}{
-				optPs: []optParam{
+				optPs: []model.OptParam{
 					{
-						index:  2,
-						optStr: "v",
-						param: paramType{
-							str:       nil,
-							quoteType: args.NoQuote,
+						Index:  2,
+						OptStr: "v",
+						Param: model.ParamType{
+							Str:       nil,
+							QuoteType: args.NoQuote,
 						},
 					},
 				},
@@ -73,48 +74,48 @@ func Test_makeOptList(t *testing.T) {
 			},
 			want: []opArgType{
 				{
-					index: 2,
-					str:   "-v",
+					Index: 2,
+					Str:   "-v",
 				},
 			},
 		},
 		{
 			name: "mix of double quote, single quote, no quote, and nil string options with short prefix",
 			input: struct {
-				optPs    []optParam
+				optPs    []model.OptParam
 				opPrefix string
 			}{
-				optPs: []optParam{
+				optPs: []model.OptParam{
 					{
-						index:  1,
-						optStr: "f",
-						param: paramType{
-							str:       nil,
-							quoteType: args.NoQuote,
+						Index:  1,
+						OptStr: "f",
+						Param: model.ParamType{
+							Str:       nil,
+							QuoteType: args.NoQuote,
 						},
 					},
 					{
-						index:  3,
-						optStr: "n",
-						param: paramType{
-							str:       testutil.Ptr("100"),
-							quoteType: args.NoQuote,
+						Index:  3,
+						OptStr: "n",
+						Param: model.ParamType{
+							Str:       testutil.Ptr("100"),
+							QuoteType: args.NoQuote,
 						},
 					},
 					{
-						index:  7,
-						optStr: "m",
-						param: paramType{
-							str:       testutil.Ptr("message text"),
-							quoteType: args.SingleQuote,
+						Index:  7,
+						OptStr: "m",
+						Param: model.ParamType{
+							Str:       testutil.Ptr("message text"),
+							QuoteType: args.SingleQuote,
 						},
 					},
 					{
-						index:  9,
-						optStr: "c",
-						param: paramType{
-							str:       testutil.Ptr("config.json"),
-							quoteType: args.DoubleQuote,
+						Index:  9,
+						OptStr: "c",
+						Param: model.ParamType{
+							Str:       testutil.Ptr("config.json"),
+							QuoteType: args.DoubleQuote,
 						},
 					},
 				},
@@ -122,20 +123,20 @@ func Test_makeOptList(t *testing.T) {
 			},
 			want: []opArgType{
 				{
-					index: 1,
-					str:   "-f",
+					Index: 1,
+					Str:   "-f",
 				},
 				{
-					index: 3,
-					str:   "-n 100",
+					Index: 3,
+					Str:   "-n 100",
 				},
 				{
-					index: 7,
-					str:   `-m 'message text'`,
+					Index: 7,
+					Str:   `-m 'message text'`,
 				},
 				{
-					index: 9,
-					str:   `-c "config.json"`,
+					Index: 9,
+					Str:   `-c "config.json"`,
 				},
 			},
 		},
