@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 )
 
 const detail = `Usage:
@@ -66,7 +66,7 @@ Examples:
         --val \
         --n "/var/log"`
 
-func GetHelp(ctrl parser.Control) (*string, error) {
+func GetHelp(ctrl model.Control) (*string, error) {
 	if !ctrl.IsHelp {
 		return nil, nil
 	}

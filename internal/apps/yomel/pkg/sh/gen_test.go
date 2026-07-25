@@ -3,7 +3,7 @@ package sh
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,18 +12,18 @@ import (
 func Test_Gen(t *testing.T) {
 	tests := []struct {
 		name  string
-		input parser.Yomel
+		input model.Yomel
 		want  []YomelInfo
 	}{
 		{
 			name: "should generate single stage YomelInfo with command and arguments correctly",
-			input: parser.Yomel{
-				Ctrl: parser.Control{
+			input: model.Yomel{
+				Ctrl: model.Control{
 					IsLog:        testutil.Ptr(true),
 					LogFilter:    "global-filter",
 					ErrLogFilter: "global-err-filter",
 				},
-				Stages: []parser.Stage{
+				Stages: []model.Stage{
 					{
 						No:        1,
 						Desc:      "echo-stage",
@@ -45,13 +45,13 @@ func Test_Gen(t *testing.T) {
 		},
 		{
 			name: "should override global filters and log settings with stage-specific configurations",
-			input: parser.Yomel{
-				Ctrl: parser.Control{
+			input: model.Yomel{
+				Ctrl: model.Control{
 					IsLog:        testutil.Ptr(false),
 					LogFilter:    "global-filter",
 					ErrLogFilter: "global-err-filter",
 				},
-				Stages: []parser.Stage{
+				Stages: []model.Stage{
 					{
 						No:           1,
 						Desc:         "complex-stage",
@@ -80,9 +80,9 @@ func Test_Gen(t *testing.T) {
 		},
 		{
 			name: "should return empty slice when stages are empty",
-			input: parser.Yomel{
-				Ctrl:   parser.Control{},
-				Stages: []parser.Stage{},
+			input: model.Yomel{
+				Ctrl:   model.Control{},
+				Stages: []model.Stage{},
 			},
 			want: []YomelInfo{},
 		},

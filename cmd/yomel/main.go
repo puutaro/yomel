@@ -7,7 +7,7 @@ import (
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/parser"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/sh"
 )
 
@@ -19,7 +19,7 @@ const (
 func main() {
 
 	argTables := args.GenArgTable()
-	yomel := parser.Parse(argTables)
+	yomel := model.Parse(argTables)
 	helpCon, helpErr := info.GetHelp(yomel.Ctrl)
 	if helpErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", helpErr)
