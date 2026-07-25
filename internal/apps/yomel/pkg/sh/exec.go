@@ -15,8 +15,8 @@ const (
 	redEnd      = "\x1b[0m"
 )
 
-func Exec(chainInfos []YomelInfo) {
-	numCmds := len(chainInfos)
+func Exec(yomelInfos []YomelInfo) {
+	numCmds := len(yomelInfos)
 	if numCmds == 0 {
 		return
 	}
@@ -28,8 +28,8 @@ func Exec(chainInfos []YomelInfo) {
 	var nextStdin io.Reader = os.Stdin
 
 	// 1. Build the pipeline structure
-	for i, chainInfo := range chainInfos {
-		cmd := exec.Command("bash", "-c", chainInfo.CmdStrs)
+	for i, yomelInfo := range yomelInfos {
+		cmd := exec.Command("bash", "-c", yomelInfo.CmdStrs)
 		cmds[i] = cmd
 
 		cmd.Stdin = nextStdin
@@ -67,20 +67,20 @@ func Exec(chainInfos []YomelInfo) {
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
-	for i, chainInfo := range chainInfos {
+	for i, yomelInfo := range yomelInfos {
 		stdoutLen := stdoutBuffers[i].Len()
 
-		shouldLogStdout := chainInfo.IsLog && stdoutLen > 0
+		shouldLogStdout := yomelInfo.IsLog && stdoutLen > 0
 
 		if !cmdHasError && !shouldLogStdout {
 			continue
 		}
 		printDecoratedLog(
-			chainInfo.No,
-			chainInfo.Desc,
-			chainInfo.CmdStrs,
-			chainInfo.LogFilter,
-			chainInfo.ErrLogFilter,
+			yomelInfo.No,
+			yomelInfo.Desc,
+			yomelInfo.CmdStrs,
+			yomelInfo.LogFilter,
+			yomelInfo.ErrLogFilter,
 			stderrBuffers[i],
 			stdoutBuffers[i],
 			cmdHasError,
@@ -134,17 +134,17 @@ func printDecoratedLog(
 	fmt.Fprintf(os.Stderr, "%s\n\n", logGuard)
 }
 
-func write2Std(f *os.File, label string, buf *bytes.Buffer, filterShell string) {
+func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string) {
 	if buf.Len() <= 0 {
 		return
 	}
-	fmt.Fprint(f, label)
+	fmt.Fprint(w, label)
 	cmd := exec.Command("bash", "-c", filterShell)
 
 	// yomelが持っているログバッファを、headコマンドの標準入力としてセット
 	cmd.Stdin = buf
 	// headコマンドの標準出力を、yomelのエラー出力（ログの出力先）に直接繋ぐ
-	cmd.Stdout = f
+	cmd.Stdout = w
 	cmdStderrBuf := new(bytes.Buffer)
 	cmd.Stderr = cmdStderrBuf
 
@@ -154,18 +154,18 @@ func write2Std(f *os.File, label string, buf *bytes.Buffer, filterShell string) 
 		if err := cmd.Run(); err == nil || cmdStderrBuf.Len() <= 0 {
 			break
 		}
-		fmt.Fprintf(f, "%sfilter shell err:%s\n", redStart, redEnd)
-		f.Write(cmdStderrBuf.Bytes())
-		addNewline(f, cmdStderrBuf)
+		fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, redEnd)
+		w.Write(cmdStderrBuf.Bytes())
+		addNewline(w, cmdStderrBuf)
 	default:
-		f.Write(buf.Bytes())
-		addNewline(f, buf)
+		w.Write(buf.Bytes())
+		addNewline(w, buf)
 	}
 }
 
-func addNewline(f *os.File, buf *bytes.Buffer) {
+func addNewline(w io.Writer, buf *bytes.Buffer) {
 	if buf.Bytes()[buf.Len()-1] == '\n' {
 		return
 	}
-	fmt.Fprintln(f)
+	fmt.Fprintln(w)
 }
