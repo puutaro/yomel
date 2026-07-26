@@ -9,6 +9,7 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/prevalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/sh"
 )
 
@@ -20,6 +21,12 @@ const (
 func main() {
 
 	argTables := args.GenArgTable()
+	preValidateErr := prevalid.PreValidate(argTables)
+	if preValidateErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", preValidateErr)
+		os.Exit(errorExitSignal)
+		return
+	}
 	ctrl, stageModels := model.Parse(argTables)
 	yomel := domain.Convert(ctrl, stageModels)
 	helpCon, helpErr := info.GetHelp(yomel.Ctrl)
