@@ -1,12 +1,12 @@
 package model
 
 import (
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
 )
 
 type ParamType struct {
 	Str       *string
-	QuoteType args.QuoteType
+	QuoteType argTable.QuoteType
 }
 
 type OptParam struct {
@@ -48,8 +48,8 @@ type ControlModel struct {
 	IsHelp       bool
 }
 
-func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
-	var curCtrlArgTables []args.ArgTable
+func Parse(argTables []argTable.ArgTable) (ControlModel, []StageModel) {
+	var curCtrlArgTables []argTable.ArgTable
 	for _, argTable := range argTables {
 		if argTable.StageNo > 0 {
 			break
@@ -63,19 +63,19 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 	ctrl.IsVersion = getFlag(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsVersion },
+		func(t argTable.ArgTable) bool { return t.IsVersion },
 		false,
 	)
 	ctrl.IsHelp = getFlag(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsHelp },
+		func(t argTable.ArgTable) bool { return t.IsHelp },
 		false,
 	)
 	if flagBool := getFlagByPtr(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsLog },
+		func(t argTable.ArgTable) bool { return t.IsLog },
 		true,
 	); flagBool != nil {
 		ctrl.IsLog = flagBool
@@ -83,7 +83,7 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 	if flagBool := getFlagByPtr(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsNoLog },
+		func(t argTable.ArgTable) bool { return t.IsNoLog },
 		false,
 	); flagBool != nil {
 		ctrl.IsLog = flagBool
@@ -91,14 +91,14 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 	if strPtr := getOneStr(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsLogFilter },
+		func(t argTable.ArgTable) bool { return t.IsLogFilter },
 	); strPtr != nil {
 		ctrl.LogFilter = *strPtr
 	}
 	if strPtr := getOneStr(
 		0,
 		curCtrlArgTables,
-		func(t args.ArgTable) bool { return t.IsErrLogFilter },
+		func(t argTable.ArgTable) bool { return t.IsErrLogFilter },
 	); strPtr != nil {
 		ctrl.ErrLogFilter = *strPtr
 	}
@@ -111,7 +111,7 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		stModel := StageModel{
 			No: stageNo,
 		}
-		var curStageArgTables []args.ArgTable
+		var curStageArgTables []argTable.ArgTable
 		for i := nextStartIndex; i < argTablesLen; i++ {
 			argTable := argTables[i]
 			if argTable.StageNo < stageNo {
@@ -128,21 +128,21 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		if ptrStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsStage },
+			func(t argTable.ArgTable) bool { return t.IsStage },
 		); ptrStr != nil {
 			stModel.Desc = *ptrStr
 		}
 		if ptrStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsCmd },
+			func(t argTable.ArgTable) bool { return t.IsCmd },
 		); ptrStr != nil {
 			stModel.Cmd = *ptrStr
 		}
 		if flagBool := getFlagByPtr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsLog },
+			func(t argTable.ArgTable) bool { return t.IsLog },
 			true,
 		); flagBool != nil {
 			stModel.IsLog = flagBool
@@ -150,7 +150,7 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		if flagBool := getFlagByPtr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsNoLog },
+			func(t argTable.ArgTable) bool { return t.IsNoLog },
 			false,
 		); flagBool != nil {
 			stModel.IsLog = flagBool
@@ -158,38 +158,38 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		if strPtr := getOneStr(
 			0,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsLogFilter },
+			func(t argTable.ArgTable) bool { return t.IsLogFilter },
 		); strPtr != nil {
 			stModel.LogFilter = *strPtr
 		}
 		if strPtr := getOneStr(
 			0,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsErrLogFilter },
+			func(t argTable.ArgTable) bool { return t.IsErrLogFilter },
 		); strPtr != nil {
 			stModel.ErrLogFilter = *strPtr
 		}
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsCmd },
-			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t args.ArgTable) bool { return t.IsOpt },
+			func(t argTable.ArgTable) bool { return t.IsCmd },
+			func(t argTable.ArgTable) bool { return t.IsSvc || t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsOpt },
 			func(p OptParam) { stModel.CmdOps = append(stModel.CmdOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsCmd },
-			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t args.ArgTable) bool { return t.IsLopt },
+			func(t argTable.ArgTable) bool { return t.IsCmd },
+			func(t argTable.ArgTable) bool { return t.IsSvc || t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsLopt },
 			func(p OptParam) { stModel.CmdLops = append(stModel.CmdLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t args.ArgTable) bool { return t.IsCmd },
+			func(t argTable.ArgTable) bool { return t.IsSvc || t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsCmd },
 			func(ind int, p ParamType) {
 				stModel.CmdArgs = append(
 					stModel.CmdArgs,
@@ -203,31 +203,31 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		if oneStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsSvc },
+			func(t argTable.ArgTable) bool { return t.IsSvc },
 		); oneStr != nil {
 			stModel.Svc = *oneStr
 		}
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsSvc },
-			func(t args.ArgTable) bool { return t.IsAct },
-			func(t args.ArgTable) bool { return t.IsOpt },
+			func(t argTable.ArgTable) bool { return t.IsSvc },
+			func(t argTable.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsOpt },
 			func(p OptParam) { stModel.SvcOps = append(stModel.SvcOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsSvc },
-			func(t args.ArgTable) bool { return t.IsAct },
-			func(t args.ArgTable) bool { return t.IsLopt },
+			func(t argTable.ArgTable) bool { return t.IsSvc },
+			func(t argTable.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsLopt },
 			func(p OptParam) { stModel.SvcLops = append(stModel.SvcLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsAct },
-			func(t args.ArgTable) bool { return t.IsSvc },
+			func(t argTable.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsSvc },
 			func(ind int, p ParamType) {
 				stModel.SvcArgs = append(
 					stModel.SvcArgs,
@@ -241,31 +241,31 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 		if oneStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsAct },
 		); oneStr != nil {
 			stModel.Act = *oneStr
 		}
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsAct },
-			func(t args.ArgTable) bool { return t.IsArg },
-			func(t args.ArgTable) bool { return t.IsOpt },
+			func(t argTable.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsArg },
+			func(t argTable.ArgTable) bool { return t.IsOpt },
 			func(p OptParam) { stModel.ActOps = append(stModel.ActOps, p) },
 		)
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return t.IsAct },
-			func(t args.ArgTable) bool { return t.IsArg },
-			func(t args.ArgTable) bool { return t.IsLopt },
+			func(t argTable.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return t.IsArg },
+			func(t argTable.ArgTable) bool { return t.IsLopt },
 			func(p OptParam) { stModel.ActLops = append(stModel.ActLops, p) },
 		)
 		nextStartIndex = parseArg(
 			nextStartIndex,
 			curStageArgTables,
-			func(t args.ArgTable) bool { return false },
-			func(t args.ArgTable) bool { return t.IsAct },
+			func(t argTable.ArgTable) bool { return false },
+			func(t argTable.ArgTable) bool { return t.IsAct },
 			func(ind int, p ParamType) {
 				stModel.ActArgs = append(
 					stModel.ActArgs,
@@ -283,8 +283,8 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 
 func getFlag(
 	nextStartIndex int,
-	curStageArgTables []args.ArgTable,
-	isCheckFn func(args.ArgTable) bool,
+	curStageArgTables []argTable.ArgTable,
+	isCheckFn func(argTable.ArgTable) bool,
 	defaultBool bool,
 ) bool {
 	argTablesLen := len(curStageArgTables)
@@ -299,8 +299,8 @@ func getFlag(
 }
 func getFlagByPtr(
 	nextStartIndex int,
-	curStageArgTables []args.ArgTable,
-	isCheckFn func(args.ArgTable) bool,
+	curStageArgTables []argTable.ArgTable,
+	isCheckFn func(argTable.ArgTable) bool,
 	returnBool bool,
 ) *bool {
 	argTablesLen := len(curStageArgTables)
@@ -316,8 +316,8 @@ func getFlagByPtr(
 
 func getOneStr(
 	nextStartIndex int,
-	curStageArgTables []args.ArgTable,
-	isCheckFn func(args.ArgTable) bool,
+	curStageArgTables []argTable.ArgTable,
+	isCheckFn func(argTable.ArgTable) bool,
 ) *string {
 	argTablesLen := len(curStageArgTables)
 	for i := nextStartIndex; i < argTablesLen; i++ {
@@ -335,10 +335,10 @@ func getOneStr(
 
 func parseOptions(
 	nextStartIndex int,
-	curStageArgTables []args.ArgTable,
-	isTargetMainArg func(t args.ArgTable) bool,
-	isNextMainArg func(t args.ArgTable) bool,
-	isTargetOpt func(args.ArgTable) bool,
+	curStageArgTables []argTable.ArgTable,
+	isTargetMainArg func(t argTable.ArgTable) bool,
+	isNextMainArg func(t argTable.ArgTable) bool,
+	isTargetOpt func(argTable.ArgTable) bool,
 	appendFn func(OptParam),
 ) {
 	curStageArgTablesLen := len(curStageArgTables)
@@ -387,9 +387,9 @@ func parseOptions(
 
 func parseArg(
 	nextStartIndex int,
-	curStageArgTables []args.ArgTable,
-	isNextMainArg func(t args.ArgTable) bool,
-	isTargetMainArg func(t args.ArgTable) bool,
+	curStageArgTables []argTable.ArgTable,
+	isNextMainArg func(t argTable.ArgTable) bool,
+	isTargetMainArg func(t argTable.ArgTable) bool,
 	appendFn func(int, ParamType),
 ) int {
 	curStageArgTablesLen := len(curStageArgTables)
@@ -420,10 +420,10 @@ func parseArg(
 	return returnNextStartIndex
 }
 
-func getQuoteStr(curStageArgTables []args.ArgTable, curIndex int) (ParamType, int) {
+func getQuoteStr(curStageArgTables []argTable.ArgTable, curIndex int) (ParamType, int) {
 	param := ParamType{}
 	afterFirstIndex := curIndex + 1
-	if curStageArgTables[afterFirstIndex].QuoteTypeSignal == args.DoubleQuote {
+	if curStageArgTables[afterFirstIndex].QuoteTypeSignal == argTable.DoubleQuote {
 		param.Str = curStageArgTables[afterFirstIndex].Str
 		return param, afterFirstIndex
 	}

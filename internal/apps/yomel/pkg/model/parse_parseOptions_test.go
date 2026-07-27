@@ -3,49 +3,49 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_parseOptions(t *testing.T) {
 	// Tiny helpers to minimize structural boilerplate
-	tStr := func(s string) args.ArgTable { return args.ArgTable{Str: &s} }
-	tCmd := func() args.ArgTable { return args.ArgTable{IsCmd: true} }
-	tSvc := func() args.ArgTable { return args.ArgTable{IsSvc: true} }
+	tStr := func(s string) argTable.ArgTable { return argTable.ArgTable{Str: &s} }
+	tCmd := func() argTable.ArgTable { return argTable.ArgTable{IsCmd: true} }
+	tSvc := func() argTable.ArgTable { return argTable.ArgTable{IsSvc: true} }
 	// tAct := func() args.ArgTable { return args.ArgTable{IsAct: true} }
-	tOpt := func() args.ArgTable { return args.ArgTable{IsOpt: true} }
-	tLopt := func() args.ArgTable { return args.ArgTable{IsLopt: true} }
-	tVal := func() args.ArgTable { return args.ArgTable{IsValue: true} }
+	tOpt := func() argTable.ArgTable { return argTable.ArgTable{IsOpt: true} }
+	tLopt := func() argTable.ArgTable { return argTable.ArgTable{IsLopt: true} }
+	tVal := func() argTable.ArgTable { return argTable.ArgTable{IsValue: true} }
 	// tArg := func() args.ArgTable { return args.ArgTable{IsArg: true} }
 
 	tests := []struct {
 		name            string
 		nextStartIndex  int
-		input           []args.ArgTable
-		isTargetMainArg func(args.ArgTable) bool
-		isNextMainArg   func(args.ArgTable) bool
-		isTargetOpt     func(args.ArgTable) bool
+		input           []argTable.ArgTable
+		isTargetMainArg func(argTable.ArgTable) bool
+		isNextMainArg   func(argTable.ArgTable) bool
+		isTargetOpt     func(argTable.ArgTable) bool
 		want            []OptParam
 	}{
 		{
 			name:           "should parse short options with values correctly",
 			nextStartIndex: 0,
-			input: []args.ArgTable{
+			input: []argTable.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: args.SingleQuote}, tStr("file.txt"),
+				tVal(), {QuoteTypeSignal: argTable.SingleQuote}, tStr("file.txt"),
 			},
-			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
+			isTargetMainArg: func(a argTable.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argTable.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argTable.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  2,
 					OptStr: "f",
 					Param: ParamType{
 						Str:       testutil.Ptr("file.txt"),
-						QuoteType: args.SingleQuote,
+						QuoteType: argTable.SingleQuote,
 					},
 				},
 			},
@@ -53,13 +53,13 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should parse long options without values correctly",
 			nextStartIndex: 0,
-			input: []args.ArgTable{
+			input: []argTable.ArgTable{
 				tCmd(),
 				tLopt(), tStr("verbose"),
 			},
-			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a args.ArgTable) bool { return a.IsLopt },
+			isTargetMainArg: func(a argTable.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argTable.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argTable.ArgTable) bool { return a.IsLopt },
 			want: []OptParam{
 				{
 					Index:  2,
@@ -71,23 +71,23 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should stop parsing when next main argument is encountered",
 			nextStartIndex: 0,
-			input: []args.ArgTable{
+			input: []argTable.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: args.NoQuote}, tStr("file1"),
+				tVal(), {QuoteTypeSignal: argTable.NoQuote}, tStr("file1"),
 				tSvc(), // Boundary to next main arg
 				tOpt(), tStr("ignored"),
 			},
-			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a args.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
+			isTargetMainArg: func(a argTable.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argTable.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argTable.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  2,
 					OptStr: "f",
 					Param: ParamType{
 						Str:       testutil.Ptr("file1"),
-						QuoteType: args.NoQuote,
+						QuoteType: argTable.NoQuote,
 					},
 				},
 			},
@@ -95,32 +95,32 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should return empty slice when target main argument is not found",
 			nextStartIndex: 0,
-			input: []args.ArgTable{
+			input: []argTable.ArgTable{
 				tSvc(),
 				tOpt(), tStr("v"),
 			},
-			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a args.ArgTable) bool { return a.IsAct },
-			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
+			isTargetMainArg: func(a argTable.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argTable.ArgTable) bool { return a.IsAct },
+			isTargetOpt:     func(a argTable.ArgTable) bool { return a.IsOpt },
 			want:            nil,
 		},
 		{
 			name:           "should skip elements before nextStartIndex",
 			nextStartIndex: 4,
-			input: []args.ArgTable{
+			input: []argTable.ArgTable{
 				tCmd(), tOpt(), tStr("a"), tVal(), tStr("val-skip"),
-				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: args.NoQuote}, tStr("val-target"),
+				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: argTable.NoQuote}, tStr("val-target"),
 			},
-			isTargetMainArg: func(a args.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a args.ArgTable) bool { return a.IsAct },
-			isTargetOpt:     func(a args.ArgTable) bool { return a.IsOpt },
+			isTargetMainArg: func(a argTable.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argTable.ArgTable) bool { return a.IsAct },
+			isTargetOpt:     func(a argTable.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  7,
 					OptStr: "b",
 					Param: ParamType{
 						Str:       testutil.Ptr("val-target"),
-						QuoteType: args.NoQuote,
+						QuoteType: argTable.NoQuote,
 					},
 				},
 			},

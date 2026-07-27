@@ -3,10 +3,10 @@ package argtablevalid
 import (
 	"errors"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
 )
 
-func ArgTableValidate(argTables []args.ArgTable) error {
+func ArgTableValidate(argTables []argTable.ArgTable) error {
 	isStageErr := checkIsStage(argTables)
 	if isStageErr != nil {
 		return isStageErr
@@ -14,7 +14,7 @@ func ArgTableValidate(argTables []args.ArgTable) error {
 	return nil
 }
 
-func checkIsStage(argTables []args.ArgTable) error {
+func checkIsStage(argTables []argTable.ArgTable) error {
 
 	for _, argTable := range argTables {
 		if argTable.IsStage {

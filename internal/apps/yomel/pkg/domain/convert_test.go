@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +29,7 @@ func Test_convert(t *testing.T) {
 							Index: 3,
 							Param: model.ParamType{
 								Str:       testutil.Ptr("hello"),
-								QuoteType: args.NoQuote,
+								QuoteType: argTable.NoQuote,
 							},
 						},
 					},
@@ -58,7 +58,7 @@ func Test_convert(t *testing.T) {
 					CmdOps:    []model.OptParam{{Index: 2, OptStr: "s", Param: model.ParamType{}}},
 					Svc:       "s3",
 					Act:       "cp",
-					ActLops:   []model.OptParam{{Index: 5, OptStr: "region", Param: model.ParamType{Str: testutil.Ptr("us-east-1"), QuoteType: args.SingleQuote}}},
+					ActLops:   []model.OptParam{{Index: 5, OptStr: "region", Param: model.ParamType{Str: testutil.Ptr("us-east-1"), QuoteType: argTable.SingleQuote}}},
 					LogFilter: "custom-filter",
 				},
 			},
@@ -87,16 +87,16 @@ func Test_convert(t *testing.T) {
 					No:           1,
 					Desc:         "comprehensive-stage",
 					Cmd:          "aws",
-					CmdLops:      []model.OptParam{{Index: 1, OptStr: "profile", Param: model.ParamType{Str: testutil.Ptr("prod"), QuoteType: args.NoQuote}}},
-					CmdArgs:      []model.ArgParam{{Index: 2, Param: model.ParamType{Str: testutil.Ptr("cmd-arg"), QuoteType: args.DoubleQuote}}},
+					CmdLops:      []model.OptParam{{Index: 1, OptStr: "profile", Param: model.ParamType{Str: testutil.Ptr("prod"), QuoteType: argTable.NoQuote}}},
+					CmdArgs:      []model.ArgParam{{Index: 2, Param: model.ParamType{Str: testutil.Ptr("cmd-arg"), QuoteType: argTable.DoubleQuote}}},
 					Svc:          "s3",
 					SvcOps:       []model.OptParam{{Index: 3, OptStr: "r", Param: model.ParamType{}}},
-					SvcLops:      []model.OptParam{{Index: 4, OptStr: "svc-lop", Param: model.ParamType{Str: testutil.Ptr("val"), QuoteType: args.SingleQuote}}},
-					SvcArgs:      []model.ArgParam{{Index: 5, Param: model.ParamType{Str: testutil.Ptr("svc-arg"), QuoteType: args.NoQuote}}},
+					SvcLops:      []model.OptParam{{Index: 4, OptStr: "svc-lop", Param: model.ParamType{Str: testutil.Ptr("val"), QuoteType: argTable.SingleQuote}}},
+					SvcArgs:      []model.ArgParam{{Index: 5, Param: model.ParamType{Str: testutil.Ptr("svc-arg"), QuoteType: argTable.NoQuote}}},
 					Act:          "cp",
 					ActOps:       []model.OptParam{{Index: 6, OptStr: "v", Param: model.ParamType{}}},
 					ActLops:      []model.OptParam{{Index: 7, OptStr: "recursive", Param: model.ParamType{}}},
-					ActArgs:      []model.ArgParam{{Index: 8, Param: model.ParamType{Str: testutil.Ptr("act-arg"), QuoteType: args.NoQuote}}},
+					ActArgs:      []model.ArgParam{{Index: 8, Param: model.ParamType{Str: testutil.Ptr("act-arg"), QuoteType: argTable.NoQuote}}},
 					IsLog:        testutil.Ptr(false),
 					LogFilter:    "stage-log-filter",
 					ErrLogFilter: "stage-err-filter",
