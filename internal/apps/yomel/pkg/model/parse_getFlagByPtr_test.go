@@ -3,7 +3,7 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,68 +12,68 @@ func Test_getFlagByPtr(t *testing.T) {
 	tests := []struct {
 		name           string
 		nextStartIndex int
-		input          []argtable.ArgTable
-		isCheckFn      func(argtable.ArgTable) bool
+		input          []argtables.ArgTable
+		isCheckFn      func(argtables.ArgTable) bool
 		returnBool     bool
 		want           *bool
 	}{
 		{
 			name:           "should return pointer to true when target flag exists",
 			nextStartIndex: 0,
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{IsLog: true},
 			},
-			isCheckFn:  func(t argtable.ArgTable) bool { return t.IsLog },
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsLog },
 			returnBool: true,
 			want:       testutil.Ptr(true),
 		},
 		{
 			name:           "should return pointer to false when target flag exists and returnBool is false",
 			nextStartIndex: 0,
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{IsNoLog: true},
 			},
-			isCheckFn:  func(t argtable.ArgTable) bool { return t.IsNoLog },
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsNoLog },
 			returnBool: false,
 			want:       testutil.Ptr(false),
 		},
 		{
 			name:           "should return nil when target flag does not exist",
 			nextStartIndex: 0,
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{IsLog: false},
 			},
-			isCheckFn:  func(t argtable.ArgTable) bool { return t.IsLog },
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsLog },
 			returnBool: true,
 			want:       nil,
 		},
 		{
 			name:           "should respect nextStartIndex and ignore flags before it",
 			nextStartIndex: 1,
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{IsLog: true},
 				{IsLog: true},
 			},
-			isCheckFn:  func(t argtable.ArgTable) bool { return t.IsLog },
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsLog },
 			returnBool: true,
 			want:       testutil.Ptr(true),
 		},
 		{
 			name:           "should return nil when flag exists before nextStartIndex",
 			nextStartIndex: 1,
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{IsLog: true},
 				{IsLog: false},
 			},
-			isCheckFn:  func(t argtable.ArgTable) bool { return t.IsLog },
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsLog },
 			returnBool: true,
 			want:       nil,
 		},
 		{
 			name:           "should return nil when input slice is empty",
 			nextStartIndex: 0,
-			input:          []argtable.ArgTable{},
-			isCheckFn:      func(t argtable.ArgTable) bool { return t.IsLog },
+			input:          []argtables.ArgTable{},
+			isCheckFn:      func(t argtables.ArgTable) bool { return t.IsLog },
 			returnBool:     true,
 			want:           nil,
 		},

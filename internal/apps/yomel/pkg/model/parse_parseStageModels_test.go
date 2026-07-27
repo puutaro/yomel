@@ -3,7 +3,7 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,20 +12,20 @@ import (
 func Test_parseStageModels(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtable.ArgTable
+		input     []argtables.ArgTable
 		wantCtrl  ControlModel
 		wantStMod []StageModel
 	}{
 		{
 			name: "should parse control flags and single stage model correctly",
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsLog: true},
 				{No: 2, StageNo: 1, IsStage: true},
 				{No: 3, StageNo: 1, Str: testutil.Ptr("stage1")},
 				{No: 4, StageNo: 1, IsCmd: true},
 				{No: 5, StageNo: 1, Str: testutil.Ptr("echo")},
 				{No: 6, StageNo: 1, IsArg: true},
-				{No: 7, StageNo: 1, QuoteTypeSignal: argtable.NoQuote},
+				{No: 7, StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
 				{No: 8, StageNo: 1, Str: testutil.Ptr("hello")},
 			},
 			wantCtrl: ControlModel{
@@ -45,7 +45,7 @@ func Test_parseStageModels(t *testing.T) {
 							Index: 6,
 							Param: ParamType{
 								Str:       testutil.Ptr("hello"),
-								QuoteType: argtable.NoQuote,
+								QuoteType: argtables.NoQuote,
 							},
 						},
 					},
@@ -54,7 +54,7 @@ func Test_parseStageModels(t *testing.T) {
 		},
 		{
 			name: "should parse multiple stages with options, services, actions, and filters",
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsLog: true},
 				{No: 2, StageNo: 0, IsLogFilter: true},
 				{No: 3, StageNo: 0, Str: testutil.Ptr("global-filter")},
@@ -101,7 +101,7 @@ func Test_parseStageModels(t *testing.T) {
 		},
 		{
 			name: "should handle control version, help, no-log, err-log-filter, and comprehensive stage parameters with service/action options and lopts",
-			input: []argtable.ArgTable{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsVersion: true},
 				{No: 2, StageNo: 0, IsHelp: true},
 				{No: 3, StageNo: 0, IsNoLog: true},
@@ -125,7 +125,7 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 21, StageNo: 1, IsLopt: true},
 				{No: 22, StageNo: 1, Str: testutil.Ptr("recursive")},
 				{No: 23, StageNo: 1, IsArg: true},
-				{No: 24, StageNo: 1, QuoteTypeSignal: argtable.SingleQuote},
+				{No: 24, StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{No: 25, StageNo: 1, Str: testutil.Ptr("arg-val")},
 			},
 			wantCtrl: ControlModel{
@@ -145,7 +145,7 @@ func Test_parseStageModels(t *testing.T) {
 					SvcOps:       []OptParam{{Index: 12, OptStr: "r", Param: ParamType{}}},
 					Act:          "cp",
 					ActLops:      []OptParam{{Index: 16, OptStr: "recursive", Param: ParamType{}}},
-					ActArgs:      []ArgParam{{Index: 19, Param: ParamType{Str: testutil.Ptr("arg-val"), QuoteType: argtable.SingleQuote}}},
+					ActArgs:      []ArgParam{{Index: 19, Param: ParamType{Str: testutil.Ptr("arg-val"), QuoteType: argtables.SingleQuote}}},
 					IsLog:        testutil.Ptr(false),
 					ErrLogFilter: "stage-err-filter",
 				},

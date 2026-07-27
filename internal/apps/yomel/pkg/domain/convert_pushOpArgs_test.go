@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +32,7 @@ func Test_pushOpArgs(t *testing.T) {
 						OptStr: "f",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("file.txt"),
-							QuoteType: argtable.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 				},
@@ -42,7 +42,7 @@ func Test_pushOpArgs(t *testing.T) {
 						OptStr: "region",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("us-east-1"),
-							QuoteType: argtable.SingleQuote,
+							QuoteType: argtables.SingleQuote,
 						},
 					},
 				},
@@ -51,14 +51,14 @@ func Test_pushOpArgs(t *testing.T) {
 						Index: 1,
 						Param: model.ParamType{
 							Str:       testutil.Ptr("first-arg"),
-							QuoteType: argtable.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 					{
 						Index: 10,
 						Param: model.ParamType{
 							Str:       testutil.Ptr("last-arg"),
-							QuoteType: argtable.DoubleQuote,
+							QuoteType: argtables.DoubleQuote,
 						},
 					},
 				},
@@ -96,7 +96,7 @@ func Test_pushOpArgs(t *testing.T) {
 						OptStr: "v",
 						Param: model.ParamType{
 							Str:       nil,
-							QuoteType: argtable.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 				},
@@ -106,7 +106,7 @@ func Test_pushOpArgs(t *testing.T) {
 						Index: 1,
 						Param: model.ParamType{
 							Str:       nil,
-							QuoteType: argtable.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 				},
