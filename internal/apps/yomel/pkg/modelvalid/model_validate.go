@@ -34,7 +34,7 @@ func isBellowSingleCharRepeated(s string) bool {
 	for _, r := range runes {
 		seen[r] = true
 		if len(seen) > 1 {
-			return false // 2種類目の文字が出たら即終了
+			return false
 		}
 	}
 	return len(seen) == 1
