@@ -125,16 +125,20 @@ func Parse(argTables []args.ArgTable) (ControlModel, []StageModel) {
 				argTable,
 			)
 		}
-		stModel.Desc = *getOneStr(
+		if ptrStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsStage },
-		)
-		stModel.Cmd = *getOneStr(
+		); ptrStr != nil {
+			stModel.Desc = *ptrStr
+		}
+		if ptrStr := getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t args.ArgTable) bool { return t.IsCmd },
-		)
+		); ptrStr != nil {
+			stModel.Cmd = *ptrStr
+		}
 		if flagBool := getFlagByPtr(
 			nextStartIndex,
 			curStageArgTables,
