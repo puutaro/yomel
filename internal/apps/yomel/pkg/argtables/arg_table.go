@@ -25,8 +25,8 @@ const (
 	HelpOpSignal         = "--" + Help
 	StageSignal          = StageArgName
 	CmdOpSignal          = "-" + CmdOpName
-	LogOpSignal          = "--" + LogOpName
-	NoLogOpSignal        = "--" + NoLogOpName
+	LogFlagSignal        = "--" + LogOpName
+	NoLogFlagSignal      = "--" + NoLogOpName
 	LogFilterOpSignal    = "--" + LogFilter
 	ErrLogFilterOpSignal = "--" + ErrLogFilter
 	SvcOpSignal          = "-" + SvcOpName
@@ -86,9 +86,9 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			argTable.IsVersion = true
 		case HelpOpSignal:
 			argTable.IsHelp = true
-		case LogOpSignal:
+		case LogFlagSignal:
 			argTable.IsLog = true
-		case NoLogOpSignal:
+		case NoLogFlagSignal:
 			argTable.IsNoLog = true
 		case LogFilterOpSignal:
 			argTable.IsLogFilter = true

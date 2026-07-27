@@ -5,18 +5,45 @@ import (
 )
 
 const (
-	stageNotFound            = "'" + argtables.StageSignal + "'" + " not found"
-	cmdOpNameWithQuote       = "'" + argtables.CmdOpSignal + "'"
-	cmdNotFound              = cmdOpNameWithQuote + " not found\nstageNo: %d"
-	cmdDuplidate             = cmdOpNameWithQuote + " duplication\nstageNo: %d"
-	svcOpNameWithQuote       = "'" + argtables.SvcOpSignal + "'"
-	actOpNameWithQuote       = "'" + argtables.ActOpSignal + "'"
-	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order \nstageNo: %d"
+	logFlagWithQuote       = "'" + argtables.LogFlagSignal + "'"
+	noLogFlagWithQuote     = "'" + argtables.NoLogFlagSignal + "'"
+	logNoLogSingnalWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote
+
+	versionWithQuote      = "'" + argtables.VersionOpSignal + "'"
+	helpWithQuote         = "'" + argtables.HelpOpSignal + "'"
+	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
+	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
+
+	cmdOpNameWithQuote = "'" + argtables.CmdOpSignal + "'"
+	svcOpNameWithQuote = "'" + argtables.SvcOpSignal + "'"
+	actOpNameWithQuote = "'" + argtables.ActOpSignal + "'"
 
 	argOpSignalWithQuote     = "'" + argtables.ArgOpSignal + "'"
 	optOpSignalWithQuote     = "'" + argtables.OptOpSignal + "'"
 	singleOpSignalWithQuote  = "'" + argtables.SingleOpSignal + "/" + argtables.SingleShortOpSignal + "'"
 	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteOpSignal + "/" + argtables.NoQuoteShortOpSignal + "'"
-	// Include duplicate quoteOption specifed
-	quoteOptionIrregularPosition = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote + " must be immediately after " + argOpSignalWithQuote + " and " + optOpSignalWithQuote + "\nstageNo: %d"
+	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
+
+	stageNoSuffix = "\nstageNo: %d"
+
+	// noLogSpecifyNotMeaning = noLogFlagWithQuote + "not meaning\n stageNo: 0"
+
+	stageNotFound = "'" + argtables.StageSignal + "'" + " not found"
+	cmdNotFound   = cmdOpNameWithQuote + " not found" + stageNoSuffix
+
+	duplicateionErrSuffix  = " duplication" + stageNoSuffix
+	versionDuplicate       = versionWithQuote + duplicateionErrSuffix
+	helpDuplicate          = helpWithQuote + duplicateionErrSuffix
+	logFilterDuplicate     = logFilterWithQuote + duplicateionErrSuffix
+	errLogFilterDuplicate  = errLogFilterWithQuote + duplicateionErrSuffix
+	noLogLogFlagDuplidate  = logNoLogSingnalWithAnd + duplicateionErrSuffix
+	svcDuplidate           = svcOpNameWithQuote + duplicateionErrSuffix
+	cmdDuplidate           = cmdOpNameWithQuote + duplicateionErrSuffix
+	actDuplidate           = actOpNameWithQuote + duplicateionErrSuffix
+	quoteOpSignalDuplicate = quoteSingnalWithAnd + duplicateionErrSuffix
+	argQuoteWithAnd        = argOpSignalWithQuote + " and " + optOpSignalWithQuote
+
+	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
+
+	quoteOptionIrregularPosition = quoteSingnalWithAnd + " must be immediately after " + argQuoteWithAnd + stageNoSuffix
 )
