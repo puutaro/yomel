@@ -6,7 +6,7 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/args"
 )
 
-func PreValidate(argTables []args.ArgTable) error {
+func ArgTableValidate(argTables []args.ArgTable) error {
 	isStageErr := checkIsStage(argTables)
 	if isStageErr != nil {
 		return isStageErr
