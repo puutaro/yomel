@@ -21,23 +21,24 @@ const (
 	NoQuoteShortOpName = "n"
 )
 const (
-	versionOpSignal      = "--" + Version
-	helpOpSignal         = "--" + Help
-	cmdOpSignal          = "-" + CmdOpName
-	logOpSignal          = "--" + LogOpName
-	noLogOpSignal        = "--" + NoLogOpName
-	logFilterOpSignal    = "--" + LogFilter
-	errLogFilterOpSignal = "--" + ErrLogFilter
-	svcOpSignal          = "-" + SvcOpName
-	actOpSignal          = "-" + ActOpName
-	optOpSignal          = "--" + OptOpName
-	loptOpSignal         = "--" + LoptOpName
-	argOpSignal          = "--" + ArgOpName
-	valueOptSignal       = "--" + ValueOpName
-	singleOpSignal       = "--" + SingleOpName
-	singleShortOpSignal  = "--" + SingleShortOpName
-	noQuoteOpSignal      = "--" + NoQuoteOpName
-	noQuoteShortOpSignal = "--" + NoQuoteShortOpName
+	VersionOpSignal      = "--" + Version
+	HelpOpSignal         = "--" + Help
+	StageSignal          = StageArgName
+	CmdOpSignal          = "-" + CmdOpName
+	LogOpSignal          = "--" + LogOpName
+	NoLogOpSignal        = "--" + NoLogOpName
+	LogFilterOpSignal    = "--" + LogFilter
+	ErrLogFilterOpSignal = "--" + ErrLogFilter
+	SvcOpSignal          = "-" + SvcOpName
+	ActOpSignal          = "-" + ActOpName
+	OptOpSignal          = "--" + OptOpName
+	LoptOpSignal         = "--" + LoptOpName
+	ArgOpSignal          = "--" + ArgOpName
+	ValueOptSignal       = "--" + ValueOpName
+	SingleOpSignal       = "--" + SingleOpName
+	SingleShortOpSignal  = "--" + SingleShortOpName
+	NoQuoteOpSignal      = "--" + NoQuoteOpName
+	NoQuoteShortOpSignal = "--" + NoQuoteShortOpName
 )
 
 type QuoteType int
@@ -81,43 +82,43 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			StageNo: stageNum,
 		}
 		switch inputArg {
-		case versionOpSignal:
+		case VersionOpSignal:
 			argTable.IsVersion = true
-		case helpOpSignal:
+		case HelpOpSignal:
 			argTable.IsHelp = true
-		case logOpSignal:
+		case LogOpSignal:
 			argTable.IsLog = true
-		case noLogOpSignal:
+		case NoLogOpSignal:
 			argTable.IsNoLog = true
-		case logFilterOpSignal:
+		case LogFilterOpSignal:
 			argTable.IsLogFilter = true
-		case errLogFilterOpSignal:
+		case ErrLogFilterOpSignal:
 			argTable.IsErrLogFilter = true
 		case StageArgName:
 			stageNum++
 			argTable.StageNo = stageNum
 			argTable.IsStage = true
-		case cmdOpSignal:
+		case CmdOpSignal:
 			argTable.IsCmd = true
-		case svcOpSignal:
+		case SvcOpSignal:
 			argTable.IsSvc = true
-		case actOpSignal:
+		case ActOpSignal:
 			argTable.IsAct = true
-		case optOpSignal:
+		case OptOpSignal:
 			argTable.IsOpt = true
-		case loptOpSignal:
+		case LoptOpSignal:
 			argTable.IsLopt = true
-		case valueOptSignal:
+		case ValueOptSignal:
 			argTable.IsValue = true
-		case argOpSignal:
+		case ArgOpSignal:
 			argTable.IsArg = true
 		case
-			singleOpSignal,
-			singleShortOpSignal:
+			SingleOpSignal,
+			SingleShortOpSignal:
 			argTable.QuoteTypeSignal = SingleQuote
 		case
-			noQuoteOpSignal,
-			noQuoteShortOpSignal:
+			NoQuoteOpSignal,
+			NoQuoteShortOpSignal:
 			argTable.QuoteTypeSignal = NoQuote
 		default:
 			argTable.Str = &inputArg
