@@ -1,5 +1,10 @@
 package argtablevalid
 
+import (
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
+)
+
 const (
-	stageNotFound = "stage not found"
+	stageNotFound = "'" + argtable.StageArgName + "'" + " not found"
+	cmdNotFound   = "'" + argtable.CmdOpName + "'" + " not found\nstageNo: %d"
 )
