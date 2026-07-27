@@ -21,7 +21,8 @@ const (
 
 func main() {
 
-	argTables := argTable.GenArgTable()
+	inputArgs := os.Args[1:]
+	argTables := argTable.GenArgTable(inputArgs)
 
 	if preValidateErr := argtablevalid.ArgTableValidate(argTables); preValidateErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", preValidateErr)

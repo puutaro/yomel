@@ -180,7 +180,8 @@ func Test_GenArgTable(t *testing.T) {
 			defer func() { os.Args = oldArgs }()
 			os.Args = tt.input
 
-			got := argTable.GenArgTable()
+			inputArgs := os.Args[1:]
+			got := argTable.GenArgTable(inputArgs)
 			for i := range tt.want {
 				tt.want[i].No = i + 1
 			}

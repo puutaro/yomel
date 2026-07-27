@@ -1,9 +1,5 @@
 package argTable
 
-import (
-	"os"
-)
-
 const (
 	Version            = "version"
 	Help               = "help"
@@ -73,9 +69,7 @@ type ArgTable struct {
 	Str             *string
 }
 
-func GenArgTable() []ArgTable {
-
-	inputArgs := os.Args[1:]
+func GenArgTable(inputArgs []string) []ArgTable {
 
 	var argTables []ArgTable
 	stageNum := 0
