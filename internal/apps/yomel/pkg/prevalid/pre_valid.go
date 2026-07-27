@@ -7,14 +7,14 @@ import (
 )
 
 func PreValidate(argTables []args.ArgTable) error {
-	isStageErr := validateByIsStage(argTables)
+	isStageErr := checkIsStage(argTables)
 	if isStageErr != nil {
 		return isStageErr
 	}
 	return nil
 }
 
-func validateByIsStage(argTables []args.ArgTable) error {
+func checkIsStage(argTables []args.ArgTable) error {
 
 	for _, argTable := range argTables {
 		if argTable.IsStage {
