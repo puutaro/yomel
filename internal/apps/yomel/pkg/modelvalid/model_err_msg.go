@@ -1,5 +1,7 @@
 package modelvalid
 
+import "github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+
 const (
-	stageDescriptionIrregular = "stage description irregular\ndesc: '%s', stageNo: %d"
+	stageDescriptionIrregular = "'" + argtables.StageArgName + "'" + " description must be meaning sentence\ndesc: '%s', stageNo: %d"
 )
