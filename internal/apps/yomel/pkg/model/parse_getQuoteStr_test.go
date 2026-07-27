@@ -3,7 +3,7 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,52 +11,52 @@ import (
 func Test_getQuoteStr(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []argTable.ArgTable
+		input    []argtable.ArgTable
 		curIndex int
 		want     ParamType
 		wantIdx  int
 	}{
 		{
 			name: "should return double quoted string and next index when quote type signal is DoubleQuote",
-			input: []argTable.ArgTable{
+			input: []argtable.ArgTable{
 				{}, // index 0
 				{}, // index 1 (curIndex)
-				{QuoteTypeSignal: argTable.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
+				{QuoteTypeSignal: argtable.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("double-val"),
-				QuoteType: argTable.DoubleQuote, // note: getQuoteStr implementation doesn't explicitly set quoteType for DoubleQuote, it stays zero-value or whatever is in struct, let's verify exact fields
+				QuoteType: argtable.DoubleQuote, // note: getQuoteStr implementation doesn't explicitly set quoteType for DoubleQuote, it stays zero-value or whatever is in struct, let's verify exact fields
 			},
 			wantIdx: 2,
 		},
 		{
 			name: "should return single quoted string, quote type, and updated index when quote type signal is SingleQuote",
-			input: []argTable.ArgTable{
+			input: []argtable.ArgTable{
 				{},                                      // index 0
 				{},                                      // index 1 (curIndex)
-				{QuoteTypeSignal: argTable.SingleQuote}, // index 2 (afterFirstIndex)
+				{QuoteTypeSignal: argtable.SingleQuote}, // index 2 (afterFirstIndex)
 				{Str: testutil.Ptr("single-val"), IsValue: true}, // index 3 (afterNextIndex)
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("single-val"),
-				QuoteType: argTable.SingleQuote,
+				QuoteType: argtable.SingleQuote,
 			},
 			wantIdx: 3,
 		},
 		{
 			name: "should return no-quote string, quote type, and updated index when quote type signal is NoQuote",
-			input: []argTable.ArgTable{
+			input: []argtable.ArgTable{
 				{},                                  // index 0
 				{},                                  // index 1 (curIndex)
-				{QuoteTypeSignal: argTable.NoQuote}, // index 2 (afterFirstIndex)
+				{QuoteTypeSignal: argtable.NoQuote}, // index 2 (afterFirstIndex)
 				{Str: testutil.Ptr("no-quote-val"), IsValue: true}, // index 3 (afterNextIndex)
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("no-quote-val"),
-				QuoteType: argTable.NoQuote,
+				QuoteType: argtable.NoQuote,
 			},
 			wantIdx: 3,
 		},

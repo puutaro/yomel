@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 )
 
@@ -136,11 +136,11 @@ func makeOptList(
 		}
 		str := *strP
 		switch p.QuoteType {
-		case argTable.DoubleQuote:
+		case argtable.DoubleQuote:
 			oat.Str = fmt.Sprintf(`%s%s "%s"`, opPrefix, optStr, str)
-		case argTable.SingleQuote:
+		case argtable.SingleQuote:
 			oat.Str = fmt.Sprintf(`%s%s '%s'`, opPrefix, optStr, str)
-		case argTable.NoQuote:
+		case argtable.NoQuote:
 			oat.Str = fmt.Sprintf(`%s%s %s`, opPrefix, optStr, str)
 		}
 		cmdLOpTypes = append(cmdLOpTypes, oat)
@@ -165,11 +165,11 @@ func makeArgList(
 		}
 		str := *strP
 		switch p.QuoteType {
-		case argTable.DoubleQuote:
+		case argtable.DoubleQuote:
 			oat.Str = fmt.Sprintf(`"%s"`, str)
-		case argTable.SingleQuote:
+		case argtable.SingleQuote:
 			oat.Str = fmt.Sprintf(`'%s'`, str)
-		case argTable.NoQuote:
+		case argtable.NoQuote:
 			oat.Str = fmt.Sprintf(`%s`, str)
 		}
 		cmdArgTypes = append(cmdArgTypes, oat)

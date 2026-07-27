@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablevalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
@@ -22,7 +22,7 @@ const (
 func main() {
 
 	inputArgs := os.Args[1:]
-	argTables := argTable.GenArgTable(inputArgs)
+	argTables := argtable.GenArgTable(inputArgs)
 
 	if preValidateErr := argtablevalid.ArgTableValidate(argTables); preValidateErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", preValidateErr)

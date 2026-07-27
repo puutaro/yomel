@@ -3,24 +3,24 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argTable"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_parseArg(t *testing.T) {
 	// Tiny helpers to minimize structural boilerplate
-	tStr := func(s string) argTable.ArgTable { return argTable.ArgTable{Str: &s} }
-	tArg := func() argTable.ArgTable { return argTable.ArgTable{IsArg: true} }
-	tAct := func() argTable.ArgTable { return argTable.ArgTable{IsAct: true} }
-	tSvc := func() argTable.ArgTable { return argTable.ArgTable{IsSvc: true} }
+	tStr := func(s string) argtable.ArgTable { return argtable.ArgTable{Str: &s} }
+	tArg := func() argtable.ArgTable { return argtable.ArgTable{IsArg: true} }
+	tAct := func() argtable.ArgTable { return argtable.ArgTable{IsAct: true} }
+	tSvc := func() argtable.ArgTable { return argtable.ArgTable{IsSvc: true} }
 
 	tests := []struct {
 		name               string
 		nextStartIndex     int
-		input              []argTable.ArgTable
-		isNextMainArg      func(t argTable.ArgTable) bool
-		isTargetMainArg    func(t argTable.ArgTable) bool
+		input              []argtable.ArgTable
+		isNextMainArg      func(t argtable.ArgTable) bool
+		isTargetMainArg    func(t argtable.ArgTable) bool
 		appendFn           func(ind int, p ParamType) // Added appendFn to table test items
 		wantParam          []ParamType
 		wantIndices        []int
@@ -29,23 +29,23 @@ func Test_parseArg(t *testing.T) {
 		{
 			name:           "should parse positional arguments correctly when target main arg matches",
 			nextStartIndex: 0,
-			input: []argTable.ArgTable{
+			input: []argtable.ArgTable{
 				tAct(),
 				tArg(),
-				{QuoteTypeSignal: argTable.SingleQuote},
+				{QuoteTypeSignal: argtable.SingleQuote},
 				tStr("arg1"),
 				tArg(),
-				{QuoteTypeSignal: argTable.NoQuote},
+				{QuoteTypeSignal: argtable.NoQuote},
 				tStr("arg2"),
 			},
-			isNextMainArg:   func(t argTable.ArgTable) bool { return false },
-			isTargetMainArg: func(t argTable.ArgTable) bool { return t.IsAct },
+			isNextMainArg:   func(t argtable.ArgTable) bool { return false },
+			isTargetMainArg: func(t argtable.ArgTable) bool { return t.IsAct },
 			appendFn: func(ind int, p ParamType) {
 				// Default append logic can be placed here or handled dynamically
 			},
 			wantParam: []ParamType{
-				{Str: testutil.Ptr("arg1"), QuoteType: argTable.SingleQuote},
-				{Str: testutil.Ptr("arg2"), QuoteType: argTable.NoQuote},
+				{Str: testutil.Ptr("arg1"), QuoteType: argtable.SingleQuote},
+				{Str: testutil.Ptr("arg2"), QuoteType: argtable.NoQuote},
 			},
 			wantIndices:        []int{3, 6},
 			wantNextStartIndex: 6,
@@ -53,18 +53,18 @@ func Test_parseArg(t *testing.T) {
 		{
 			name:           "should stop parsing when next main arg is encountered",
 			nextStartIndex: 0,
-			input: []argTable.ArgTable{
+			input: []argtable.ArgTable{
 				tAct(),
-				tArg(), {QuoteTypeSignal: argTable.NoQuote}, tStr("arg1"),
+				tArg(), {QuoteTypeSignal: argtable.NoQuote}, tStr("arg1"),
 				tSvc(), // Next main arg boundary
-				tArg(), {QuoteTypeSignal: argTable.NoQuote}, tStr("arg-skipped"),
+				tArg(), {QuoteTypeSignal: argtable.NoQuote}, tStr("arg-skipped"),
 			},
-			isNextMainArg:   func(t argTable.ArgTable) bool { return t.IsSvc },
-			isTargetMainArg: func(t argTable.ArgTable) bool { return t.IsAct },
+			isNextMainArg:   func(t argtable.ArgTable) bool { return t.IsSvc },
+			isTargetMainArg: func(t argtable.ArgTable) bool { return t.IsAct },
 			appendFn: func(ind int, p ParamType) {
 			},
 			wantParam: []ParamType{
-				{Str: testutil.Ptr("arg1"), QuoteType: argTable.NoQuote},
+				{Str: testutil.Ptr("arg1"), QuoteType: argtable.NoQuote},
 			},
 			wantIndices:        []int{3},
 			wantNextStartIndex: 3,

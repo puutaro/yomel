@@ -1,4 +1,4 @@
-package argTable
+package argtable
 
 const (
 	Version            = "version"
