@@ -1,4 +1,4 @@
-package prevalid
+package argtablevalid
 
 import (
 	"errors"
