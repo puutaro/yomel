@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arglist"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtable"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -180,7 +181,7 @@ func Test_GenArgTable(t *testing.T) {
 			defer func() { os.Args = oldArgs }()
 			os.Args = tt.input
 
-			inputArgs := os.Args[1:]
+			inputArgs := arglist.Gen()
 			got := argtable.GenArgTable(inputArgs)
 			for i := range tt.want {
 				tt.want[i].No = i + 1
