@@ -39,7 +39,7 @@ const (
 	duplicateionErrSuffix = duplicationStr + stageNoSuffix
 	argQuoteWithAnd       = argOpSignalWithQuote + " and " + optOpSignalWithQuote
 
-	unkownParameterSpecifyedErrMsg      = "'%s' is unkown option" + stageNoSuffix
+	unknownParameterSpecifyedErrMsg     = "'%s' is unknown option" + stageNoSuffix
 	ctrParameterOnlyOneErrMsg           = ctrlParameterWithAnd + onlyOneStr + ctrlFieldSuffix
 	stageParameterSpecifyedInCtrlErrMsg = "'%s' must be specfied in stage field"
 	stageNotFound                       = "'" + argtables.StageSignal + "'" + " not found"

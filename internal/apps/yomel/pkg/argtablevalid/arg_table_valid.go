@@ -16,6 +16,7 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 		checkIsCmd,
 		checkCtrlParameterSpecifyInStageErr,
 		checkOnlyOneOptionErr,
+		checkCmdSvcActOrderErr,
 	}
 	for _, validate := range validators {
 		if err := validate(argTables); err != nil {
@@ -31,7 +32,7 @@ func checkUnkownOptionSpecifyedErrMsg(argTables []argtables.ArgTable) error {
 		stageNo += incrementStageNo(argTable.IsStage)
 		if argTable.UnkownOption != "" {
 			return fmt.Errorf(
-				unkownParameterSpecifyedErrMsg,
+				unknownParameterSpecifyedErrMsg,
 				argTable.UnkownOption,
 				stageNo,
 			)
@@ -49,14 +50,30 @@ func checkIsStage(argTables []argtables.ArgTable) error {
 	return errors.New(stageNotFound)
 }
 func checkIsCmd(argTables []argtables.ArgTable) error {
-	stageNo := 0
+	stageNum := 0
 	for _, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
-		if argTable.IsCmd {
-			return nil
+		if !argTable.IsStage {
+			continue
+		}
+		stageNum++
+	}
+	cmdCountList := make([]int, stageNum)
+	currentStageIdx := -1
+	for _, argTable := range argTables {
+		if argTable.IsStage {
+			currentStageIdx++
+		}
+		if argTable.IsCmd && currentStageIdx > -1 {
+			cmdCountList[currentStageIdx]++
 		}
 	}
-	return fmt.Errorf(cmdNotFound, stageNo)
+	for stageIndex, cmdNum := range cmdCountList {
+		if cmdNum > 0 {
+			continue
+		}
+		return fmt.Errorf(cmdNotFound, stageIndex+1)
+	}
+	return nil
 }
 
 func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
@@ -246,6 +263,39 @@ func execCheckOnlyOneOptionErr(
 				stageNo,
 			)
 		}
+	}
+	return nil
+}
+
+func checkCmdSvcActOrderErr(argTables []argtables.ArgTable) error {
+	stageNo := 0
+	curMainArgNum := 0
+	cmdOrder := 1
+	svcOrder := 2
+	actOrder := 3
+	for _, argTable := range argTables {
+		incStageNo := incrementStageNo(argTable.IsStage)
+		if incStageNo > 0 {
+			curMainArgNum = 0
+		}
+		switch true {
+		case argTable.IsCmd:
+			if curMainArgNum > cmdOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+			}
+			curMainArgNum = cmdOrder
+		case argTable.IsSvc:
+			if curMainArgNum > svcOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+			}
+			curMainArgNum = svcOrder
+		case argTable.IsAct:
+			if curMainArgNum > actOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+			}
+			curMainArgNum = actOrder
+		}
+		stageNo += incStageNo
 	}
 	return nil
 }
