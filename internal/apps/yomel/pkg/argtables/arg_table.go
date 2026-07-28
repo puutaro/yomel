@@ -76,80 +76,76 @@ type ArgTable struct {
 }
 
 func GenArgTable(inputArgs []string) []ArgTable {
-
 	var argTables []ArgTable
 	stageNum := 0
 	enableHypenPrefix := false
-	for i := 0; i < len(inputArgs); i++ {
+	for i, inputArg := range inputArgs {
 		displayNum := i + 1
-		inputArg := inputArgs[i]
 		argTable := ArgTable{
 			No:      displayNum,
 			StageNo: stageNum,
 		}
-		switch true {
-		case inputArg == VersionOpSignal &&
-			!enableHypenPrefix:
-			argTable.IsVersion = true
-		case inputArg == HelpOpSignal &&
-			!enableHypenPrefix:
-			argTable.IsHelp = true
-		case inputArg == LogFlagSignal &&
-			!enableHypenPrefix:
-			argTable.IsLog = true
-		case inputArg == NoLogFlagSignal &&
-			!enableHypenPrefix:
-			argTable.IsNoLog = true
-		case inputArg == LogFilterOpSignal &&
-			!enableHypenPrefix:
-			argTable.IsLogFilter = true
-		case inputArg == ErrLogFilterOpSignal &&
-			!enableHypenPrefix:
-			argTable.IsErrLogFilter = true
-		case inputArg == StageArgName:
+		// flag don't infer enableHypenPrefix
+		// no hyphen prefix and no-quote or singl-quote option
+		switch inputArg {
+		case
+			StageArgName:
 			stageNum++
 			argTable.StageNo = stageNum
 			argTable.IsStage = true
-		case inputArg == CmdOpSignal &&
-			!enableHypenPrefix:
+			argTables = append(argTables, argTable)
+			continue
+		case
+			SingleOpSignal,
+			SingleShortOpSignal:
+			argTable.QuoteTypeSignal = SingleQuote
+			argTables = append(argTables, argTable)
+			continue
+		case
+			NoQuoteOpSignal,
+			NoQuoteShortOpSignal:
+			argTable.QuoteTypeSignal = NoQuote
+			argTables = append(argTables, argTable)
+			continue
+		}
+		if enableHypenPrefix || !strings.HasPrefix(inputArg, "-") {
+			argTable.Str = &inputArg
+			enableHypenPrefix = false
+			argTables = append(argTables, argTable)
+			continue
+		}
+
+		switch inputArg {
+		case VersionOpSignal:
+			argTable.IsVersion = true
+		case HelpOpSignal:
+			argTable.IsHelp = true
+		case LogFlagSignal:
+			argTable.IsLog = true
+		case NoLogFlagSignal:
+			argTable.IsNoLog = true
+		case LogFilterOpSignal:
+			argTable.IsLogFilter = true
+		case ErrLogFilterOpSignal:
+			argTable.IsErrLogFilter = true
+		case CmdOpSignal:
 			argTable.IsCmd = true
-		case inputArg == SvcOpSignal &&
-			!enableHypenPrefix:
+		case SvcOpSignal:
 			argTable.IsSvc = true
-		case inputArg == ActOpSignal &&
-			!enableHypenPrefix:
+		case ActOpSignal:
 			argTable.IsAct = true
-		case inputArg == OptOpSignal &&
-			!enableHypenPrefix:
+		case OptOpSignal:
 			argTable.IsOpt = true
-		case inputArg == LoptOpSignal &&
-			!enableHypenPrefix:
+		case LoptOpSignal:
 			argTable.IsLopt = true
-		case inputArg == ValueOptSignal &&
-			!enableHypenPrefix:
+		case ValueOptSignal:
 			argTable.IsValue = true
 			enableHypenPrefix = true
-		case inputArg == ArgOpSignal &&
-			!enableHypenPrefix:
+		case ArgOpSignal:
 			argTable.IsArg = true
 			enableHypenPrefix = true
-		case
-			inputArg == SingleOpSignal,
-			inputArg == SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-		case
-			inputArg == NoQuoteOpSignal &&
-				!enableHypenPrefix,
-			inputArg == NoQuoteShortOpSignal &&
-				!enableHypenPrefix:
-			argTable.QuoteTypeSignal = NoQuote
 		default:
-			if !strings.HasPrefix(inputArg, "-") ||
-				enableHypenPrefix {
-				argTable.Str = &inputArg
-			} else {
-				argTable.UnkownOption = inputArg
-			}
+			argTable.UnkownOption = inputArg
 			enableHypenPrefix = false
 		}
 		argTables = append(
