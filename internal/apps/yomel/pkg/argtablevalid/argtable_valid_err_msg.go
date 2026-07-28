@@ -27,17 +27,19 @@ const (
 	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteOpSignal + "/" + argtables.NoQuoteShortOpSignal + "'"
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
 
-	stageNoSuffix = "\nstageNo: %d"
+	stageNoSuffix   = "\nstageNo: %d"
+	ctrlFieldSuffix = " in ctrl field"
 
 	// noLogSpecifyNotMeaning = noLogFlagWithQuote + "not meaning\n stageNo: 0"
 
 	stageNotFound = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound   = cmdOpNameWithQuote + " not found" + stageNoSuffix
 
-	duplicateionErrSuffix = " duplication" + stageNoSuffix
+	duplicationStr        = " are duplicates"
+	duplicateionErrSuffix = duplicationStr + stageNoSuffix
 
-	versionDuplicate       = versionWithQuote + duplicateionErrSuffix
-	helpDuplicate          = helpWithQuote + duplicateionErrSuffix
+	ctrParameterDuplicate = ctrlParameterWithAnd + duplicationStr + ctrlFieldSuffix
+
 	logFilterDuplicate     = logFilterWithQuote + duplicateionErrSuffix
 	errLogFilterDuplicate  = errLogFilterWithQuote + duplicateionErrSuffix
 	noLogLogFlagDuplidate  = logNoLogSingnalWithAnd + duplicateionErrSuffix
@@ -45,9 +47,11 @@ const (
 	cmdDuplidate           = cmdOpNameWithQuote + duplicateionErrSuffix
 	actDuplidate           = actOpNameWithQuote + duplicateionErrSuffix
 	quoteOpSignalDuplicate = quoteSingnalWithAnd + duplicateionErrSuffix
-	argQuoteWithAnd        = argOpSignalWithQuote + " and " + optOpSignalWithQuote
 
-	ctrlParameterSpecifyInSatgeErrMsg = "Must be specified" + ctrlParameterWithAnd + " before first stage" + stageNoSuffix
+	argQuoteWithAnd = argOpSignalWithQuote + " and " + optOpSignalWithQuote
+
+	ctrlParameterSpecifyInSatgeErrMsg   = "Must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
+	stageParameterSpecifyedInCtrlErrMsg = "'%s' must be specfied in stage field"
 
 	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
 
