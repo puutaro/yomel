@@ -30,32 +30,24 @@ const (
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
 
 	stageNoSuffix   = "\nstageNo: %d"
-	ctrlFieldSuffix = " in ctrl field"
+	ctrlFieldSuffix = " in stage 0 field"
 
-	unkownParameterSpecifyedErrMsg = "'%s' is unkown option" + stageNoSuffix
-
-	// noLogSpecifyNotMeaning = noLogFlagWithQuote + "not meaning\n stageNo: 0"
-
-	stageNotFound = "'" + argtables.StageSignal + "'" + " not found"
-	cmdNotFound   = cmdOpNameWithQuote + " not found" + stageNoSuffix
-
-	ctrParameterDuplicate = ctrlParameterWithAnd + " are only one" + ctrlFieldSuffix
+	onlyOneStr            = " are only one"
+	onlyOneErrStageSuffix = onlyOneStr + " in each stage field" + stageNoSuffix
 
 	duplicationStr        = " are duplicates"
 	duplicateionErrSuffix = duplicationStr + stageNoSuffix
+	argQuoteWithAnd       = argOpSignalWithQuote + " and " + optOpSignalWithQuote
 
-	logFilterDuplicate     = logFilterWithQuote + duplicateionErrSuffix
-	errLogFilterDuplicate  = errLogFilterWithQuote + duplicateionErrSuffix
-	noLogLogFlagDuplidate  = logNoLogSingnalWithAnd + duplicateionErrSuffix
-	svcDuplidate           = svcOpNameWithQuote + duplicateionErrSuffix
-	cmdDuplidate           = cmdOpNameWithQuote + duplicateionErrSuffix
-	actDuplidate           = actOpNameWithQuote + duplicateionErrSuffix
-	quoteOpSignalDuplicate = quoteSingnalWithAnd + duplicateionErrSuffix
-
-	argQuoteWithAnd = argOpSignalWithQuote + " and " + optOpSignalWithQuote
-
-	ctrlParameterSpecifyInSatgeErrMsg   = "Must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
+	unkownParameterSpecifyedErrMsg      = "'%s' is unkown option" + stageNoSuffix
+	ctrParameterOnlyOneErrMsg           = ctrlParameterWithAnd + onlyOneStr + ctrlFieldSuffix
 	stageParameterSpecifyedInCtrlErrMsg = "'%s' must be specfied in stage field"
+	stageNotFound                       = "'" + argtables.StageSignal + "'" + " not found"
+	cmdNotFound                         = cmdOpNameWithQuote + " not found" + stageNoSuffix
+
+	ctrlParameterSpecifyInStageErrMsg = "Must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
+
+	onlyOneErrMsg = "%s" + onlyOneStr + " in each stage field" + stageNoSuffix
 
 	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
 

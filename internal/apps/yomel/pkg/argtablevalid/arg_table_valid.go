@@ -8,35 +8,19 @@ import (
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
-	if unkownOptionSpecifyedErr := checkUnkownOptionSpecifyedErrMsg(
-		argTables,
-	); unkownOptionSpecifyedErr != nil {
-		return unkownOptionSpecifyedErr
+	validators := []func([]argtables.ArgTable) error{
+		checkUnkownOptionSpecifyedErrMsg,
+		checkCtrlParameterOnlyOne,
+		checkStageParameterSpecifyInCtrlErr,
+		checkIsStage,
+		checkIsCmd,
+		checkCtrlParameterSpecifyInStageErr,
+		checkOnlyOneOptionErr,
 	}
-	if ctrlParameterSpecifyInSatgeErr := checkCtrlParameterSpecifyInStageErr(
-		argTables,
-	); ctrlParameterSpecifyInSatgeErr != nil {
-		return ctrlParameterSpecifyInSatgeErr
-	}
-	if stageParameterSpecifyInCtrlErr := checkStageParameterSpecifyInCtrlErr(
-		argTables,
-	); stageParameterSpecifyInCtrlErr != nil {
-		return stageParameterSpecifyInCtrlErr
-	}
-	if versionDuplicateErr := checkCtrlParameterDuplidate(
-		argTables,
-	); versionDuplicateErr != nil {
-		return versionDuplicateErr
-	}
-	if isStageErr := checkIsStage(
-		argTables,
-	); isStageErr != nil {
-		return isStageErr
-	}
-	if isCmdErr := checkIsCmd(
-		argTables,
-	); isCmdErr != nil {
-		return isCmdErr
+	for _, validate := range validators {
+		if err := validate(argTables); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -83,13 +67,13 @@ func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
 			continue
 		}
 		if argTable.IsVersion || argTable.IsHelp {
-			return fmt.Errorf(ctrlParameterSpecifyInSatgeErrMsg, stageNo)
+			return fmt.Errorf(ctrlParameterSpecifyInStageErrMsg, stageNo)
 		}
 	}
 	return nil
 }
 
-func checkCtrlParameterDuplidate(argTables []argtables.ArgTable) error {
+func checkCtrlParameterOnlyOne(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	count := 0
 	for _, argTable := range argTables {
@@ -102,7 +86,7 @@ func checkCtrlParameterDuplidate(argTables []argtables.ArgTable) error {
 		}
 	}
 	if count > 1 {
-		return fmt.Errorf(ctrParameterDuplicate)
+		return fmt.Errorf(ctrParameterOnlyOneErrMsg)
 	}
 	return nil
 }
@@ -166,6 +150,100 @@ func execCheckStageParameterSpecifyInCtrl(
 			return fmt.Errorf(
 				stageParameterSpecifyedInCtrlErrMsg,
 				parameterSignal,
+			)
+		}
+	}
+	return nil
+}
+func checkOnlyOneOptionErr(
+	argTables []argtables.ArgTable,
+) error {
+	checkers := []struct {
+		targetParameterCheckFn func(argtable argtables.ArgTable) bool
+		targetParameters       string
+	}{
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsLog || a.IsNoLog
+			},
+			targetParameters: logNoLogSingnalWithAnd,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsLogFilter
+			},
+			targetParameters: logFilterWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsErrLogFilter
+			},
+			targetParameters: errLogFilterWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsCmd
+			},
+			targetParameters: cmdOpNameWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsSvc
+			},
+			targetParameters: svcOpNameWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtables.ArgTable,
+			) bool {
+				return a.IsAct
+			},
+			targetParameters: actOpNameWithQuote,
+		},
+	}
+
+	for _, c := range checkers {
+		if err := execCheckOnlyOneOptionErr(
+			argTables,
+			c.targetParameterCheckFn,
+			c.targetParameters,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func execCheckOnlyOneOptionErr(
+	argTables []argtables.ArgTable,
+	targetPrameterCheckFn func(argtables.ArgTable) bool,
+	targetParametersSignal string,
+) error {
+	stageNo := 0
+	count := 0
+	for _, argTable := range argTables {
+		incStageNo := incrementStageNo(argTable.IsStage)
+		if incStageNo > 0 {
+			count = 0
+		}
+		stageNo += incStageNo
+		if targetPrameterCheckFn(argTable) {
+			count++
+		}
+		if count > 1 {
+			return fmt.Errorf(
+				onlyOneErrMsg,
+				targetParametersSignal,
+				stageNo,
 			)
 		}
 	}
