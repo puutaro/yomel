@@ -21,6 +21,8 @@ const (
 	svcOpNameWithQuote = "'" + argtables.SvcOpSignal + "'"
 	actOpNameWithQuote = "'" + argtables.ActOpSignal + "'"
 
+	cmdSvcActOpNameWithAnd = cmdOpNameWithQuote + " and " + svcOpNameWithQuote + " and " + actOpNameWithQuote
+
 	argOpSignalWithQuote     = "'" + argtables.ArgOpSignal + "'"
 	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
 	argValueWithAnd          = argOpSignalWithQuote + " and " + valueOpSignalWithQuote
@@ -45,11 +47,11 @@ const (
 	stageNotFound                       = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound                         = cmdOpNameWithQuote + " not found" + stageNoSuffix
 
-	ctrlParameterSpecifyInStageErrMsg = "Must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
+	ctrlParameterSpecifyInStageErrMsg = "must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
 
 	onlyOneErrMsg = "%s" + onlyOneStr + " in each stage field" + stageNoSuffix
 
-	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
+	cmdSvcActOrdrerIrregular = cmdSvcActOpNameWithAnd + " must be" + cmdOpNameWithQuote + " -> " + svcOpNameWithQuote + " -> " + actOpNameWithQuote + " order " + stageNoSuffix
 
 	quoteOptionIrregularPosition = argValueWithAnd + " must be immediately after " + argQuoteWithAnd + stageNoSuffix
 )
