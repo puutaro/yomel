@@ -8,12 +8,17 @@ import (
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
+	if unkownOptionSpecifyedErr := checkUnkownOptionSpecifyedErrMsg(
+		argTables,
+	); unkownOptionSpecifyedErr != nil {
+		return unkownOptionSpecifyedErr
+	}
 	if ctrlParameterSpecifyInSatgeErr := checkCtrlParameterSpecifyInStageErr(
 		argTables,
 	); ctrlParameterSpecifyInSatgeErr != nil {
 		return ctrlParameterSpecifyInSatgeErr
 	}
-	if stageParameterSpecifyInCtrlErr := checkStageParameterSpecifyInCtrl(
+	if stageParameterSpecifyInCtrlErr := checkStageParameterSpecifyInCtrlErr(
 		argTables,
 	); stageParameterSpecifyInCtrlErr != nil {
 		return stageParameterSpecifyInCtrlErr
@@ -32,6 +37,21 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 		argTables,
 	); isCmdErr != nil {
 		return isCmdErr
+	}
+	return nil
+}
+
+func checkUnkownOptionSpecifyedErrMsg(argTables []argtables.ArgTable) error {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += incrementStageNo(argTable.IsStage)
+		if argTable.UnkownOption != "" {
+			return fmt.Errorf(
+				unkownParameterSpecifyedErrMsg,
+				argTable.UnkownOption,
+				stageNo,
+			)
+		}
 	}
 	return nil
 }
@@ -87,7 +107,7 @@ func checkCtrlParameterDuplidate(argTables []argtables.ArgTable) error {
 	return nil
 }
 
-func checkStageParameterSpecifyInCtrl(
+func checkStageParameterSpecifyInCtrlErr(
 	argTables []argtables.ArgTable,
 ) error {
 	checkers := []struct {

@@ -22,6 +22,8 @@ const (
 	actOpNameWithQuote = "'" + argtables.ActOpSignal + "'"
 
 	argOpSignalWithQuote     = "'" + argtables.ArgOpSignal + "'"
+	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
+	argValueWithAnd          = argOpSignalWithQuote + " and " + valueOpSignalWithQuote
 	optOpSignalWithQuote     = "'" + argtables.OptOpSignal + "'"
 	singleOpSignalWithQuote  = "'" + argtables.SingleOpSignal + "/" + argtables.SingleShortOpSignal + "'"
 	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteOpSignal + "/" + argtables.NoQuoteShortOpSignal + "'"
@@ -30,15 +32,17 @@ const (
 	stageNoSuffix   = "\nstageNo: %d"
 	ctrlFieldSuffix = " in ctrl field"
 
+	unkownParameterSpecifyedErrMsg = "'%s' is unkown option" + stageNoSuffix
+
 	// noLogSpecifyNotMeaning = noLogFlagWithQuote + "not meaning\n stageNo: 0"
 
 	stageNotFound = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound   = cmdOpNameWithQuote + " not found" + stageNoSuffix
 
+	ctrParameterDuplicate = ctrlParameterWithAnd + " are only one" + ctrlFieldSuffix
+
 	duplicationStr        = " are duplicates"
 	duplicateionErrSuffix = duplicationStr + stageNoSuffix
-
-	ctrParameterDuplicate = ctrlParameterWithAnd + duplicationStr + ctrlFieldSuffix
 
 	logFilterDuplicate     = logFilterWithQuote + duplicateionErrSuffix
 	errLogFilterDuplicate  = errLogFilterWithQuote + duplicateionErrSuffix
@@ -55,5 +59,5 @@ const (
 
 	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
 
-	quoteOptionIrregularPosition = quoteSingnalWithAnd + " must be immediately after " + argQuoteWithAnd + stageNoSuffix
+	quoteOptionIrregularPosition = argValueWithAnd + " must be immediately after " + argQuoteWithAnd + stageNoSuffix
 )
