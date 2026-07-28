@@ -8,6 +8,9 @@ import (
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
+	if ctrlParameterSpecifyInSatgeErr := checkCtrlParameterSpecifyInSatgeErr(argTables); ctrlParameterSpecifyInSatgeErr != nil {
+		return ctrlParameterSpecifyInSatgeErr
+	}
 	if versionDuplicateErr := checkVersionDuplidate(argTables); versionDuplicateErr != nil {
 		return versionDuplicateErr
 	}
@@ -37,6 +40,20 @@ func checkIsCmd(argTables []argtables.ArgTable) error {
 		}
 	}
 	return fmt.Errorf(cmdNotFound, stageNo)
+}
+
+func checkCtrlParameterSpecifyInSatgeErr(argTables []argtables.ArgTable) error {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += incrementStageNo(argTable.IsStage)
+		if stageNo == 0 {
+			continue
+		}
+		if argTable.IsVersion || argTable.IsHelp {
+			return fmt.Errorf(ctrlParameterSpecifyInSatgeErrMsg, stageNo)
+		}
+	}
+	return nil
 }
 
 func checkVersionDuplidate(argTables []argtables.ArgTable) error {

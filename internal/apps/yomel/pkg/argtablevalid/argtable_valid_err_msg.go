@@ -12,7 +12,7 @@ const (
 	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
 	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
 
-	ctrlParameterWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote + " and " + versionWithQuote + " and " + helpWithQuote
+	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote
 
 	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
 	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
@@ -47,7 +47,7 @@ const (
 	quoteOpSignalDuplicate = quoteSingnalWithAnd + duplicateionErrSuffix
 	argQuoteWithAnd        = argOpSignalWithQuote + " and " + optOpSignalWithQuote
 
-	ctrlParameterSpecifyInSatgeErr = "Must be specified" + ctrlParameterWithAnd + " before first stage"
+	ctrlParameterSpecifyInSatgeErrMsg = "Must be specified" + ctrlParameterWithAnd + " before first stage" + stageNoSuffix
 
 	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
 
