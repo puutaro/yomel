@@ -8,6 +8,9 @@ import (
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
+	if versionDuplicateErr := checkVersionDuplidate(argTables); versionDuplicateErr != nil {
+		return versionDuplicateErr
+	}
 	if isStageErr := checkIsStage(argTables); isStageErr != nil {
 		return isStageErr
 	}
@@ -34,6 +37,24 @@ func checkIsCmd(argTables []argtables.ArgTable) error {
 		}
 	}
 	return fmt.Errorf(cmdNotFound, stageNo)
+}
+
+func checkVersionDuplidate(argTables []argtables.ArgTable) error {
+	stageNo := 0
+	count := 0
+	for _, argTable := range argTables {
+		stageNo += incrementStageNo(argTable.IsStage)
+		if stageNo > 0 {
+			break
+		}
+		if argTable.IsVersion {
+			count++
+		}
+	}
+	if count > 1 {
+		return fmt.Errorf(versionDuplicate, 0)
+	}
+	return nil
 }
 
 func incrementStageNo(isStage bool) int {

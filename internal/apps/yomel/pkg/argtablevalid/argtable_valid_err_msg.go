@@ -9,8 +9,11 @@ const (
 	noLogFlagWithQuote     = "'" + argtables.NoLogFlagSignal + "'"
 	logNoLogSingnalWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote
 
-	versionWithQuote      = "'" + argtables.VersionOpSignal + "'"
-	helpWithQuote         = "'" + argtables.HelpOpSignal + "'"
+	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
+	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
+
+	ctrlParameterWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote + " and " + versionWithQuote + " and " + helpWithQuote
+
 	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
 	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
 
@@ -31,7 +34,8 @@ const (
 	stageNotFound = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound   = cmdOpNameWithQuote + " not found" + stageNoSuffix
 
-	duplicateionErrSuffix  = " duplication" + stageNoSuffix
+	duplicateionErrSuffix = " duplication" + stageNoSuffix
+
 	versionDuplicate       = versionWithQuote + duplicateionErrSuffix
 	helpDuplicate          = helpWithQuote + duplicateionErrSuffix
 	logFilterDuplicate     = logFilterWithQuote + duplicateionErrSuffix
@@ -42,6 +46,8 @@ const (
 	actDuplidate           = actOpNameWithQuote + duplicateionErrSuffix
 	quoteOpSignalDuplicate = quoteSingnalWithAnd + duplicateionErrSuffix
 	argQuoteWithAnd        = argOpSignalWithQuote + " and " + optOpSignalWithQuote
+
+	ctrlParameterSpecifyInSatgeErr = "Must be specified" + ctrlParameterWithAnd + " before first stage"
 
 	cmdSvcActOrdrerIrregular = "Must be" + cmdOpNameWithQuote + "->" + svcOpNameWithQuote + "->" + actOpNameWithQuote + "order " + stageNoSuffix
 
