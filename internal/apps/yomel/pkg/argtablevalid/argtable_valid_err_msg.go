@@ -9,8 +9,8 @@ const (
 	noLogFlagWithQuote     = "'" + argtables.NoLogFlagSignal + "'"
 	logNoLogSingnalWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote
 
-	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
-	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
+	versionWithQuote = "'" + argtables.VersionShortOpSignal + "/" + argtables.VersionOpSignal + "'"
+	helpWithQuote    = "'" + argtables.HelpShortOpSignal + "/" + argtables.HelpOpSignal + "'"
 
 	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote
 
@@ -27,8 +27,8 @@ const (
 	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
 	argValueWithAnd          = argOpSignalWithQuote + " and " + valueOpSignalWithQuote
 	optOpSignalWithQuote     = "'" + argtables.OptOpSignal + "'"
-	singleOpSignalWithQuote  = "'" + argtables.SingleOpSignal + "/" + argtables.SingleShortOpSignal + "'"
-	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteOpSignal + "/" + argtables.NoQuoteShortOpSignal + "'"
+	singleOpSignalWithQuote  = "'" + argtables.SingleShortOpSignal + "/" + argtables.SingleOpSignal + "'"
+	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteShortOpSignal + "/" + argtables.NoQuoteOpSignal + "'"
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
 
 	stageNoSuffix   = "\nstageNo: %d"

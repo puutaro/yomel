@@ -77,7 +77,7 @@ Examples:
         --log-filter "head -1"
         stage "add prefix" \
         -cmd sed \
-        --arg -s 's/^/$HOME/'
+        --arg -s 's/^/$HOME/'`
 
 func GetHelp(ctrl domain.Control) (*string, error) {
 	if !ctrl.IsHelp {

@@ -6,7 +6,9 @@ import (
 
 const (
 	Version            = "version"
+	VersionShort       = "v"
 	Help               = "help"
+	HelpShort          = "h"
 	StageArgName       = "stage"
 	LogOpName          = "log"
 	NoLogOpName        = "no-log"
@@ -26,7 +28,9 @@ const (
 )
 const (
 	VersionOpSignal      = "--" + Version
+	VersionShortOpSignal = "-" + VersionShort
 	HelpOpSignal         = "--" + Help
+	HelpShortOpSignal    = "-" + HelpShort
 	StageSignal          = StageArgName
 	CmdOpSignal          = "-" + CmdOpName
 	LogFlagSignal        = "--" + LogOpName
@@ -130,9 +134,11 @@ func GenArgTable(inputArgs []string) []ArgTable {
 		}
 
 		switch inputArg {
-		case VersionOpSignal:
+		case VersionOpSignal,
+			VersionShortOpSignal:
 			argTable.IsVersion = true
-		case HelpOpSignal:
+		case HelpOpSignal,
+			HelpShortOpSignal:
 			argTable.IsHelp = true
 		case LogFlagSignal:
 			argTable.IsLog = true
