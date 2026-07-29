@@ -51,7 +51,7 @@ const (
 
 	onlyOneErrMsg = "%s" + onlyOneStr + " in each stage field" + stageNoSuffix
 
-	cmdSvcActOrdrerIrregular = cmdSvcActOpNameWithAnd + " must be" + cmdOpNameWithQuote + " -> " + svcOpNameWithQuote + " -> " + actOpNameWithQuote + " order " + stageNoSuffix
+	cmdSvcActOrdrerIrregularErrMsg = cmdSvcActOpNameWithAnd + " must be" + cmdOpNameWithQuote + " -> " + svcOpNameWithQuote + " -> " + actOpNameWithQuote + " order " + stageNoSuffix
 
-	quoteOptionIrregularPosition = argValueWithAnd + " must be immediately after " + argQuoteWithAnd + stageNoSuffix
+	quoteOptionIrregularPositionErrMsg = quoteSingnalWithAnd + " must be immediately after " + argValueWithAnd + stageNoSuffix
 )

@@ -17,6 +17,7 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 		checkCtrlParameterSpecifyInStageErr,
 		checkOnlyOneOptionErr,
 		checkCmdSvcActOrderErr,
+		checkQuoteOptionIrregularPositionErr,
 	}
 	for _, validate := range validators {
 		if err := validate(argTables); err != nil {
@@ -281,21 +282,46 @@ func checkCmdSvcActOrderErr(argTables []argtables.ArgTable) error {
 		switch true {
 		case argTable.IsCmd:
 			if curMainArgNum > cmdOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
 			}
 			curMainArgNum = cmdOrder
 		case argTable.IsSvc:
 			if curMainArgNum > svcOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
 			}
 			curMainArgNum = svcOrder
 		case argTable.IsAct:
 			if curMainArgNum > actOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregular, stageNo)
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
 			}
 			curMainArgNum = actOrder
 		}
 		stageNo += incStageNo
+	}
+	return nil
+}
+func checkQuoteOptionIrregularPositionErr(
+	argTables []argtables.ArgTable,
+) error {
+	stageNo := 0
+	for index, argTable := range argTables {
+		stageNo += incrementStageNo(argTable.IsStage)
+		if argTable.QuoteTypeSignal == argtables.DoubleQuote {
+			continue
+		}
+		if index <= 0 {
+			continue
+		}
+		prevArgTable := argTables[index]
+		if prevArgTable.IsOpt ||
+			prevArgTable.IsLopt ||
+			prevArgTable.IsArg {
+			continue
+		}
+		return fmt.Errorf(
+			quoteOptionIrregularPositionErrMsg,
+			stageNo,
+		)
 	}
 	return nil
 }
