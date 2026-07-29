@@ -93,6 +93,30 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			No:      displayNum,
 			StageNo: stageNum,
 		}
+		switch inputArg {
+		case StageArgName:
+			if expectedNext > ExpectNormalStr {
+				break
+			}
+			stageNum++
+			argTable.StageNo = stageNum
+			argTable.IsStage = true
+			argTables = append(argTables, argTable)
+			expectedNext = ExpectUp2StageStr
+			continue
+		case
+			SingleOpSignal,
+			SingleShortOpSignal:
+			argTable.QuoteTypeSignal = SingleQuote
+			argTables = append(argTables, argTable)
+			continue
+		case
+			NoQuoteOpSignal,
+			NoQuoteShortOpSignal:
+			argTable.QuoteTypeSignal = NoQuote
+			argTables = append(argTables, argTable)
+			continue
+		}
 		switch true {
 		case
 			expectedNext == ExpectUp2HyphenStr:
@@ -119,18 +143,7 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			expectedNext = ExpectNormalStr
 			continue
 		}
-		switch inputArg {
-		case StageArgName:
-			if expectedNext > ExpectNormalStr {
-				break
-			}
-			stageNum++
-			argTable.StageNo = stageNum
-			argTable.IsStage = true
-			argTables = append(argTables, argTable)
-			expectedNext = ExpectUp2StageStr
-			continue
-		}
+
 		switch inputArg {
 		case VersionOpSignal:
 			argTable.IsVersion = true
@@ -163,14 +176,6 @@ func GenArgTable(inputArgs []string) []ArgTable {
 		case ArgOpSignal:
 			argTable.IsArg = true
 			expectedNext = ExpectUp2HyphenStr
-		case
-			SingleOpSignal,
-			SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-		case
-			NoQuoteOpSignal,
-			NoQuoteShortOpSignal:
-			argTable.QuoteTypeSignal = NoQuote
 		default:
 			argTable.UnkownOption = inputArg
 			expectedNext = ExpectNormalStr

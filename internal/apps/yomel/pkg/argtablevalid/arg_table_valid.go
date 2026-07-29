@@ -312,9 +312,8 @@ func checkQuoteOptionIrregularPositionErr(
 		if index <= 0 {
 			continue
 		}
-		prevArgTable := argTables[index]
-		if prevArgTable.IsOpt ||
-			prevArgTable.IsLopt ||
+		prevArgTable := argTables[index-1]
+		if prevArgTable.IsValue ||
 			prevArgTable.IsArg {
 			continue
 		}
