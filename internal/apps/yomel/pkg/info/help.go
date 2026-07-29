@@ -6,7 +6,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
 const detail = `Usage:
@@ -79,10 +80,27 @@ Examples:
         -cmd sed \
         --arg -s 's/^/$HOME/'`
 
-func GetHelp(ctrl domain.Control) (*string, error) {
-	if !ctrl.IsHelp {
+func GetHelpByDefault(argList []string) (*string, error) {
+	if len(argList) > 0 {
 		return nil, nil
 	}
+	return execGetHelp()
+}
+func GetHelpByOption(argTables []argtables.ArgTable) (*string, error) {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if stageNo > 0 {
+			return nil, nil
+		}
+		if argTable.IsHelp {
+			return execGetHelp()
+		}
+	}
+	return nil, nil
+}
+
+func execGetHelp() (*string, error) {
 	var info YomelInfo
 	if _, err := toml.Decode(YomelInfoRaw, &info); err != nil {
 		return nil, fmt.Errorf("failed to parse yomel.toml: %v\n", err)

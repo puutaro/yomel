@@ -5,13 +5,24 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
-func GetVersion(ctrl domain.Control) (*string, error) {
-	if !ctrl.IsVersion {
-		return nil, nil
+func GetVersion(argTables []argtables.ArgTable) (*string, error) {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if stageNo > 0 {
+			return nil, nil
+		}
+		if argTable.IsVersion {
+			return execGetVersion()
+		}
 	}
+	return nil, nil
+}
+func execGetVersion() (*string, error) {
 	var info YomelInfo
 	if _, err := toml.Decode(YomelInfoRaw, &info); err != nil {
 		return nil, fmt.Errorf("failed to parse yomel.toml: %v\n", err)

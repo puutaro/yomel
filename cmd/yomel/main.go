@@ -23,8 +23,34 @@ const (
 func main() {
 
 	inputArgs := arglist.Gen()
+	helpConByDefault, helpErrByDefault := info.GetHelpByDefault(inputArgs)
+	if helpErrByDefault != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", helpErrByDefault)
+		os.Exit(errorExitSignal)
+	}
+	if helpConByDefault != nil {
+		fmt.Fprintf(os.Stdout, "%s\n", *helpConByDefault)
+		os.Exit(normalExitSignal)
+	}
 	argTables := argtables.GenArgTable(inputArgs)
-
+	helpConByOption, helpErrByOption := info.GetHelpByOption(argTables)
+	if helpErrByOption != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", helpErrByOption)
+		os.Exit(errorExitSignal)
+	}
+	if helpConByOption != nil {
+		fmt.Fprintf(os.Stdout, "%s\n", *helpConByOption)
+		os.Exit(normalExitSignal)
+	}
+	version, versionErr := info.GetVersion(argTables)
+	if versionErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", versionErr)
+		os.Exit(errorExitSignal)
+	}
+	if version != nil {
+		fmt.Fprintf(os.Stdout, "%s\n", *version)
+		os.Exit(normalExitSignal)
+	}
 	if preValidateErr := argtablevalid.ArgTableValidate(argTables); preValidateErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", preValidateErr)
 		os.Exit(errorExitSignal)
@@ -38,24 +64,6 @@ func main() {
 		return
 	}
 	yomel := domain.Convert(ctrl, stageModels)
-	helpCon, helpErr := info.GetHelp(yomel.Ctrl)
-	if helpErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", helpErr)
-		os.Exit(errorExitSignal)
-	}
-	if helpCon != nil {
-		fmt.Fprintf(os.Stdout, "%s\n", *helpCon)
-		os.Exit(normalExitSignal)
-	}
-	version, versionErr := info.GetVersion(yomel.Ctrl)
-	if versionErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", versionErr)
-		os.Exit(errorExitSignal)
-	}
-	if version != nil {
-		fmt.Fprintf(os.Stdout, "%s\n", *version)
-		os.Exit(normalExitSignal)
-	}
 	chainStr := sh.Gen(yomel)
 	sh.Exec(chainStr)
 

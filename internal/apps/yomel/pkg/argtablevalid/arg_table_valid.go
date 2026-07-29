@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
 	validators := []func([]argtables.ArgTable) error{
 		checkUnkownOptionSpecifyedErrMsg,
-		checkCtrlParameterOnlyOne,
+		// checkCtrlParameterOnlyOne,
 		checkStageParameterSpecifyInCtrlErr,
 		checkIsStage,
 		checkIsCmd,
@@ -30,7 +31,7 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 func checkUnkownOptionSpecifyedErrMsg(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	for _, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if argTable.UnkownOption != "" {
 			return fmt.Errorf(
 				unknownParameterSpecifyedErrMsg,
@@ -80,7 +81,7 @@ func checkIsCmd(argTables []argtables.ArgTable) error {
 func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	for _, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if stageNo == 0 {
 			continue
 		}
@@ -91,23 +92,23 @@ func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
 	return nil
 }
 
-func checkCtrlParameterOnlyOne(argTables []argtables.ArgTable) error {
-	stageNo := 0
-	count := 0
-	for _, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
-		if stageNo > 0 {
-			break
-		}
-		if argTable.IsVersion || argTable.IsHelp {
-			count++
-		}
-	}
-	if count > 1 {
-		return fmt.Errorf(ctrParameterOnlyOneErrMsg)
-	}
-	return nil
-}
+// func checkCtrlParameterOnlyOne(argTables []argtables.ArgTable) error {
+// 	stageNo := 0
+// 	count := 0
+// 	for _, argTable := range argTables {
+// 		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+// 		if stageNo > 0 {
+// 			break
+// 		}
+// 		if argTable.IsVersion || argTable.IsHelp {
+// 			count++
+// 		}
+// 	}
+// 	if count > 1 {
+// 		return fmt.Errorf(ctrParameterOnlyOneErrMsg)
+// 	}
+// 	return nil
+// }
 
 func checkStageParameterSpecifyInCtrlErr(
 	argTables []argtables.ArgTable,
@@ -160,7 +161,7 @@ func execCheckStageParameterSpecifyInCtrl(
 ) error {
 	stageNo := 0
 	for _, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if stageNo > 0 {
 			break
 		}
@@ -249,7 +250,7 @@ func execCheckOnlyOneOptionErr(
 	stageNo := 0
 	count := 0
 	for _, argTable := range argTables {
-		incStageNo := incrementStageNo(argTable.IsStage)
+		incStageNo := argtablecounter.IncrementStageNo(argTable.IsStage)
 		if incStageNo > 0 {
 			count = 0
 		}
@@ -275,7 +276,7 @@ func checkCmdSvcActOrderErr(argTables []argtables.ArgTable) error {
 	svcOrder := 2
 	actOrder := 3
 	for _, argTable := range argTables {
-		incStageNo := incrementStageNo(argTable.IsStage)
+		incStageNo := argtablecounter.IncrementStageNo(argTable.IsStage)
 		if incStageNo > 0 {
 			curMainArgNum = 0
 		}
@@ -305,7 +306,7 @@ func checkQuoteOptionIrregularPositionErr(
 ) error {
 	stageNo := 0
 	for index, argTable := range argTables {
-		stageNo += incrementStageNo(argTable.IsStage)
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if argTable.QuoteTypeSignal == argtables.DoubleQuote {
 			continue
 		}
@@ -323,11 +324,4 @@ func checkQuoteOptionIrregularPositionErr(
 		)
 	}
 	return nil
-}
-
-func incrementStageNo(isStage bool) int {
-	if isStage {
-		return 1
-	}
-	return 0
 }

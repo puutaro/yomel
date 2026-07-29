@@ -41,8 +41,10 @@ const (
 	duplicateionErrSuffix = duplicationStr + stageNoSuffix
 	argQuoteWithAnd       = argOpSignalWithQuote + " and " + optOpSignalWithQuote
 
-	unknownParameterSpecifyedErrMsg     = "'%s' is unknown option" + stageNoSuffix
-	ctrParameterOnlyOneErrMsg           = ctrlParameterWithAnd + onlyOneStr + ctrlFieldSuffix
+	unknownParameterSpecifyedErrMsg = "'%s' is unknown option" + stageNoSuffix
+
+	// this validateion omit, becuase I wont to soft for --version and --help judge
+	// ctrParameterOnlyOneErrMsg           = ctrlParameterWithAnd + onlyOneStr + ctrlFieldSuffix
 	stageParameterSpecifyedInCtrlErrMsg = "'%s' must be specfied in stage field"
 	stageNotFound                       = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound                         = cmdOpNameWithQuote + " not found" + stageNoSuffix
