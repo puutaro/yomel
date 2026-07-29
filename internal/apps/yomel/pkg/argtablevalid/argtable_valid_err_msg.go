@@ -9,8 +9,8 @@ const (
 	noLogFlagWithQuote     = "'" + argtables.NoLogFlagSignal + "'"
 	logNoLogSingnalWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote
 
-	versionWithQuote = "'" + argtables.VersionShortOpSignal + "/" + argtables.VersionOpSignal + "'"
-	helpWithQuote    = "'" + argtables.HelpShortOpSignal + "/" + argtables.HelpOpSignal + "'"
+	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
+	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
 
 	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote
 
