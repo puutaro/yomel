@@ -82,6 +82,8 @@ const (
 	ExpectUp2HyphenStr
 )
 
+// TODO judge option or str about --s, --n
+// I escape this judge for rare case considering --s, --n as str
 func GenArgTable(inputArgs []string) []ArgTable {
 	var argTables []ArgTable
 	stageNum := 0
