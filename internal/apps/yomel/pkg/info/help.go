@@ -10,33 +10,29 @@ import (
 )
 
 const detail = `Usage:
-  yomel [global flags] stage <stage-name> [stage flags...] [stage <stage-name> [stage flags...] ...]
+  yomel [flags] stage [desc] [cmd options/arguments...] [service options/arguments...] [action options/arguments...]
 
-Global Flags:
-  --help, -h               Show this help message and exit.
-  --version, -v            Show version information and exit.
-  --log                    Enable execution logging (displays constructed shell commands).
-  --log-filter <cmd>       Specify a command to filter standard output logs (e.g., "grep 'Exception'").
-  --err-log-filter <cmd>   Specify a command to filter standard error logs.
+Meta Flags:
+  --version          Print version information
+  --help             Print help information
 
-Stage Flags (Can be specified after each "stage" keyword):
-  -cmd, --cmd <string>     Base command to run in this stage (e.g., "aws", "curl", "sed").
-  -svc, --svc <string>     First sub-command or logical block (e.g., "s3", "logs").
-  -act, --act <string>     Second sub-command or action (e.g., "cp", "filter").
+General Flags:
+  --log              Enable stdout logging for pipeline execution
+  --no-log           Disable stdout logging for pipeline execution
+  --log-filter       Filter stdout logs using shell commands
+  --err-log-filter   Filter stderr logs using shell commands
 
-  --lop "<option>"         Appends a long option (--key). Must be followed by a value modifier (--val --s or --val --n).
-                           Example: --lop "region" --val --s "us-east-1" -> --region 'us-east-1'
-
-  -sop, --opt "<option>"   Appends a short option (-key). Must be followed by a value modifier (--val --s or --val --n).
-                           Example: --opt "f" --val --n "Dockerfile" -> -f Dockerfile
-
-  --val                    Value modifier flag accompanying --lop or --opt.
-    --val --s "<string>"   Emits value enclosed in single quotes.
-    --val --n "<string>"   Emits raw value without quotes (useful for numbers or shell variables).
-
-  --arg                    Appends a standalone positional argument at the end.
-    --arg --s "<string>"   Appends a single-quoted positional argument.
-    --arg --n "<string>"   Appends an unquoted positional argument.
+Stage Parameters:
+  stage              Define a new pipeline stage with a description
+  -cmd               Specify the command to execute
+  -svc               Specify the service name
+  -act               Specify the action name
+  --opt              Specify a short or long option key
+  --lop              Specify a long option key
+  --val              Specify an option value
+  --arg              Specify a positional argument
+  --single, -s       Indicate single-quoted value or argument
+  --no-quote, -n       Indicate unquoted value or argument
 
 Examples:
   1. Retrieve logs from S3, extract them, and grep for errors:
@@ -60,11 +56,28 @@ Examples:
   2. Run with global logging enabled:
      yomel \
         --log \
+        --log-filter "head -10" \
         stage "list" \
         -cmd "ls" \
         --opt "l" \
-        --val \
-        --n "/var/log"`
+        --val --n "/var/log"
+
+  3. Run with logging disable partly:
+     yomel \
+        --log \
+        stage "list" \
+        -cmd "ls" \
+        --opt "l" \
+        --val --n "/var/log"
+        --no-log \
+        stage "replace newline to space" \
+        -cmd "tr" \
+        --arg --s '\n' \
+        --arg --s ' ' \
+        --log-filter "head -1"
+        stage "add prefix" \
+        -cmd sed \
+        --arg -s 's/^/$HOME/'
 
 func GetHelp(ctrl domain.Control) (*string, error) {
 	if !ctrl.IsHelp {
