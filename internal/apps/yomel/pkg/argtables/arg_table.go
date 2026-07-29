@@ -74,47 +74,63 @@ type ArgTable struct {
 	UnkownOption    string
 	Str             *string
 }
+type ExpectedNext int
+
+const (
+	ExpectNormalStr ExpectedNext = iota
+	ExpectUp2StageStr
+	ExpectUp2HyphenStr
+)
 
 func GenArgTable(inputArgs []string) []ArgTable {
 	var argTables []ArgTable
 	stageNum := 0
-	enableHypenPrefix := false
+	expectedNext := ExpectNormalStr
+
 	for i, inputArg := range inputArgs {
 		displayNum := i + 1
 		argTable := ArgTable{
 			No:      displayNum,
 			StageNo: stageNum,
 		}
-		// flag don't infer enableHypenPrefix
-		// no hyphen prefix and no-quote or singl-quote option
-		switch inputArg {
+		switch true {
 		case
-			StageArgName:
+			expectedNext == ExpectUp2HyphenStr:
+			val := inputArg
+			argTable.Str = &val
+			argTables = append(argTables, argTable)
+			expectedNext = ExpectNormalStr
+			continue
+		case
+			expectedNext == ExpectUp2StageStr &&
+				!strings.HasPrefix(inputArg, "-"):
+			val := inputArg
+			argTable.Str = &val
+			argTables = append(argTables, argTable)
+			expectedNext = ExpectNormalStr
+			continue
+		case
+			expectedNext == ExpectNormalStr &&
+				!strings.HasPrefix(inputArg, "-") &&
+				inputArg != StageSignal:
+			val := inputArg
+			argTable.Str = &val
+			argTables = append(argTables, argTable)
+			expectedNext = ExpectNormalStr
+			continue
+		}
+		switch inputArg {
+		case StageArgName:
+			if expectedNext > ExpectNormalStr {
+				break
+			}
 			stageNum++
 			argTable.StageNo = stageNum
 			argTable.IsStage = true
 			argTables = append(argTables, argTable)
-			continue
-		case
-			SingleOpSignal,
-			SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-			argTables = append(argTables, argTable)
-			continue
-		case
-			NoQuoteOpSignal,
-			NoQuoteShortOpSignal:
-			argTable.QuoteTypeSignal = NoQuote
-			argTables = append(argTables, argTable)
+			expectedNext = ExpectUp2StageStr
 			continue
 		}
-		if enableHypenPrefix || !strings.HasPrefix(inputArg, "-") {
-			argTable.Str = &inputArg
-			enableHypenPrefix = false
-			argTables = append(argTables, argTable)
-			continue
-		}
-
 		switch inputArg {
 		case VersionOpSignal:
 			argTable.IsVersion = true
@@ -130,28 +146,37 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			argTable.IsErrLogFilter = true
 		case CmdOpSignal:
 			argTable.IsCmd = true
+			expectedNext = ExpectUp2StageStr
 		case SvcOpSignal:
 			argTable.IsSvc = true
+			expectedNext = ExpectUp2StageStr
 		case ActOpSignal:
 			argTable.IsAct = true
+			expectedNext = ExpectUp2StageStr
 		case OptOpSignal:
 			argTable.IsOpt = true
 		case LoptOpSignal:
 			argTable.IsLopt = true
 		case ValueOptSignal:
 			argTable.IsValue = true
-			enableHypenPrefix = true
+			expectedNext = ExpectUp2HyphenStr
 		case ArgOpSignal:
 			argTable.IsArg = true
-			enableHypenPrefix = true
+			expectedNext = ExpectUp2HyphenStr
+		case
+			SingleOpSignal,
+			SingleShortOpSignal:
+			argTable.QuoteTypeSignal = SingleQuote
+		case
+			NoQuoteOpSignal,
+			NoQuoteShortOpSignal:
+			argTable.QuoteTypeSignal = NoQuote
 		default:
 			argTable.UnkownOption = inputArg
-			enableHypenPrefix = false
+			expectedNext = ExpectNormalStr
 		}
-		argTables = append(
-			argTables,
-			argTable,
-		)
+
+		argTables = append(argTables, argTable)
 	}
 	return argTables
 }

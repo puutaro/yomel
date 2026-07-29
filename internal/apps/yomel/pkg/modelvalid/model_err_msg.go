@@ -10,5 +10,4 @@ const (
 	cmdStrRequire        = "'" + argtables.CmdOpSignal + "'" + valueRequireMsgAfter
 	svcStrRequire        = "'" + argtables.SvcOpSignal + "'" + valueRequireMsgAfter
 	actStrRequire        = "'" + argtables.ActOpSignal + "'" + valueRequireMsgAfter
-	// also arg
 )
