@@ -84,6 +84,7 @@ const (
 
 // TODO judge option or str about --s, --n
 // I escape this judge for rare case considering --s, --n as str
+// So this implement apply --s, --n as option always
 func GenArgTable(inputArgs []string) []ArgTable {
 	var argTables []ArgTable
 	stageNum := 0
@@ -95,33 +96,15 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			No:      displayNum,
 			StageNo: stageNum,
 		}
-		switch inputArg {
-		case StageArgName:
-			if expectedNext > ExpectNormalStr {
-				break
-			}
-			stageNum++
-			argTable.StageNo = stageNum
-			argTable.IsStage = true
-			argTables = append(argTables, argTable)
-			expectedNext = ExpectUp2StageStr
-			continue
-		case
-			SingleOpSignal,
-			SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-			argTables = append(argTables, argTable)
-			continue
-		case
-			NoQuoteOpSignal,
-			NoQuoteShortOpSignal:
-			argTable.QuoteTypeSignal = NoQuote
-			argTables = append(argTables, argTable)
-			continue
-		}
+		// Primary judge expectedNext about str or special option or stage
 		switch true {
 		case
-			expectedNext == ExpectUp2HyphenStr:
+			// Apply --s, --n as option always
+			expectedNext == ExpectUp2HyphenStr &&
+				(inputArg != NoQuoteOpSignal &&
+					inputArg != NoQuoteShortOpSignal &&
+					inputArg != SingleOpSignal &&
+					inputArg != SingleShortOpSignal):
 			val := inputArg
 			argTable.Str = &val
 			argTables = append(argTables, argTable)
@@ -159,6 +142,11 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			argTable.IsLogFilter = true
 		case ErrLogFilterOpSignal:
 			argTable.IsErrLogFilter = true
+		// stage interpret as special arg always in this line by first switch sentence
+		case StageArgName:
+			stageNum++
+			argTable.StageNo = stageNum
+			argTable.IsStage = true
 		case CmdOpSignal:
 			argTable.IsCmd = true
 			expectedNext = ExpectUp2StageStr
@@ -178,6 +166,14 @@ func GenArgTable(inputArgs []string) []ArgTable {
 		case ArgOpSignal:
 			argTable.IsArg = true
 			expectedNext = ExpectUp2HyphenStr
+		case
+			SingleOpSignal,
+			SingleShortOpSignal:
+			argTable.QuoteTypeSignal = SingleQuote
+		case
+			NoQuoteOpSignal,
+			NoQuoteShortOpSignal:
+			argTable.QuoteTypeSignal = NoQuote
 		default:
 			argTable.UnkownOption = inputArg
 			expectedNext = ExpectNormalStr
