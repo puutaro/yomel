@@ -38,6 +38,12 @@ type Yomel struct {
 }
 
 func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
+	stringValue := func(s *string) string {
+		if s == nil || *s == "" {
+			return ""
+		}
+		return *s
+	}
 	ctrl := Control{
 		IsLog:        ctrlModel.IsLog,
 		LogFilter:    ctrlModel.LogFilter,
@@ -49,11 +55,12 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 	stages := make([]Stage, len(stModels))
 	for i, stModel := range stModels {
 		var stage = Stage{
-			No:           stModel.No,
-			Desc:         stModel.Desc,
-			Cmd:          stModel.Cmd,
-			Svc:          stModel.Svc,
-			Act:          stModel.Act,
+			No:   stModel.No,
+			Desc: stModel.Desc,
+			Cmd:  stModel.Cmd,
+			// svc and act *string is no need, because finish validation and keep culc speed
+			Svc:          stringValue(stModel.Svc),
+			Act:          stringValue(stModel.Act),
 			IsLog:        stModel.IsLog,
 			LogFilter:    stModel.LogFilter,
 			ErrLogFilter: stModel.ErrLogFilter,

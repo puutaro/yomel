@@ -25,11 +25,11 @@ type StageModel struct {
 	CmdOps       []OptParam
 	CmdLops      []OptParam
 	CmdArgs      []ArgParam
-	Svc          string
+	Svc          *string
 	SvcOps       []OptParam
 	SvcLops      []OptParam
 	SvcArgs      []ArgParam
-	Act          string
+	Act          *string
 	ActOps       []OptParam
 	ActLops      []OptParam
 	ActArgs      []ArgParam
@@ -200,13 +200,11 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 				)
 			},
 		)
-		if oneStr := getOneStr(
+		stModel.Svc = getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t argtables.ArgTable) bool { return t.IsSvc },
-		); oneStr != nil {
-			stModel.Svc = *oneStr
-		}
+		)
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
@@ -238,13 +236,11 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 				)
 			},
 		)
-		if oneStr := getOneStr(
+		stModel.Act = getOneStr(
 			nextStartIndex,
 			curStageArgTables,
 			func(t argtables.ArgTable) bool { return t.IsAct },
-		); oneStr != nil {
-			stModel.Act = *oneStr
-		}
+		)
 		parseOptions(
 			nextStartIndex,
 			curStageArgTables,
