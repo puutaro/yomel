@@ -2,6 +2,7 @@ package modelvalid
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
@@ -10,7 +11,7 @@ import (
 
 func ModelValidate(stModels []model.StageModel) error {
 	validators := []func(model.StageModel) error{
-		checkByIrregularStageDesc,
+		checkIrregularStageDesc,
 		checkNoBlankStrRequireErrForCmd,
 		checkNoBlankStrRequireErr,
 	}
@@ -21,16 +22,23 @@ func ModelValidate(stModels []model.StageModel) error {
 			}
 		}
 	}
-	return nil
-}
-
-func checkByIrregularStageDesc(stModel model.StageModel) error {
-	if isBellowSingleCharRepeated(stModel.Desc) {
-		return fmt.Errorf(stageDescriptionIrregular, stModel.Desc, stModel.No)
+	wholeValidators := []func([]model.StageModel) error{
+		checkStageDescriptionDuplicate,
+	}
+	for _, validate := range wholeValidators {
+		if err := validate(stModels); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
+func checkIrregularStageDesc(stModel model.StageModel) error {
+	if isBellowSingleCharRepeated(stModel.Desc) {
+		return fmt.Errorf(stageDescriptionIrregular, stModel.No, stModel.Desc)
+	}
+	return nil
+}
 func isBellowSingleCharRepeated(s string) bool {
 	trimmed := strings.Trim(s, " 　")
 	if len(trimmed) == 0 {
@@ -45,6 +53,19 @@ func isBellowSingleCharRepeated(s string) bool {
 		}
 	}
 	return len(seen) == 1
+}
+func checkStageDescriptionDuplicate(stModels []model.StageModel) error {
+	var descList []string
+	for _, stModel := range stModels {
+		desc := stModel.Desc
+		if !slices.Contains(descList, desc) {
+			descList = append(descList, desc)
+			continue
+		}
+		stageNo := len(descList) + 1
+		return fmt.Errorf(stageDescriptionDuplicate, stageNo, desc)
+	}
+	return nil
 }
 
 func checkNoBlankStrRequireErrForCmd(stModel model.StageModel) error {

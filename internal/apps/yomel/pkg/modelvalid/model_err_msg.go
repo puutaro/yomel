@@ -3,9 +3,12 @@ package modelvalid
 import "github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 
 const (
-	stageDescriptionIrregular = "'" + argtables.StageSignal + "'" + " description must be meaning sentence\ndesc: '%s', stageNo: %d"
+	stageNoSuffix             = "\nstageNo: %d"
+	stageDesc                 = "\ndesc: '%s'"
+	stageSignalWithQuote      = "'" + argtables.StageSignal + "'"
+	stageDescriptionIrregular = stageSignalWithQuote + " description must be meaning sentence" + stageNoSuffix + stageDesc
+	stageDescriptionDuplicate = stageSignalWithQuote + " description must be unique across stages" + stageNoSuffix + stageDesc
 
-	stageNoSuffix           = "\nstageNo: %d"
 	noBlankStrRequireErrMsg = "'%s' no blank str is required" + stageNoSuffix
 	// cmdStrRequire        = "'" + argtables.CmdOpSignal + "'" + noBlankStrRequireErrMsg
 	// svcStrRequire        = "'" + argtables.SvcOpSignal + "'" + noBlankStrRequireErrMsg
