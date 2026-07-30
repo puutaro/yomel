@@ -71,7 +71,7 @@ jobs:
         with:
           files: ${{ env.BUILD_DIR }}/*
           tag_name: ${{ env.TAG_VERSION }}
-          name: Release ${{ env.TAG_VERSION }}
+          name: Release yomel-${{ env.TAG_VERSION }}
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
