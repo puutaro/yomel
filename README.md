@@ -1,6 +1,21 @@
 
 <img width="512" height="474" alt="yomel4_siro_1024" src="https://github.com/user-attachments/assets/c90f8341-7ed6-4dde-a35a-1a64db71bf23" />
 
+<!-- CIステータスバッジ -->
+[![CI](https://github.com/puutaro/yomel/actions/workflows/ci.yaml/badge.svg)](https://github.com/puutaro/yomel/actions/workflows/ci.yaml)
+
+<!-- リリースバージョンバッジ -->
+[![Release](https://img.shields.io/github/v/release/puutaro/yomel)](https://github.com/puutaro/yomel/releases)
+
+<!-- ライセンスバッジ（MITなどの場合） -->
+[![License](https://img.shields.io/github/license/puutaro/yomel)](LICENSE)
+
+<!-- Goモジュールバージョンバッジ -->
+[![Go Reference](https://pkg.go.dev/badge/puutaro/yomel.svg)](https://pkg.go.dev/puutaro/yomel)
+
+<!-- カバレッジバッジ（Codecov） -->
+[![codecov](https://codecov.io/gh/puutaro/yomel/branch/main/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
+
 # yomel
 
 `yomel` is a command-line utility designed to write multi-stage shell script pipelines using a structured, flat, and human-readable argument layout—inspired by the clear, nested visual style of YAML configuration files.
