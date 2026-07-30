@@ -70,6 +70,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.BUILD_DIR }}/*
+          tag_name: ${{ env.TAG_VERSION }}
+          name: Release ${{ env.TAG_VERSION }}
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
