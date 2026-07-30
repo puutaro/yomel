@@ -3,18 +3,10 @@
 
 <!-- CIステータスバッジ -->
 [![CI](https://github.com/puutaro/yomel/actions/workflows/ci.yaml/badge.svg)](https://github.com/puutaro/yomel/actions/workflows/ci.yaml)
-
-<!-- リリースバージョンバッジ -->
 [![Release](https://img.shields.io/github/v/release/puutaro/yomel)](https://github.com/puutaro/yomel/releases)
-
-<!-- ライセンスバッジ（MITなどの場合） -->
-[![License](https://img.shields.io/github/license/puutaro/yomel)](LICENSE)
-
-<!-- Goモジュールバージョンバッジ -->
+[![License](https://img.shields.io/github/license/puutaro/yomel)](https://github.com/puutaro/yomel/blob/master/LICENSE)
 [![Go Reference](https://pkg.go.dev/badge/puutaro/yomel.svg)](https://pkg.go.dev/puutaro/yomel)
-
-<!-- カバレッジバッジ（Codecov） -->
-[![codecov](https://codecov.io/gh/puutaro/yomel/branch/main/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
+[![codecov](https://codecov.io/gh/puutaro/yomel/branch/master/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
 
 # yomel
 
