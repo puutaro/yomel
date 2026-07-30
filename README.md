@@ -16,6 +16,21 @@ By breaking down complex, nested one-liners or lengthy shell scripts into highly
 
 ---
 
+## 📦 Installation (Linux/Mac)
+
+### General
+
+```sh.sh
+curl https://raw.githubusercontent.com/puutaro/yomel/refs/heads/master/install.sh | sh
+```
+
+### go install
+
+```sh.sh
+go install github.com/puutaro/yomel/cmd/yomel@latest
+```
+---
+
 ## 🚀 Key Features
 
 - 🛠️ **YAML-Like Structure:** Compose sequentially grouped pipelines via continuous CLI arguments using explicit components (`stage`, `-cmd`, `-svc`, `-act`, etc.).
@@ -114,24 +129,6 @@ yomel \
   -cmd "sed" \
   --opt "e" \
   --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
-```
-
----
-
-## 📦 Installation
-
-Ensure you have Go (1.20+) installed on your Ubuntu Linux environment. Clone the repository and build the binary:
-
-```bash
-git clone https://github.com/puutaro/yomel.git
-cd yomel
-go build -o bin/yomel ./cmd/yomel
-```
-
-Alternatively, install directly via `go install`:
-
-```bash
-go install github.com/puutaro/yomel/cmd/yomel@latest
 ```
 
 ---
