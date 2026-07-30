@@ -14,7 +14,7 @@
 [![Go Reference](https://pkg.go.dev/badge/puutaro/yomel.svg)](https://pkg.go.dev/puutaro/yomel)
 
 <!-- カバレッジバッジ（Codecov） -->
-[![codecov](https://codecov.io/gh/puutaro/yomel/branch/main/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
+[![codecov](https://codecov.io/gh/puutaro/yomel/branch/master/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
 
 # yomel
 
