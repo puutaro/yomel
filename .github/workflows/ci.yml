@@ -24,6 +24,7 @@ jobs:
 
       - name: Run tests and generate coverage
         run: |
+          go generate ./...
           go test -v -coverprofile=coverage.out -covermode=atomic ./...
 
       - name: Upload coverage to Codecov
