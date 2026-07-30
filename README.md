@@ -1,8 +1,5 @@
-<!-- <img width="512" height="474" alt="yomel4_1024" src="https://github.com/user-attachments/assets/880acff6-4e01-4869-8fd9-6a8582a74fd6" /> -->
 
 <img width="512" height="474" alt="yomel4_siro_1024" src="https://github.com/user-attachments/assets/c90f8341-7ed6-4dde-a35a-1a64db71bf23" />
-
-
 
 # yomel
 
@@ -39,7 +36,7 @@ These options control debugging output and stream filtering. They do not alter t
 
 * **`--err-log-filter "<shell_command>"`**
   * **Meaning:** Attaches an asynchronous log interceptor for standard error (`stderr`). This functions exactly like `--log-filter` but processes error streams thrown by the executing binaries.
-  * **Usage:** `--err-log-filter "awk '{print \"[ERR] \" \$0}'"` prefixes all error outputs with a custom tag.
+  * **Usage:** `--err-log-filter "awk '{print "[ERR] " \$0}'"` prefixes all error outputs with a custom tag.
 
 ### 2. Structural Stage Elements
 These keywords separate different processes and define command parts.
@@ -110,3 +107,50 @@ yomel \
   -cmd "sed" \
   --opt "e" \
   --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+```
+
+---
+
+## 📦 Installation
+
+Ensure you have Go (1.20+) installed on your Ubuntu Linux environment. Clone the repository and build the binary:
+
+```bash
+git clone https://github.com/puutaro/yomel.git
+cd yomel
+go build -o bin/yomel ./cmd/yomel
+```
+
+Alternatively, install directly via `go install`:
+
+```bash
+go install github.com/puutaro/yomel/cmd/yomel@latest
+```
+
+---
+
+## 🏗️ Architecture & Internal Packages
+
+`yomel` is built with a clean, modular Go architecture under `internal/apps/yomel/pkg/`:
+
+- **`arglist`**: Manages flat argument arrays and sequential tokenization.
+- **`argtables` & `argtablevalid`**: Structures and validates syntactic pipeline definitions.
+- **`domain`**: Converts raw inputs into executable command models.
+- **`model` & `modelvalid`**: Core pipeline structures and integrity validation rules.
+- **`sh`**: Handles concurrent shell execution, process spawning, and `io.TeeReader` pipe streaming.
+
+---
+
+## 🧪 Development & Testing
+
+Run unit tests across all internal packages to verify functionality:
+
+```bash
+go test ./... -v
+```
+
+---
+
+## 📜 License
+
+MIT License
