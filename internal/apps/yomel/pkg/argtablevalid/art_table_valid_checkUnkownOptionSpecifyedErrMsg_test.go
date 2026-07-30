@@ -60,8 +60,3 @@ func Test_checkUnkownOptionSpecifyedErrMsg(t *testing.T) {
 		})
 	}
 }
-
-// testutilPtr is a helper function to return a pointer to a string.
-func testutilPtr(s string) *string {
-	return &s
-}
