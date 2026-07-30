@@ -207,6 +207,24 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 1, Str: testutil.Ptr("stage")},
 			},
 		},
+		{
+			name: "should handle unknown options and explicit short quote signals correctly",
+			input: []string{
+				"yomel",
+				"--unknown-flag",
+				"--n",
+				"--s",
+				"-n",
+				"-s",
+			},
+			want: []argtables.ArgTable{
+				{StageNo: 0, UnkownOption: "--unknown-flag"},
+				{StageNo: 0, QuoteTypeSignal: argtables.NoQuote},
+				{StageNo: 0, QuoteTypeSignal: argtables.SingleQuote},
+				{StageNo: 0, UnkownOption: "-n"},
+				{StageNo: 0, UnkownOption: "-s"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
