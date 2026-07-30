@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_GenArgTable verifies that command-line arguments are correctly parsed into structured ArgTable entries.
 func Test_GenArgTable(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -172,6 +173,38 @@ func Test_GenArgTable(t *testing.T) {
 				// parse argument expression for sed
 				{StageNo: 2, IsArg: true},
 				{StageNo: 2, Str: testutil.Ptr("/aa/bb/")},
+			},
+		},
+		{
+			name: "should handle hyphen-starting strings and stage strings after arg, val, cmd, svc, act, and stage",
+			input: []string{
+				"yomel",
+				"stage", "stage",
+				"-cmd", "stage",
+				"--val", "-hyphenval",
+				"-svc", "stage",
+				"--val", "stage",
+				"-act", "stage",
+				"--arg", "-hyphenarg",
+				"--arg", "stage",
+			},
+			want: []argtables.ArgTable{
+				{StageNo: 1, IsStage: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
+				{StageNo: 1, IsCmd: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
+				{StageNo: 1, IsValue: true},
+				{StageNo: 1, Str: testutil.Ptr("-hyphenval")},
+				{StageNo: 1, IsSvc: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
+				{StageNo: 1, IsValue: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
+				{StageNo: 1, IsAct: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
+				{StageNo: 1, IsArg: true},
+				{StageNo: 1, Str: testutil.Ptr("-hyphenarg")},
+				{StageNo: 1, IsArg: true},
+				{StageNo: 1, Str: testutil.Ptr("stage")},
 			},
 		},
 	}

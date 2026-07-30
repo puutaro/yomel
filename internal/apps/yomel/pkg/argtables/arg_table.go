@@ -147,6 +147,7 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			stageNum++
 			argTable.StageNo = stageNum
 			argTable.IsStage = true
+			expectedNext = ExpectUp2StageStr
 		case CmdOpSignal:
 			argTable.IsCmd = true
 			expectedNext = ExpectUp2StageStr
