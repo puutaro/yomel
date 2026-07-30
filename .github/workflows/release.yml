@@ -60,6 +60,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
+          go generate ./...
           mkdir -p ${{ env.BUILD_DIR }}
           BINARY_NAME="yomel_${{ env.TAG_VERSION }}_${{ matrix.goos }}_${{ matrix.arch }}"
           
