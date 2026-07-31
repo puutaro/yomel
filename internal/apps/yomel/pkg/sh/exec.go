@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	logGuard    = "####"
-	labelPrefix = "#"
-	redStart    = "\x1b[31m"
-	redEnd      = "\x1b[0m"
+	logGuard       = "####"
+	labelPrefix    = "#"
+	redStart       = "\x1b[31m"
+	blueGreenStart = "\x1b[30m"
+	colorEnd       = "\x1b[0m"
 )
 
 func Exec(yomelInfos []YomelInfo) {
@@ -69,8 +70,9 @@ func Exec(yomelInfos []YomelInfo) {
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
 	for i, yomelInfo := range yomelInfos {
 		stdoutLen := stdoutBuffers[i].Len()
+		stderrLen := stderrBuffers[i].Len()
 
-		shouldLogStdout := yomelInfo.IsLog && stdoutLen > 0
+		shouldLogStdout := (yomelInfo.IsLog && stdoutLen > 0) || stderrLen > 0
 
 		if !cmdHasError && !shouldLogStdout {
 			continue
@@ -83,6 +85,7 @@ func Exec(yomelInfos []YomelInfo) {
 			yomelInfo.ErrLogFilter,
 			stderrBuffers[i],
 			stdoutBuffers[i],
+			shouldLogStdout,
 			cmdHasError,
 		)
 	}
@@ -96,6 +99,7 @@ func printDecoratedLog(
 	errLogFilterShell string,
 	stderrBuf,
 	stdoutBuf *bytes.Buffer,
+	shouldStdErr bool,
 	cmdHasError bool,
 ) {
 
@@ -111,15 +115,10 @@ func printDecoratedLog(
 		cmdName,
 	)
 
-	if cmdHasError {
+	if shouldStdErr {
 		write2Std(
 			os.Stderr,
-			fmt.Sprintf(
-				"%s%s error:%s\n",
-				labelPrefix,
-				redStart,
-				redEnd,
-			),
+			makeNormalOrRedStdErrLabel(cmdHasError),
 			stderrBuf,
 			errLogFilterShell,
 		)
@@ -132,6 +131,25 @@ func printDecoratedLog(
 	)
 
 	fmt.Fprintf(os.Stderr, "%s\n\n", logGuard)
+}
+
+func makeNormalOrRedStdErrLabel(hasErr bool) string {
+	logGenre := "progress"
+	if hasErr {
+		logGenre = "error"
+		return fmt.Sprintf(
+			"%s%s %s:%s\n",
+			labelPrefix,
+			redStart,
+			logGenre,
+			colorEnd,
+		)
+	}
+	return fmt.Sprintf(
+		"%s %s:\n",
+		labelPrefix,
+		logGenre,
+	)
 }
 
 func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string) {
@@ -156,7 +174,7 @@ func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string)
 		addNewline(w, filterShellCmdStdoutBuf)
 		return
 	}
-	fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, redEnd)
+	fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, colorEnd)
 	w.Write(filterShellCmdStderrBuf.Bytes())
 	addNewline(w, filterShellCmdStderrBuf)
 }
