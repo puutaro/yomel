@@ -52,6 +52,10 @@ These options control debugging output and stream filtering. They do not alter t
   * **Meaning:** Activates the internal logging system. When this flag is present, `yomel` prints detailed panel execution metrics, generated shell commands, and raw step statuses to `stderr`.
   * **Usage:** Place it at the very beginning of the command to apply globally, or within specific sections.
 
+* **`--direct`**
+  * **Meaning:** Execute pippe shell directly without log. 
+  * **Usage:** More speedy shell pipe executuion, and capture realtime stderr log.
+
 * **`--log-filter "<shell_command>"`**
   * **Meaning:** Attaches an asynchronous log interceptor for standard output (`stdout`). The log data captured from the stage is passed to this shell command (e.g., `grep`, `awk`, `sed`) via stdin before being printed.
   * **Usage:** `--log-filter "grep 'ERROR'"` will ensure only log lines containing "ERROR" are emitted to your console log view.
