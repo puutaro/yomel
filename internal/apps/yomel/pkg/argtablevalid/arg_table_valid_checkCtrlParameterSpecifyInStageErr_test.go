@@ -18,6 +18,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 			input: []argtables.ArgTable{
 				{StageNo: 0, IsVersion: true},
 				{StageNo: 0, IsHelp: true},
+				{StageNo: 0, IsDirect: true},
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, Str: testutilPtr("echo")},
@@ -30,7 +31,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsVersion: true},
 			},
-			wantError: "must be specified'--version' and '--help' in stage 0 field\nstageNo: 1",
+			wantError: "must be specified'--version' and '--help' and '--direct' in stage 0 field\nstageNo: 1",
 		},
 		{
 			name: "should return error when help is specified in stage field",
@@ -38,7 +39,15 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsHelp: true},
 			},
-			wantError: "must be specified'--version' and '--help' in stage 0 field\nstageNo: 1",
+			wantError: "must be specified'--version' and '--help' and '--direct' in stage 0 field\nstageNo: 1",
+		},
+		{
+			name: "should return error when direct is specified in stage field",
+			input: []argtables.ArgTable{
+				{StageNo: 1, IsStage: true},
+				{StageNo: 1, IsDirect: true},
+			},
+			wantError: "must be specified'--version' and '--help' and '--direct' in stage 0 field\nstageNo: 1",
 		},
 	}
 

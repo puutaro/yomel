@@ -11,8 +11,9 @@ const (
 
 	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
 	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
+	directWithQuote  = "'" + argtables.DirectModeFlagSignal + "'"
 
-	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote
+	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote + " and " + directWithQuote
 
 	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
 	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
