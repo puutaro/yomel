@@ -25,6 +25,7 @@ func Test_GenArgTable(t *testing.T) {
 				"--no-log",
 				"--version",
 				"--help",
+				"--direct",
 				"--log-filter", "grep log",
 				"--err-log-filter", "grep err_log",
 				"stage", "test1",
@@ -67,6 +68,7 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 0, IsVersion: true},
 				// parse --help option
 				{StageNo: 0, IsHelp: true},
+				{StageNo: 0, IsDirect: true},
 				// parse --log-filter option with pattern
 				{StageNo: 0, IsLogFilter: true},
 				{StageNo: 0, Str: testutil.Ptr("grep log")},
