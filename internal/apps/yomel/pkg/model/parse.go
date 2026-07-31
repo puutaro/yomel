@@ -46,6 +46,7 @@ type ControlModel struct {
 	ErrLogFilter string
 	IsVersion    bool
 	IsHelp       bool
+	IsDirect     bool
 }
 
 func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
@@ -70,6 +71,12 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 		0,
 		curCtrlArgTables,
 		func(t argtables.ArgTable) bool { return t.IsHelp },
+		false,
+	)
+	ctrl.IsDirect = getFlag(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsDirect },
 		false,
 	)
 	if flagBool := getFlagByPtr(

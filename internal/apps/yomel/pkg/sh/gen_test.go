@@ -13,7 +13,7 @@ func Test_Gen(t *testing.T) {
 	tests := []struct {
 		name  string
 		input domain.Yomel
-		want  []YomelInfo
+		want  []StageInfo
 	}{
 		{
 			name: "should generate single stage YomelInfo with command and arguments correctly",
@@ -32,7 +32,7 @@ func Test_Gen(t *testing.T) {
 					},
 				},
 			},
-			want: []YomelInfo{
+			want: []StageInfo{
 				{
 					No:           1,
 					Desc:         "echo-stage",
@@ -67,7 +67,7 @@ func Test_Gen(t *testing.T) {
 					},
 				},
 			},
-			want: []YomelInfo{
+			want: []StageInfo{
 				{
 					No:           1,
 					Desc:         "complex-stage",
@@ -84,13 +84,13 @@ func Test_Gen(t *testing.T) {
 				Ctrl:   domain.Control{},
 				Stages: []domain.Stage{},
 			},
-			want: []YomelInfo{},
+			want: []StageInfo{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Gen(tt.input)
+			got := GenStageInfo(tt.input)
 			assert.Equal(t, tt.want, got)
 		})
 	}

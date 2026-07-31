@@ -16,9 +16,14 @@ const (
 	colorEnd       = "\x1b[0m"
 )
 
-func Exec(yomelInfos []YomelInfo) {
-	numCmds := len(yomelInfos)
+func Exec(yomelInfo YomelInfo) {
+	stageInfos := yomelInfo.StageInfos
+	numCmds := len(stageInfos)
 	if numCmds == 0 {
+		return
+	}
+	if yomelInfo.IsDirect {
+		directExec(stageInfos)
 		return
 	}
 
@@ -29,8 +34,8 @@ func Exec(yomelInfos []YomelInfo) {
 	var nextStdin io.Reader = os.Stdin
 
 	// 1. Build the pipeline structure
-	for i, yomelInfo := range yomelInfos {
-		cmd := exec.Command("bash", "-c", yomelInfo.CmdStrs)
+	for i, stageInfo := range stageInfos {
+		cmd := exec.Command("bash", "-c", stageInfo.CmdStrs)
 		cmds[i] = cmd
 
 		cmd.Stdin = nextStdin
@@ -68,7 +73,7 @@ func Exec(yomelInfos []YomelInfo) {
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
-	for i, yomelInfo := range yomelInfos {
+	for i, yomelInfo := range stageInfos {
 		stdoutLen := stdoutBuffers[i].Len()
 		stderrLen := stderrBuffers[i].Len()
 
@@ -88,6 +93,27 @@ func Exec(yomelInfos []YomelInfo) {
 			shouldLogStdout,
 			cmdHasError,
 		)
+	}
+}
+func directExec(stageInfos []StageInfo) {
+	if len(stageInfos) == 0 {
+		return
+	}
+	var cmdPipeline string
+	for i, info := range stageInfos {
+		if i == 0 {
+			cmdPipeline = info.CmdStrs
+		} else {
+			cmdPipeline = fmt.Sprintf("%s \\\n| %s", cmdPipeline, info.CmdStrs)
+		}
+	}
+	cmd := exec.Command("bash", "-c", cmdPipeline)
+	cmd.Stderr = os.Stderr
+	stdoutBuf := new(bytes.Buffer)
+	cmd.Stdout = stdoutBuf
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
 	}
 }
 

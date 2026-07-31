@@ -18,6 +18,7 @@ type Control struct {
 	ErrLogFilter string
 	IsVersion    bool
 	IsHelp       bool
+	IsDirect     bool
 }
 type Stage struct {
 	No           int
@@ -50,6 +51,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 		ErrLogFilter: ctrlModel.ErrLogFilter,
 		IsVersion:    ctrlModel.IsVersion,
 		IsHelp:       ctrlModel.IsHelp,
+		IsDirect:     ctrlModel.IsDirect,
 	}
 	yomel := Yomel{Ctrl: ctrl}
 	stages := make([]Stage, len(stModels))

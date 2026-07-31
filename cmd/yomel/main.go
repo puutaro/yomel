@@ -64,7 +64,7 @@ func main() {
 		return
 	}
 	yomel := domain.Convert(ctrl, stageModels)
-	chainStr := sh.Gen(yomel)
-	sh.Exec(chainStr)
+	yomelInfo := sh.Gen(yomel)
+	sh.Exec(yomelInfo)
 
 }

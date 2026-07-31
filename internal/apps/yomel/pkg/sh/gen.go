@@ -16,7 +16,7 @@ const (
 
 type stageCommand string
 
-type YomelInfo struct {
+type StageInfo struct {
 	No           int
 	Desc         string
 	IsLog        bool
@@ -24,10 +24,22 @@ type YomelInfo struct {
 	ErrLogFilter string
 	CmdStrs      string
 }
+type YomelInfo struct {
+	IsDirect   bool
+	StageInfos []StageInfo
+}
 
-func Gen(yomel domain.Yomel) []YomelInfo {
+func Gen(yomel domain.Yomel) YomelInfo {
+	stageInfos := GenStageInfo(yomel)
+	return YomelInfo{
+		IsDirect:   yomel.Ctrl.IsDirect,
+		StageInfos: stageInfos,
+	}
+}
+
+func GenStageInfo(yomel domain.Yomel) []StageInfo {
 	stages := yomel.Stages
-	yomelInfos := make([]YomelInfo, len(stages))
+	yomelInfos := make([]StageInfo, len(stages))
 	globalLogFilter := yomel.Ctrl.LogFilter
 	globalErrLogFilter := yomel.Ctrl.ErrLogFilter
 	// default stdout log don't display
@@ -39,7 +51,7 @@ func Gen(yomel domain.Yomel) []YomelInfo {
 		if stageIsLog := stage.IsLog; stageIsLog != nil {
 			isLog = *stageIsLog
 		}
-		yomelInfo := YomelInfo{
+		yomelInfo := StageInfo{
 			No:           stage.No,
 			Desc:         stage.Desc,
 			IsLog:        isLog,
