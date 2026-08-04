@@ -8,6 +8,7 @@ const (
 	Version            = "version"
 	Help               = "help"
 	DirectMode         = "direct"
+	GenMode            = "gen"
 	StageArgName       = "stage"
 	LogOpName          = "log"
 	NoLogOpName        = "no-log"
@@ -29,6 +30,7 @@ const (
 	VersionOpSignal      = "--" + Version
 	HelpOpSignal         = "--" + Help
 	DirectModeFlagSignal = "--" + DirectMode
+	GenModeFlagSingnal   = "--" + GenMode
 	StageSignal          = StageArgName
 	CmdOpSignal          = "-" + CmdOpName
 	LogFlagSignal        = "--" + LogOpName
@@ -59,6 +61,7 @@ type ArgTable struct {
 	No              int
 	IsVersion       bool
 	IsHelp          bool
+	IsGen           bool
 	IsDirect        bool
 	IsLogFilter     bool
 	IsErrLogFilter  bool
@@ -137,6 +140,8 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			argTable.IsVersion = true
 		case HelpOpSignal:
 			argTable.IsHelp = true
+		case GenModeFlagSingnal:
+			argTable.IsGen = true
 		case DirectModeFlagSignal:
 			argTable.IsDirect = true
 		case LogFlagSignal:

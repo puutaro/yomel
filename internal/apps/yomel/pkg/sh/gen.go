@@ -26,13 +26,16 @@ type StageInfo struct {
 }
 type YomelInfo struct {
 	IsDirect   bool
+	IsGen      bool
 	StageInfos []StageInfo
 }
 
 func Gen(yomel domain.Yomel) YomelInfo {
 	stageInfos := GenStageInfo(yomel)
+	ctrl := yomel.Ctrl
 	return YomelInfo{
-		IsDirect:   yomel.Ctrl.IsDirect,
+		IsDirect:   ctrl.IsDirect,
+		IsGen:      ctrl.IsGen,
 		StageInfos: stageInfos,
 	}
 }

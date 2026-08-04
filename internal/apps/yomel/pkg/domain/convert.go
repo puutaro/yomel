@@ -13,6 +13,7 @@ type opArgType struct {
 	Str   string
 }
 type Control struct {
+	IsGen        bool
 	IsLog        *bool
 	LogFilter    string
 	ErrLogFilter string
@@ -46,6 +47,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 		return *s
 	}
 	ctrl := Control{
+		IsGen:        ctrlModel.IsGen,
 		IsLog:        ctrlModel.IsLog,
 		LogFilter:    ctrlModel.LogFilter,
 		ErrLogFilter: ctrlModel.ErrLogFilter,

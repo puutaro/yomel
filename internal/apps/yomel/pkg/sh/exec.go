@@ -22,6 +22,10 @@ func Exec(yomelInfo YomelInfo) {
 	if numCmds == 0 {
 		return
 	}
+	if yomelInfo.IsGen {
+		outputCmd(stageInfos)
+		return
+	}
 	if yomelInfo.IsDirect {
 		directExec(stageInfos)
 		return
@@ -95,10 +99,26 @@ func Exec(yomelInfo YomelInfo) {
 		)
 	}
 }
+func outputCmd(stageInfo []StageInfo) {
+	fmt.Fprintln(
+		os.Stdout,
+		makeDirectCmd(stageInfo),
+	)
+}
 func directExec(stageInfos []StageInfo) {
 	if len(stageInfos) == 0 {
 		return
 	}
+	cmdPipeline := makeDirectCmd(stageInfos)
+	cmd := exec.Command("bash", "-c", cmdPipeline)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
+	}
+}
+func makeDirectCmd(stageInfos []StageInfo) string {
 	var cmdPipeline string
 	for i, info := range stageInfos {
 		if i == 0 {
@@ -107,13 +127,7 @@ func directExec(stageInfos []StageInfo) {
 			cmdPipeline = fmt.Sprintf("%s \\\n| %s", cmdPipeline, info.CmdStrs)
 		}
 	}
-	cmd := exec.Command("bash", "-c", cmdPipeline)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
-	}
+	return cmdPipeline
 }
 
 func printDecoratedLog(

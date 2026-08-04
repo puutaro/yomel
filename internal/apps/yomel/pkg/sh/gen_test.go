@@ -79,6 +79,30 @@ func Test_Gen(t *testing.T) {
 			},
 		},
 		{
+			name: "should generate YomelInfo with IsDirect and IsGen set to true correctly",
+			input: domain.Yomel{
+				Ctrl: domain.Control{
+					IsGen:    true,
+					IsDirect: true,
+				},
+				Stages: []domain.Stage{
+					{
+						No:        1,
+						Desc:      "direct-gen-stage",
+						Cmd:       "echo",
+						CmdOpArgs: []string{"test"},
+					},
+				},
+			},
+			want: []StageInfo{
+				{
+					No:      1,
+					Desc:    "direct-gen-stage",
+					CmdStrs: "echo \\\n test",
+				},
+			},
+		},
+		{
 			name: "should return empty slice when stages are empty",
 			input: domain.Yomel{
 				Ctrl:   domain.Control{},
