@@ -109,8 +109,7 @@ func directExec(stageInfos []StageInfo) {
 	}
 	cmd := exec.Command("bash", "-c", cmdPipeline)
 	cmd.Stderr = os.Stderr
-	stdoutBuf := new(bytes.Buffer)
-	cmd.Stdout = stdoutBuf
+	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
