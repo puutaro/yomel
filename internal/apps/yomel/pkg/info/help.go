@@ -16,6 +16,7 @@ const detail = `Usage:
 Meta Flags:
   --version          Print version information
   --help             Print help information
+  --gen            outout total pipeline cmd 
   --direct            Exec shell by direct (simple exec pipe shell without log) 
 
 General Flags:

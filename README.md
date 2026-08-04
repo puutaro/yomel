@@ -52,6 +52,10 @@ These options control debugging output and stream filtering. They do not alter t
   * **Meaning:** Activates the internal logging system. When this flag is present, `yomel` prints detailed panel execution metrics, generated shell commands, and raw step statuses to `stderr`.
   * **Usage:** Place it at the very beginning of the command to apply globally, or within specific sections.
 
+* **`--gen`**
+  * **Meaning:** Output total pipe line command. 
+  * **Usage:** You want to confirm total pipeline cmd, so colled by `dry-run` .
+
 * **`--direct`**
   * **Meaning:** Execute pippe shell directly without log. 
   * **Usage:** More speedy shell pipe executuion, and capture realtime stderr log.
