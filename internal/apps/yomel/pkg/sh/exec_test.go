@@ -99,6 +99,24 @@ func Test_Exec(t *testing.T) {
 			},
 			wantSubstr: "YOMEL-LOG",
 		},
+		{
+			name: "should execute successfully with live stdout and live stderr enabled",
+			yomelInfo: YomelInfo{
+				IsDirect:     false,
+				IsLiveStdout: true,
+				IsLiveStdErr: true,
+				StageInfos: []StageInfo{
+					{
+						No:           1,
+						Desc:         "live-stage",
+						CmdStrs:      "echo 'live content' 1>&2",
+						IsLog:        true,
+						ErrLogFilter: "grep 'live'",
+					},
+				},
+			},
+			wantSubstr: "YOMEL-LOG",
+		},
 	}
 
 	for _, tt := range tests {

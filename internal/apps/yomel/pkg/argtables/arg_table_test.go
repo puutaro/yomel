@@ -11,8 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_GenArgTableDto verifies that command-line arguments are correctly parsed into structured ArgTableDto entries.
-func Test_GenArgTableDto(t *testing.T) {
+func Test_GenArgTable(t *testing.T) {
 	tests := []struct {
 		name  string
 		input []string
@@ -22,6 +21,8 @@ func Test_GenArgTableDto(t *testing.T) {
 			name: "make argTable from args",
 			input: []string{
 				"yomel",
+				"--no-live-stdout",
+				"--no-live-stderr",
 				"--log",
 				"--no-log",
 				"--version",
@@ -63,6 +64,8 @@ func Test_GenArgTableDto(t *testing.T) {
 				"--arg", "/aa/bb/",
 			},
 			want: []argtables.ArgTableDto{
+				{StageNo: 0, IsNoLiveStdout: true},
+				{StageNo: 0, IsNoLiveStderr: true},
 				// parse --log option
 				{StageNo: 0, IsLog: true},
 				// parse --no-log option

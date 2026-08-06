@@ -25,18 +25,22 @@ type StageInfo struct {
 	CmdStrs      string
 }
 type YomelInfo struct {
-	IsDirect   bool
-	IsGen      bool
-	StageInfos []StageInfo
+	IsDirect     bool
+	IsGen        bool
+	IsLiveStdout bool
+	IsLiveStdErr bool
+	StageInfos   []StageInfo
 }
 
 func Gen(yomel domain.Yomel) YomelInfo {
 	stageInfos := GenStageInfo(yomel)
 	ctrl := yomel.Ctrl
 	return YomelInfo{
-		IsDirect:   ctrl.IsDirect,
-		IsGen:      ctrl.IsGen,
-		StageInfos: stageInfos,
+		IsLiveStdout: ctrl.IsLiveStdout,
+		IsLiveStdErr: ctrl.IsLiveStderr,
+		IsDirect:     ctrl.IsDirect,
+		IsGen:        ctrl.IsGen,
+		StageInfos:   stageInfos,
 	}
 }
 

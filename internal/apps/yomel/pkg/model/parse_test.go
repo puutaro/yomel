@@ -30,6 +30,8 @@ func Test_Parse(t *testing.T) {
 				{No: 8, StageNo: 1, Str: testutil.Ptr("hello")},
 			},
 			wantCtrl: ControlModel{
+				IsLiveStdout: true,
+				IsLiveStderr: true,
 				IsLog:        testutil.Ptr(true),
 				LogFilter:    "",
 				ErrLogFilter: "",
@@ -77,6 +79,8 @@ func Test_Parse(t *testing.T) {
 				{No: 19, StageNo: 2, Str: testutil.Ptr("cat")},
 			},
 			wantCtrl: ControlModel{
+				IsLiveStdout: true,
+				IsLiveStderr: true,
 				IsLog:        testutil.Ptr(true),
 				LogFilter:    "global-filter",
 				ErrLogFilter: "",
@@ -132,6 +136,8 @@ func Test_Parse(t *testing.T) {
 				{No: 27, StageNo: 1, Str: testutil.Ptr("arg-val")},
 			},
 			wantCtrl: ControlModel{
+				IsLiveStdout: true,
+				IsLiveStderr: true,
 				IsVersion:    true,
 				IsHelp:       true,
 				IsGen:        true,

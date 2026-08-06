@@ -54,7 +54,11 @@ func Exec(yomelInfo YomelInfo) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, _ = io.Copy(os.Stderr, stderrTee)
+			if yomelInfo.IsLiveStdErr {
+				_, _ = io.Copy(os.Stderr, stderrTee)
+			} else {
+				_, _ = io.Copy(io.Discard, stderrTee)
+			}
 		}()
 
 		stdoutPipe, _ := cmd.StdoutPipe()
@@ -66,7 +70,11 @@ func Exec(yomelInfo YomelInfo) error {
 	lastCmdDone := make(chan struct{})
 	// 2. Start consuming data in the background
 	go func() {
-		_, _ = io.Copy(os.Stdout, nextStdin)
+		if yomelInfo.IsLiveStdout {
+			_, _ = io.Copy(os.Stdout, nextStdin)
+		} else {
+			_, _ = io.Copy(io.Discard, nextStdin)
+		}
 		close(lastCmdDone)
 	}()
 	// 3. Start all commands simultaneously

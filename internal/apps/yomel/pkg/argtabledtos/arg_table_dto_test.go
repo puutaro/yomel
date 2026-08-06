@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_GenArgTable verifies that GenArgTable correctly converts a slice of ArgTableDto into a slice of ArgTable structures.
-func Test_GenArgTable(t *testing.T) {
+// Test_GenArgTableDto verifies that GenArgTable correctly converts a slice of ArgTableDto into a slice of ArgTable structures.
+func Test_GenArgTableDto(t *testing.T) {
 	tests := []struct {
 		name  string
 		input []argtables.ArgTableDto
@@ -21,6 +21,8 @@ func Test_GenArgTable(t *testing.T) {
 			input: []argtables.ArgTableDto{
 				{
 					No:              1,
+					IsNoLiveStdout:  false,
+					IsNoLiveStderr:  false,
 					IsVersion:       true,
 					IsHelp:          false,
 					IsGen:           true,
@@ -44,6 +46,8 @@ func Test_GenArgTable(t *testing.T) {
 				},
 				{
 					No:              2,
+					IsNoLiveStdout:  false,
+					IsNoLiveStderr:  false,
 					IsVersion:       false,
 					IsHelp:          true,
 					IsGen:           false,

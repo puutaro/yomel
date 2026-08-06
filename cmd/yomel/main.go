@@ -34,8 +34,8 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", *helpConByDefault)
 		os.Exit(normalExitSignal)
 	}
-	argTableSrc := argtables.GenArgTable(inputArgs)
-	helpConByOption, helpErrByOption := info.GetHelpByOption(argTableSrc)
+	argTables := argtables.GenArgTable(inputArgs)
+	helpConByOption, helpErrByOption := info.GetHelpByOption(argTables)
 	if helpErrByOption != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", helpErrByOption)
 		os.Exit(errorExitSignal)
@@ -44,7 +44,7 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", *helpConByOption)
 		os.Exit(normalExitSignal)
 	}
-	version, versionErr := info.GetVersion(argTableSrc)
+	version, versionErr := info.GetVersion(argTables)
 	if versionErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", versionErr)
 		os.Exit(errorExitSignal)
@@ -53,14 +53,13 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", *version)
 		os.Exit(normalExitSignal)
 	}
-
-	if argTableDtosValidErr := argtablevalid.ArgTableValid(argTableSrc); argTableDtosValidErr != nil {
+	if argTableDtosValidErr := argtablevalid.ArgTableValid(argTables); argTableDtosValidErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", argTableDtosValidErr)
 		os.Exit(errorExitSignal)
 	}
-	argTableDtos := argtabledtos.GenArgTableDto(argTableSrc)
-	if preValidateErr := argtabledtosvalid.ArgTableValidate(argTableDtos); preValidateErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", preValidateErr)
+	argTableDtos := argtabledtos.GenArgTableDto(argTables)
+	if argTableValidateErr := argtabledtosvalid.ArgTableValidate(argTableDtos); argTableValidateErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", argTableValidateErr)
 		os.Exit(errorExitSignal)
 		return
 	}

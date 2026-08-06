@@ -110,6 +110,42 @@ func Test_Gen(t *testing.T) {
 			},
 			want: []StageInfo{},
 		},
+		{
+			name: "should generate multiple stages with correct ordering and numbering",
+			input: domain.Yomel{
+				Ctrl: domain.Control{
+					IsLog: testutil.Ptr(true),
+				},
+				Stages: []domain.Stage{
+					{
+						No:        1,
+						Desc:      "first-stage",
+						Cmd:       "echo",
+						CmdOpArgs: []string{"first"},
+					},
+					{
+						No:        2,
+						Desc:      "second-stage",
+						Cmd:       "echo",
+						CmdOpArgs: []string{"second"},
+					},
+				},
+			},
+			want: []StageInfo{
+				{
+					No:      1,
+					Desc:    "first-stage",
+					IsLog:   true,
+					CmdStrs: "echo \\\n first",
+				},
+				{
+					No:      2,
+					Desc:    "second-stage",
+					IsLog:   true,
+					CmdStrs: "echo \\\n second",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {

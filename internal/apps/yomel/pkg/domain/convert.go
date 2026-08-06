@@ -20,6 +20,8 @@ type Control struct {
 	IsVersion    bool
 	IsHelp       bool
 	IsDirect     bool
+	IsLiveStdout bool
+	IsLiveStderr bool
 }
 type Stage struct {
 	No           int
@@ -54,6 +56,8 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 		IsVersion:    ctrlModel.IsVersion,
 		IsHelp:       ctrlModel.IsHelp,
 		IsDirect:     ctrlModel.IsDirect,
+		IsLiveStdout: ctrlModel.IsLiveStdout,
+		IsLiveStderr: ctrlModel.IsLiveStderr,
 	}
 	yomel := Yomel{Ctrl: ctrl}
 	stages := make([]Stage, len(stModels))

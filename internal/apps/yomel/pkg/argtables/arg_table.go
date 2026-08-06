@@ -5,48 +5,52 @@ import (
 )
 
 const (
-	Version            = "version"
-	Help               = "help"
-	DirectMode         = "direct"
-	GenMode            = "gen"
-	StageArgName       = "stage"
-	LogOpName          = "log"
-	NoLogOpName        = "no-log"
-	LogFilter          = "log-filter"
-	ErrLogFilter       = "err-log-filter"
-	CmdOpName          = "cmd"
-	SvcOpName          = "svc"
-	ActOpName          = "act"
-	OptOpName          = "opt"
-	LoptOpName         = "lop"
-	ArgOpName          = "arg"
-	ValueOpName        = "val"
-	SingleOpName       = "single"
-	SingleShortOpName  = "s"
-	NoQuoteOpName      = "no-quote"
-	NoQuoteShortOpName = "n"
+	Version              = "version"
+	Help                 = "help"
+	DirectMode           = "direct"
+	GenMode              = "gen"
+	StageArgName         = "stage"
+	NoLiveStdoutFlagName = "no-live-stdout"
+	NoLiveStderrFlagName = "no-live-stderr"
+	LogOpName            = "log"
+	NoLogOpName          = "no-log"
+	LogFilter            = "log-filter"
+	ErrLogFilter         = "err-log-filter"
+	CmdOpName            = "cmd"
+	SvcOpName            = "svc"
+	ActOpName            = "act"
+	OptOpName            = "opt"
+	LoptOpName           = "lop"
+	ArgOpName            = "arg"
+	ValueOpName          = "val"
+	SingleOpName         = "single"
+	SingleShortOpName    = "s"
+	NoQuoteOpName        = "no-quote"
+	NoQuoteShortOpName   = "n"
 )
 const (
-	VersionOpSignal      = "--" + Version
-	HelpOpSignal         = "--" + Help
-	DirectModeFlagSignal = "--" + DirectMode
-	GenModeFlagSignal    = "--" + GenMode
-	StageSignal          = StageArgName
-	CmdOpSignal          = "-" + CmdOpName
-	LogFlagSignal        = "--" + LogOpName
-	NoLogFlagSignal      = "--" + NoLogOpName
-	LogFilterOpSignal    = "--" + LogFilter
-	ErrLogFilterOpSignal = "--" + ErrLogFilter
-	SvcOpSignal          = "-" + SvcOpName
-	ActOpSignal          = "-" + ActOpName
-	OptOpSignal          = "--" + OptOpName
-	LoptOpSignal         = "--" + LoptOpName
-	ArgOpSignal          = "--" + ArgOpName
-	ValueOptSignal       = "--" + ValueOpName
-	SingleOpSignal       = "--" + SingleOpName
-	SingleShortOpSignal  = "--" + SingleShortOpName
-	NoQuoteOpSignal      = "--" + NoQuoteOpName
-	NoQuoteShortOpSignal = "--" + NoQuoteShortOpName
+	VersionOpSignal        = "--" + Version
+	HelpOpSignal           = "--" + Help
+	DirectModeFlagSignal   = "--" + DirectMode
+	GenModeFlagSignal      = "--" + GenMode
+	StageSignal            = StageArgName
+	CmdOpSignal            = "-" + CmdOpName
+	NoLiveStdoutFlagSignal = "--" + NoLiveStdoutFlagName
+	NoLiveStderrFlagSignal = "--" + NoLiveStderrFlagName
+	LogFlagSignal          = "--" + LogOpName
+	NoLogFlagSignal        = "--" + NoLogOpName
+	LogFilterOpSignal      = "--" + LogFilter
+	ErrLogFilterOpSignal   = "--" + ErrLogFilter
+	SvcOpSignal            = "-" + SvcOpName
+	ActOpSignal            = "-" + ActOpName
+	OptOpSignal            = "--" + OptOpName
+	LoptOpSignal           = "--" + LoptOpName
+	ArgOpSignal            = "--" + ArgOpName
+	ValueOptSignal         = "--" + ValueOpName
+	SingleOpSignal         = "--" + SingleOpName
+	SingleShortOpSignal    = "--" + SingleShortOpName
+	NoQuoteOpSignal        = "--" + NoQuoteOpName
+	NoQuoteShortOpSignal   = "--" + NoQuoteShortOpName
 )
 
 type QuoteType int
@@ -62,6 +66,8 @@ type ArgTableDto struct {
 	IsVersion       bool
 	IsHelp          bool
 	IsGen           bool
+	IsNoLiveStdout  bool
+	IsNoLiveStderr  bool
 	IsDirect        bool
 	IsLogFilter     bool
 	IsErrLogFilter  bool
@@ -144,6 +150,10 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			argTable.IsGen = true
 		case inputArg == DirectModeFlagSignal:
 			argTable.IsDirect = true
+		case inputArg == NoLiveStdoutFlagSignal:
+			argTable.IsNoLiveStdout = true
+		case inputArg == NoLiveStderrFlagSignal:
+			argTable.IsNoLiveStderr = true
 		case inputArg == LogFlagSignal:
 			argTable.IsLog = true
 		case inputArg == NoLogFlagSignal:

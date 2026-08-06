@@ -49,6 +49,8 @@ type ControlModel struct {
 	IsHelp       bool
 	IsGen        bool
 	IsDirect     bool
+	IsLiveStdout bool
+	IsLiveStderr bool
 }
 
 func Parse(argTables []argtabledtos.ArgTableDto) (ControlModel, []StageModel) {
@@ -85,6 +87,22 @@ func Parse(argTables []argtabledtos.ArgTableDto) (ControlModel, []StageModel) {
 		0,
 		curCtrlArgTables,
 		func(t argtabledtos.ArgTableDto) bool { return t.IsDirect },
+		false,
+	)
+	ctrl.IsLiveStdout = !getFlag(
+		0,
+		curCtrlArgTables,
+		func(t argtabledtos.ArgTableDto) bool {
+			return t.IsNoLiveStdout
+		},
+		false,
+	)
+	ctrl.IsLiveStderr = !getFlag(
+		0,
+		curCtrlArgTables,
+		func(t argtabledtos.ArgTableDto) bool {
+			return t.IsNoLiveStderr
+		},
 		false,
 	)
 	if flagBool := getFlagByPtr(
