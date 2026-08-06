@@ -70,7 +70,7 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "YOMEL LOG",
+			wantSubstr: "YOMEL_LOG",
 		},
 		{
 			name: "should execute direct mode successfully when IsDirect is true",
@@ -85,6 +85,20 @@ func Test_Exec(t *testing.T) {
 				},
 			},
 			wantSubstr: "",
+		},
+		{
+			name: "should print log and handle error when command fails in normal mode",
+			yomelInfo: YomelInfo{
+				IsDirect: false,
+				StageInfos: []StageInfo{
+					{
+						No:      1,
+						Desc:    "error-stage",
+						CmdStrs: "echo 'error message' 1>&2; exit 1",
+					},
+				},
+			},
+			wantSubstr: "YOMEL_LOG",
 		},
 	}
 

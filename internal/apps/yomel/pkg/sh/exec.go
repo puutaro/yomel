@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 )
 
 const (
@@ -150,7 +151,8 @@ func printDecoratedLog(
 	cmdHasError bool,
 ) {
 
-	title := fmt.Sprintf("%s [%d]YOMEL LOG", logGuard, no)
+	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
+	title := fmt.Sprintf("%s YOMEL_LOG[%d]_%s", logGuard, no, timestamp)
 
 	fmt.Fprintf(
 		os.Stderr,
