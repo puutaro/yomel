@@ -65,6 +65,9 @@ func main() {
 	}
 	yomel := domain.Convert(ctrl, stageModels)
 	yomelInfo := sh.Gen(yomel)
-	sh.Exec(yomelInfo)
+	execErr := sh.Exec(yomelInfo)
+	if execErr != nil {
+		os.Exit(errorExitSignal)
+	}
 
 }

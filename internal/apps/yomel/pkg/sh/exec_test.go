@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_Exec verifies that Exec correctly executes pipeline commands or direct mode based on YomelInfo settings.
 func Test_Exec(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -70,7 +69,7 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "YOMEL_LOG",
+			wantSubstr: "YOMEL-LOG",
 		},
 		{
 			name: "should execute direct mode successfully when IsDirect is true",
@@ -98,7 +97,7 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "YOMEL_LOG",
+			wantSubstr: "YOMEL-LOG",
 		},
 	}
 
@@ -111,7 +110,7 @@ func Test_Exec(t *testing.T) {
 			os.Stdout = wOut
 			os.Stderr = wErr
 
-			Exec(tt.yomelInfo)
+			_ = Exec(tt.yomelInfo)
 
 			wOut.Close()
 			wErr.Close()

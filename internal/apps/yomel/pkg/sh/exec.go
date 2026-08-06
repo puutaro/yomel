@@ -2,6 +2,7 @@ package sh
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -18,19 +19,19 @@ const (
 	colorEnd       = "\x1b[0m"
 )
 
-func Exec(yomelInfo YomelInfo) {
+func Exec(yomelInfo YomelInfo) error {
 	stageInfos := yomelInfo.StageInfos
 	numCmds := len(stageInfos)
 	if numCmds == 0 {
-		return
+		return nil
 	}
 	if yomelInfo.IsGen {
 		outputCmd(stageInfos)
-		return
+		return nil
 	}
 	if yomelInfo.IsDirect {
 		directExec(stageInfos)
-		return
+		return nil
 	}
 
 	cmds := make([]*exec.Cmd, numCmds)
@@ -107,6 +108,10 @@ func Exec(yomelInfo YomelInfo) {
 			cmdHasError,
 		)
 	}
+	if cmdHasError {
+		return errors.New("failed")
+	}
+	return nil
 }
 func outputCmd(stageInfo []StageInfo) {
 	fmt.Fprintln(
@@ -152,7 +157,7 @@ func printDecoratedLog(
 ) {
 
 	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
-	title := fmt.Sprintf("%s YOMEL_LOG[%d]_%s", logGuard, no, timestamp)
+	title := fmt.Sprintf("%s YOMEL-LOG[%d]_%s", logGuard, no, timestamp)
 
 	fmt.Fprintf(
 		os.Stderr,

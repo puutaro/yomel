@@ -34,7 +34,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			shouldStdErr:      true,
 			cmdHasError:       false,
 			wantOutputSubstr: []string{
-				"#### YOMEL_LOG[1]_",
+				"#### YOMEL-LOG[1]_",
 				"# stage: \ntest-stage",
 				"# cmd: \necho 'hello'",
 				"# progress:",
@@ -56,7 +56,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			shouldStdErr:      true,
 			cmdHasError:       true,
 			wantOutputSubstr: []string{
-				"#### YOMEL_LOG[2]_",
+				"#### YOMEL-LOG[2]_",
 				"# stage: \nerror-stage",
 				"# cmd: \nexit 1",
 				"#\x1b[31m error:\x1b[0m",
@@ -76,7 +76,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			shouldStdErr:      false,
 			cmdHasError:       false,
 			wantOutputSubstr: []string{
-				"#### YOMEL_LOG[3]_",
+				"#### YOMEL-LOG[3]_",
 				"# stage: \nstdout-only-stage",
 				"# cmd: \nls",
 				"# stdout:",
