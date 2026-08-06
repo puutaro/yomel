@@ -20,15 +20,12 @@ By breaking down complex, nested one-liners or lengthy shell scripts into highly
 
 ### General
 
-```sh.sh
 curl https://raw.githubusercontent.com/puutaro/yomel/refs/heads/master/install.sh | sh
-```
 
 ### go install
 
-```sh.sh
 go install github.com/puutaro/yomel/cmd/yomel@latest
-```
+
 ---
 
 ## 🚀 Key Features
@@ -37,13 +34,13 @@ go install github.com/puutaro/yomel/cmd/yomel@latest
 - 🔄 **Auto-Chaining Pipelines:** Standard output (`stdout`) from an earlier stage automatically streams directly into the standard input (`stdin`) of the next stage using concurrent `io.TeeReader` pipes.
 - 📝 **Smart Logging & Isolation:** Enable automated logging (`--log`) per stage with standalone error capturing.
 - 🧽 **Asynchronous Stream Filtering:** Apply global or stage-specific custom shell hooks (`--log-filter` or `--err-log-filter`) to process log fragments on-the-fly (e.g., streaming only specific info lines).
-- 🔤 **Granular Quote Management:** Control parameter escaping instantly with semantic operators like `--val --s` (single quote wrapper) or `--val --n` (no quote wrapper).
+- 🔤 **Granular Quote & Description Management:** Control parameter escaping instantly with semantic operators (`--val --s`, `--val --n`, `--arg --s`, `--arg --n`) and append optional Alphanumeric PascalCase description suffixes (e.g., `--optS3Path`, `--lopRegion`, `--valDest`, `--argPattern`) to document argument intent clearly.
 
 ---
 
 ## 🛠️ Complete Option Reference & Deep Dive
 
-`yomel` parses arguments sequentially from left to right. Arguments are divided into global/stage telemetry controllers, structural elements, and value modifiers.
+`yomel` parses arguments sequentially from left to right. Arguments are divided into global/stage telemetry controllers, structural elements, and value/option modifiers.
 
 ### 1. Telemetry and Filter Options
 These options control debugging output and stream filtering. They do not alter the data passing through the core pipeline but manage what is written to `stderr`.
@@ -53,16 +50,16 @@ These options control debugging output and stream filtering. They do not alter t
   * **Usage:** Place it at the very beginning of the command to apply globally, or within specific sections.
 
 * **`--gen`**
-  * **Meaning:** Output total pipe line command. 
-  * **Usage:** You want to confirm total pipeline cmd, so colled by `dry-run` .
+  * **Meaning:** Outputs the total pipeline command. 
+  * **Usage:** Useful for a `dry-run` to confirm the entire generated pipeline command before execution.
 
 * **`--direct`**
-  * **Meaning:** Execute pippe shell directly without log. 
-  * **Usage:** More speedy shell pipe executuion, and capture realtime stderr log.
+  * **Meaning:** Executes the shell pipeline directly without internal logging decoration. 
+  * **Usage:** Enables faster shell pipe execution and captures real-time `stderr` logs directly.
 
 * **`--log-filter "<shell_command>"`**
   * **Meaning:** Attaches an asynchronous log interceptor for standard output (`stdout`). The log data captured from the stage is passed to this shell command (e.g., `grep`, `awk`, `sed`) via stdin before being printed.
-  * **Usage:** `--log-filter "grep 'ERROR'"` will ensure only log lines containing "ERROR" are emitted to your console log view.
+  * **Usage:** `--log-filter "grep 'ERROR'"` ensures only log lines containing "ERROR" are emitted to your console log view.
 
 * **`--err-log-filter "<shell_command>"`**
   * **Meaning:** Attaches an asynchronous log interceptor for standard error (`stderr`). This functions exactly like `--log-filter` but processes error streams thrown by the executing binaries.
@@ -87,79 +84,68 @@ These keywords separate different processes and define command parts.
   * **Meaning:** Declares the operation, verb, or action to be performed under the specified command or service.
   * **Usage:** In `docker container run`, `run` is the action. Example: `-act "list-objects"`.
 
-### 3. Option and Argument Value Modifiers
-Modifiers specify how parameters, options, and trailing arguments are constructed and quoted.
+### 3. Option and Argument Value Modifiers with PascalCase Suffixes
+Modifiers specify how parameters, options, and trailing arguments are constructed and quoted. You can append an optional Alphanumeric PascalCase description suffix to `--opt`, `--lop`, `--val`, and `--arg` to document the role of each argument clearly.
 
-* **`--opt "<flag>"`**
-  * **Meaning:** Generates a short-style option flag (prefixed with a single dash `-`).
-  * **Usage:** `--opt "v"` generates `-v`.
+* **`--opt[PascalCase] "<flag>"`**
+  * **Meaning:** Generates a short-style option flag (prefixed with a single dash `-`). An optional PascalCase suffix can be appended for documentation.
+  * **Usage:** `--optVerbose "v"` generates `-v`.
 
-* **`--lop "<flag>"`**
-  * **Meaning:** Generates a long-style option flag (prefixed with double dashes `--`).
-  * **Usage:** `--lop "region"` generates `--region`.
+* **`--lop[PascalCase] "<flag>"`**
+  * **Meaning:** Generates a long-style option flag (prefixed with double dashes `--`). An optional PascalCase suffix can be appended for documentation.
+  * **Usage:** `--lopRegion "region"` generates `--region`.
 
-* **`--val`**
-  * **Meaning:** Declares a value associated with the preceding option (`--opt` or `--lop`). It **must** be immediately followed by a quote control flag (`--s` or `--n`).
+* **`--val[PascalCase]`**
+  * **Meaning:** Declares a value associated with the preceding option (`--opt` or `--lop`). It **must** be immediately followed by a quote control flag (`--s` or `--n`), and can include an optional PascalCase description suffix.
   * **Modifiers:**
-    * `--val --s "<string>"`: Encloses the value in single quotes (`'value'`).
-    * `--val --n "<string>"`: Emits the raw value without quotes (`value`), ideal for numbers or unquoted tokens.
-  * **Usage:** `--lop "id" --val --s "123"` generates `--id '123'`. `--lop "count" --val --n "5"` generates `--count 5`.
+    * `--val[PascalCase] --s "<string>"`: Encloses the value in single quotes (`'value'`).
+    * `--val[PascalCase] --n "<string>"`: Emits the raw value without quotes (`value`), ideal for numbers or unquoted tokens.
+  * **Usage:** `--lopId --valId --s "123"` generates `--id '123'`. `--lopCount --valCount --n "5"` generates `--count 5`.
 
-* **`--arg`**
-  * **Meaning:** Appends a standalone, positional argument to the tail end of the generated command string. It **must** be immediately followed by a quote control flag (`--s` or `--n`).
+* **`--arg[PascalCase]`**
+  * **Meaning:** Appends a standalone, positional argument to the tail end of the generated command string. It **must** be immediately followed by a quote control flag (`--s` or `--n`), and can include an optional PascalCase description suffix.
   * **Modifiers:**
-    * `--arg --s "<string>"`: Appends a single-quoted positional argument.
-    * `--arg --n "<string>"`: Appends an unquoted positional argument.
-  * **Usage:** `--arg --s "/pattern/d"` appends `'/pattern/d'`.
+    * `--arg[PascalCase] --s "<string>"`: Appends a single-quoted positional argument.
+    * `--arg[PascalCase] --n "<string>"`: Appends an unquoted positional argument.
+  * **Usage:** `--argPattern --s "/pattern/d"` appends `'/pattern/d'`.
 
 ---
 
 ## 💡 Practical Examples & Use Cases
 
-### Example 1: Multi-Stage Cloud & Data Processing
-This example showcases how a lengthy AWS log query can be piped directly into `grep` and `sed` dynamically, structured into readable, distinct stages.
+### Example 1: Multi-Stage Cloud & Data Processing with PascalCase Suffixes
+This example showcases how option and argument modifiers can be paired with Alphanumeric PascalCase description suffixes for high readability.
 
-```bash
+```sh.sh
 yomel \
   --log \
   --log-filter "grep 'Exception'" \
   stage "fetch-cloud-logs" \
   -cmd "aws" \
-  --lop "region" \
-  --val --s "us-east-1" \
+  --lopRegion \
+  --valRegion --s "us-east-1" \
   -svc "logs" \
   -act "filter-log-events" \
-  --lop "log-group-name" \
-  --val --s "/aws/lambda/my-prod-service" \
-  --lop "limit" \
-  --val --n "100" \
+  --lopGroupName \
+  --valGroupName --s "/aws/lambda/my-prod-service" \
+  --lopLimit \
+  --valLimit --n "100" \
   stage "mask-sensitive-data" \
   -cmd "sed" \
+  --optExpr \
   --opt "e" \
-  --arg --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+  --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+
 ```
 
 ---
 
-## 🏗️ Architecture & Internal Packages
-
-`yomel` is built with a clean, modular Go architecture under `internal/apps/yomel/pkg/`:
-
-- **`arglist`**: Manages flat argument arrays and sequential tokenization.
-- **`argtables` & `argtablevalid`**: Structures and validates syntactic pipeline definitions.
-- **`domain`**: Converts raw inputs into executable command models.
-- **`model` & `modelvalid`**: Core pipeline structures and integrity validation rules.
-- **`sh`**: Handles concurrent shell execution, process spawning, and `io.TeeReader` pipe streaming.
-
----
 
 ## 🧪 Development & Testing
 
 Run unit tests across all internal packages to verify functionality:
 
-```bash
 go test ./... -v
-```
 
 ---
 

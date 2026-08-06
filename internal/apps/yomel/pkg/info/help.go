@@ -16,8 +16,8 @@ const detail = `Usage:
 Meta Flags:
   --version          Print version information
   --help             Print help information
-  --gen            outout total pipeline cmd 
-  --direct            Exec shell by direct (simple exec pipe shell without log) 
+  --gen              Output total pipeline command
+  --direct           Exec shell directly (simple exec pipe shell without log)
 
 General Flags:
   --log              Enable stdout logging for pipeline execution
@@ -30,12 +30,12 @@ Stage Parameters:
   -cmd               Specify the command to execute
   -svc               Specify the service name
   -act               Specify the action name
-  --opt              Specify a short or long option key
-  --lop              Specify a long option key
-  --val              Specify an option value
-  --arg              Specify a positional argument
+  --opt[PascalCase]  Specify a short option key with an optional Alphanumeric PascalCase description suffix
+  --lop[PascalCase]  Specify a long option key with an optional Alphanumeric PascalCase description suffix
+  --val[PascalCase]  Specify an option value with an optional Alphanumeric PascalCase description suffix
+  --arg[PascalCase]  Specify a positional argument with an optional Alphanumeric PascalCase description suffix
   --single, -s       Indicate single-quoted value or argument
-  --no-quote, -n       Indicate unquoted value or argument
+  --no-quote, -n     Indicate unquoted value or argument
 
 Examples:
   1. Retrieve logs from S3, extract them, and grep for errors:
@@ -44,17 +44,17 @@ Examples:
        -cmd "aws" \
        -svc "s3" \
        -act "cp" \
-       --arg --s "s3://my-bucket/logs.tar.gz" \
-       --arg --n "-" \
+       --argS3Path --s "s3://my-bucket/logs.tar.gz" \
+       --argDest --n "-" \
        stage "extract" \
        -cmd "tar" \
-       --opt "x" \
-       --val --n "z" \
-       --opt "O" \
-       --val --n "-" \
+       --optX \
+       --valCompressType --n "z" \
+       --optO \
+       --valDest --n "-" \
        stage "search" \
        -cmd "grep" \
-       --arg --s "ERROR"
+       --argPattern --s "ERROR"
 
   2. Run with global logging enabled:
      yomel \
@@ -62,25 +62,25 @@ Examples:
         --log-filter "head -10" \
         stage "list" \
         -cmd "ls" \
-        --opt "l" \
-        --val --n "/var/log"
+        --optL \
+        --valTargetDir --n "/var/log"
 
-  3. Run with logging disable partly:
+  3. Run with logging disabled partly:
      yomel \
         --log \
         stage "list" \
         -cmd "ls" \
-        --opt "l" \
-        --val --n "/var/log"
+        --optL \
+        --valTargetDir --n "/var/log" \
         --no-log \
         stage "replace newline to space" \
         -cmd "tr" \
-        --arg --s '\n' \
-        --arg --s ' ' \
-        --log-filter "head -1"
+        --argFrom --s '\n' \
+        --argTo --s ' ' \
+        --log-filter "head -1" \
         stage "add prefix" \
         -cmd sed \
-        --arg -s 's/^/$HOME/'`
+        --argPattern --s 's/^/$HOME/'`
 
 func GetHelpByDefault(argList []string) (*string, error) {
 	if len(argList) > 0 {
