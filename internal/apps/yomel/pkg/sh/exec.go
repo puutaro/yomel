@@ -90,9 +90,10 @@ func Exec(yomelInfo YomelInfo) {
 		stdoutLen := stdoutBuffers[i].Len()
 		stderrLen := stderrBuffers[i].Len()
 
-		shouldLogStdout := (stageInfo.IsLog && stdoutLen > 0) || stderrLen > 0
+		shouldLog := (stageInfo.IsLog && stdoutLen > 0) ||
+			(stderrLen > 0 && cmdHasError)
 
-		if !cmdHasError && !shouldLogStdout {
+		if !cmdHasError && !shouldLog {
 			continue
 		}
 		printDecoratedLog(
@@ -103,7 +104,7 @@ func Exec(yomelInfo YomelInfo) {
 			stageInfo.ErrLogFilter,
 			stderrBuffers[i],
 			stdoutBuffers[i],
-			shouldLogStdout,
+			shouldLog,
 			cmdHasError,
 		)
 	}
@@ -147,7 +148,7 @@ func printDecoratedLog(
 	errLogFilterShell string,
 	stderrBuf,
 	stdoutBuf *bytes.Buffer,
-	shouldStdErr bool,
+	shouldLog bool,
 	cmdHasError bool,
 ) {
 
@@ -163,7 +164,7 @@ func printDecoratedLog(
 		cmdName,
 	)
 
-	if shouldStdErr {
+	if shouldLog {
 		write2Std(
 			os.Stderr,
 			makeNormalOrRedStdErrLabel(cmdHasError),
