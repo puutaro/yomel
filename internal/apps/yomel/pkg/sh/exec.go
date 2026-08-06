@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"sync"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 const (
@@ -164,13 +166,20 @@ func printTitleLog(
 	}
 	boldStart := "\x1b[1m"
 	titleHolder := fmt.Sprintf("%s%s YOMEL-TITLE:%s", boldStart, logGuard, colorEnd)
-	titleSentence := boldStart + title + colorEnd
+	titleSentence := boldStart + capitalizeFirst(title) + colorEnd
 	fmt.Fprintf(
 		os.Stderr,
-		"%s\n%s\n",
+		"%s\n%s\n\n",
 		titleHolder,
 		titleSentence,
 	)
+}
+func capitalizeFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
 }
 func printDecoratedLog(
 	no int,
@@ -189,10 +198,10 @@ func printDecoratedLog(
 
 	fmt.Fprintf(
 		os.Stderr,
-		"%s\n%s stage: \n%s\n%s cmd: \n%s\n",
+		"%s\n%s Stage: \n%s\n\n%s Cmd: \n%s\n\n",
 		title,
 		labelPrefix,
-		desc,
+		capitalizeFirst(desc),
 		labelPrefix,
 		cmdName,
 	)
@@ -207,18 +216,18 @@ func printDecoratedLog(
 	}
 	write2Std(
 		os.Stderr,
-		fmt.Sprintf("%s stdout:\n", labelPrefix),
+		fmt.Sprintf("%s Stdout:\n", labelPrefix),
 		stdoutBuf,
 		logFilterShell,
 	)
 
-	fmt.Fprintf(os.Stderr, "%s\n\n", logGuard)
+	fmt.Fprintf(os.Stderr, "\n\n")
 }
 
 func makeNormalOrRedStdErrLabel(hasErr bool) string {
-	logGenre := "progress"
+	logGenre := "Progress"
 	if hasErr {
-		logGenre = "error"
+		logGenre = "Error"
 		return fmt.Sprintf(
 			"%s%s %s:%s\n",
 			labelPrefix,

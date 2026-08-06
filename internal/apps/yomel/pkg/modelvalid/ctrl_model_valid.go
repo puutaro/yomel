@@ -7,7 +7,6 @@ import (
 )
 
 func CtrlModeValidate(ctrlModel model.ControlModel, stageLen int) error {
-	fmt.Println("stageLne", stageLen)
 	if stageLen <= 1 {
 		return nil
 	}
