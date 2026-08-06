@@ -1,7 +1,7 @@
 package argtables
 
 import (
-	"strings"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 )
 
 const (
@@ -91,106 +91,38 @@ const (
 // TODO judge option or str about --s, --n
 // I escape this judge for rare case considering --s, --n as str
 // So this implement apply --s, --n as option always
-func GenArgTable(inputArgs []string) []ArgTable {
+func GenArgTable(argTableDtos []argtabledtos.ArgTableDto) []ArgTable {
 	var argTables []ArgTable
-	stageNum := 0
-	expectedNext := ExpectNormalStr
-
-	for i, inputArg := range inputArgs {
-		displayNum := i + 1
+	for _, argTableDto := range argTableDtos {
 		argTable := ArgTable{
-			No:      displayNum,
-			StageNo: stageNum,
-		}
-		// Primary judge expectedNext about str or special option or stage
-		switch true {
-		case
-			// Apply --s, --n as option always
-			expectedNext == ExpectUp2HyphenStr &&
-				(inputArg != NoQuoteOpSignal &&
-					inputArg != NoQuoteShortOpSignal &&
-					inputArg != SingleOpSignal &&
-					inputArg != SingleShortOpSignal):
-			val := inputArg
-			argTable.Str = &val
-			argTables = append(argTables, argTable)
-			expectedNext = ExpectNormalStr
-			continue
-		case
-			expectedNext == ExpectUp2StageStr &&
-				!strings.HasPrefix(inputArg, "-"):
-			val := inputArg
-			argTable.Str = &val
-			argTables = append(argTables, argTable)
-			expectedNext = ExpectNormalStr
-			continue
-		case
-			expectedNext == ExpectNormalStr &&
-				!strings.HasPrefix(inputArg, "-") &&
-				inputArg != StageSignal:
-			val := inputArg
-			argTable.Str = &val
-			argTables = append(argTables, argTable)
-			expectedNext = ExpectNormalStr
-			continue
-		}
-
-		switch inputArg {
-		case VersionOpSignal:
-			argTable.IsVersion = true
-		case HelpOpSignal:
-			argTable.IsHelp = true
-		case GenModeFlagSingnal:
-			argTable.IsGen = true
-		case DirectModeFlagSignal:
-			argTable.IsDirect = true
-		case LogFlagSignal:
-			argTable.IsLog = true
-		case NoLogFlagSignal:
-			argTable.IsNoLog = true
-		case LogFilterOpSignal:
-			argTable.IsLogFilter = true
-		case ErrLogFilterOpSignal:
-			argTable.IsErrLogFilter = true
-		// stage interpret as special arg always in this line by first switch sentence
-		case StageArgName:
-			stageNum++
-			argTable.StageNo = stageNum
-			argTable.IsStage = true
-			expectedNext = ExpectUp2StageStr
-		case CmdOpSignal:
-			argTable.IsCmd = true
-			expectedNext = ExpectUp2StageStr
-		case SvcOpSignal:
-			argTable.IsSvc = true
-			expectedNext = ExpectUp2StageStr
-		case ActOpSignal:
-			argTable.IsAct = true
-			expectedNext = ExpectUp2StageStr
-		case OptOpSignal:
-			argTable.IsOpt = true
-		case LoptOpSignal:
-			argTable.IsLopt = true
-		case ValueOptSignal:
-			argTable.IsValue = true
-			expectedNext = ExpectUp2HyphenStr
-		case ArgOpSignal:
-			argTable.IsArg = true
-			expectedNext = ExpectUp2HyphenStr
-		case
-			SingleOpSignal,
-			SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-		case
-			NoQuoteOpSignal,
-			NoQuoteShortOpSignal:
-			argTable.QuoteTypeSignal = NoQuote
-		default:
-			argTable.UnkownOption = inputArg
-			expectedNext = ExpectNormalStr
+			No:              argTableDto.No,
+			IsVersion:       argTableDto.IsVersion,
+			IsHelp:          argTableDto.IsHelp,
+			IsGen:           argTableDto.IsGen,
+			IsDirect:        argTableDto.IsDirect,
+			IsLogFilter:     argTableDto.IsLogFilter,
+			IsErrLogFilter:  argTableDto.IsErrLogFilter,
+			StageNo:         argTableDto.StageNo,
+			IsStage:         argTableDto.IsStage,
+			IsLog:           argTableDto.IsLog,
+			IsNoLog:         argTableDto.IsNoLog,
+			IsCmd:           argTableDto.IsCmd,
+			IsSvc:           argTableDto.IsSvc,
+			IsAct:           argTableDto.IsAct,
+			IsOpt:           isSetStr(argTableDto.OptStr),
+			IsLopt:          isSetStr(argTableDto.LoptStr),
+			IsValue:         isSetStr(argTableDto.ValueStr),
+			IsArg:           isSetStr(argTableDto.ArgStr),
+			QuoteTypeSignal: QuoteType(argTableDto.QuoteTypeSignal),
+			UnkownOption:    argTableDto.UnknownOption,
+			Str:             argTableDto.Str,
 		}
 
 		argTables = append(argTables, argTable)
 	}
 	return argTables
+}
+
+func isSetStr(ptrStr *string) bool {
+	return ptrStr != nil
 }

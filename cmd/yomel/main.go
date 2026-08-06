@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arglist"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablevalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
@@ -32,7 +33,8 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", *helpConByDefault)
 		os.Exit(normalExitSignal)
 	}
-	argTables := argtables.GenArgTable(inputArgs)
+	argTableDto := argtabledtos.GenArgTableDto(inputArgs)
+	argTables := argtables.GenArgTable(argTableDto)
 	helpConByOption, helpErrByOption := info.GetHelpByOption(argTables)
 	if helpErrByOption != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", helpErrByOption)
