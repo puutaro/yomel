@@ -221,9 +221,6 @@ func printDecoratedLog(
 		logFilterShell,
 	)
 
-	if len(stdoutBuf.Bytes()) > 0 {
-		fmt.Fprintf(os.Stderr, "\n")
-	}
 }
 
 func makeNormalOrRedStdErrLabel(hasErr bool) string {
@@ -277,7 +274,9 @@ func addNewline(w io.Writer, buf *bytes.Buffer) {
 		return
 	}
 	if buf.Bytes()[buf.Len()-1] == '\n' {
+		fmt.Fprintln(w)
 		return
 	}
+	fmt.Fprintln(w)
 	fmt.Fprintln(w)
 }

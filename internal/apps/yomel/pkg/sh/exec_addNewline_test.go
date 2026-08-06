@@ -17,12 +17,12 @@ func Test_addNewline(t *testing.T) {
 		{
 			name:       "should append newline when buffer does not end with newline",
 			buffer:     "no newline",
-			wantOutput: "\n",
+			wantOutput: "\n\n",
 		},
 		{
 			name:       "should not append newline when buffer already ends with newline",
 			buffer:     "already has newline\n",
-			wantOutput: "",
+			wantOutput: "\n",
 		},
 		{
 			name:       "should do nothing and not panic when buffer is empty",
