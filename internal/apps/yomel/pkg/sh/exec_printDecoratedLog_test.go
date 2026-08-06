@@ -20,7 +20,7 @@ func Test_printDecoratedLog(t *testing.T) {
 		stdoutBuf           string
 		shouldStdErr        bool
 		cmdHasError         bool
-		firstPipeLogNewLine string
+		firstPipeLogNewLine rune
 		wantOutputSubstr    []string
 	}{
 		{
@@ -34,7 +34,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			stdoutBuf:           "hello\n",
 			shouldStdErr:        true,
 			cmdHasError:         false,
-			firstPipeLogNewLine: "\n",
+			firstPipeLogNewLine: '\n',
 			wantOutputSubstr: []string{
 				"\n#### YOMEL-LOG[1]_",
 				"# Stage: \nTest-stage",

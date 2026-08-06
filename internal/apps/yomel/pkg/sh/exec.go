@@ -107,10 +107,10 @@ func Exec(yomelInfo YomelInfo) error {
 		if !cmdHasError && !shouldLog {
 			continue
 		}
-		firstPipeLogNewLine := "\n"
+		firstPipeLogNewLine := '\n'
 		if i == 0 && yomelTitle != "" {
 			printTitleLog(yomelTitle)
-			firstPipeLogNewLine = ""
+			firstPipeLogNewLine = ' '
 		}
 		printDecoratedLog(
 			stageInfo.No,
@@ -194,11 +194,14 @@ func printDecoratedLog(
 	stdoutBuf *bytes.Buffer,
 	shouldLog bool,
 	cmdHasError bool,
-	firstPipeLogNewLine string,
+	firstPipeLogNewLine rune,
 ) {
 
 	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
-	title := fmt.Sprintf("%s%s YOMEL-LOG[%d]_%s:", firstPipeLogNewLine, logGuard, no, timestamp)
+	title := fmt.Sprintf("%s YOMEL-LOG[%d]_%s:", logGuard, no, timestamp)
+	if firstPipeLogNewLine == '\n' {
+		title = string(firstPipeLogNewLine) + title
+	}
 
 	fmt.Fprintf(
 		os.Stderr,
