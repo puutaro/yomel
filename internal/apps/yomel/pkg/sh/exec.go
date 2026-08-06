@@ -86,21 +86,21 @@ func Exec(yomelInfo YomelInfo) {
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
-	for i, yomelInfo := range stageInfos {
+	for i, stageInfo := range stageInfos {
 		stdoutLen := stdoutBuffers[i].Len()
 		stderrLen := stderrBuffers[i].Len()
 
-		shouldLogStdout := (yomelInfo.IsLog && stdoutLen > 0) || stderrLen > 0
+		shouldLogStdout := (stageInfo.IsLog && stdoutLen > 0) || stderrLen > 0
 
 		if !cmdHasError && !shouldLogStdout {
 			continue
 		}
 		printDecoratedLog(
-			yomelInfo.No,
-			yomelInfo.Desc,
-			yomelInfo.CmdStrs,
-			yomelInfo.LogFilter,
-			yomelInfo.ErrLogFilter,
+			stageInfo.No,
+			stageInfo.Desc,
+			stageInfo.CmdStrs,
+			stageInfo.LogFilter,
+			stageInfo.ErrLogFilter,
 			stderrBuffers[i],
 			stdoutBuffers[i],
 			shouldLogStdout,
@@ -228,6 +228,9 @@ func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string)
 }
 
 func addNewline(w io.Writer, buf *bytes.Buffer) {
+	if buf.Len() == 0 {
+		return
+	}
 	if buf.Bytes()[buf.Len()-1] == '\n' {
 		return
 	}

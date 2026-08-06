@@ -24,6 +24,11 @@ func Test_addNewline(t *testing.T) {
 			buffer:     "already has newline\n",
 			wantOutput: "",
 		},
+		{
+			name:       "should do nothing and not panic when buffer is empty",
+			buffer:     "",
+			wantOutput: "",
+		},
 	}
 
 	for _, tt := range tests {
