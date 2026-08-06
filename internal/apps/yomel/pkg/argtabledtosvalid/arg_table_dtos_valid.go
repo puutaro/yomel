@@ -1,52 +1,328 @@
 package argtabledtosvalid
 
 import (
+	"errors"
 	"fmt"
-	"unicode"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
-func ArgTableDtosValid(argTableDtos []argtabledtos.ArgTableDto) error {
-	for _, argTableDto := range argTableDtos {
-		checkParameterSuffixDescs := []*string{
-			argTableDto.OptStr,
-			argTableDto.LoptStr,
-			argTableDto.ValueStr,
-			argTableDto.ArgStr,
-		}
-		stageNo := argTableDto.StageNo
-		for _, checkParaSuffixDesc := range checkParameterSuffixDescs {
-			err := checkDescriptionSuffixMustBealPhanumericPascalCaseErrMsg(
-				checkParaSuffixDesc,
-				stageNo,
-			)
-			if err != nil {
-				return err
-			}
+func ArgTableValidate(argTables []argtabledtos.ArgTableDto) error {
+	validators := []func([]argtabledtos.ArgTableDto) error{
+		checkUnkownOptionSpecifyedErrMsg,
+		// checkCtrlParameterOnlyOne,
+		checkStageParameterSpecifyInCtrlErr,
+		checkIsStage,
+		checkIsCmd,
+		checkCtrlParameterSpecifyInStageErr,
+		checkOnlyOneOptionErr,
+		checkCmdSvcActOrderErr,
+		checkQuoteOptionIrregularPositionErr,
+	}
+	for _, validate := range validators {
+		if err := validate(argTables); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func checkDescriptionSuffixMustBealPhanumericPascalCaseErrMsg(
-	str *string,
-	stageNo int,
-) error {
-	if str == nil {
-		return nil
-	}
-	if *str == "" {
-		return nil
-	}
-	runes := []rune(*str)
-	if !unicode.IsUpper(runes[0]) || !unicode.IsLetter(runes[0]) {
-		return fmt.Errorf(descriptionSuffixMustBealPhanumericPascalCaseErrMsg, stageNo)
-	}
-	for _, r := range runes[1:] {
-		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
-			return fmt.Errorf(descriptionSuffixMustBealPhanumericPascalCaseErrMsg, stageNo)
+func checkUnkownOptionSpecifyedErrMsg(argTables []argtabledtos.ArgTableDto) error {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if argTable.UnkownOption != "" {
+			return fmt.Errorf(
+				unknownParameterSpecifyedErrMsg,
+				argTable.UnkownOption,
+				stageNo,
+			)
 		}
+	}
+	return nil
+}
+
+func checkIsStage(argTables []argtabledtos.ArgTableDto) error {
+	for _, argTable := range argTables {
+		if argTable.IsStage {
+			return nil
+		}
+	}
+	return errors.New(stageNotFound)
+}
+func checkIsCmd(argTables []argtabledtos.ArgTableDto) error {
+	stageNum := 0
+	for _, argTable := range argTables {
+		if !argTable.IsStage {
+			continue
+		}
+		stageNum++
+	}
+	cmdCountList := make([]int, stageNum)
+	currentStageIdx := -1
+	for _, argTable := range argTables {
+		if argTable.IsStage {
+			currentStageIdx++
+		}
+		if argTable.IsCmd && currentStageIdx > -1 {
+			cmdCountList[currentStageIdx]++
+		}
+	}
+	for stageIndex, cmdNum := range cmdCountList {
+		if cmdNum > 0 {
+			continue
+		}
+		return fmt.Errorf(cmdNotFound, stageIndex+1)
+	}
+	return nil
+}
+
+func checkCtrlParameterSpecifyInStageErr(argTables []argtabledtos.ArgTableDto) error {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if stageNo == 0 {
+			continue
+		}
+		if argTable.IsVersion || argTable.IsHelp || argTable.IsDirect || argTable.IsGen {
+			return fmt.Errorf(ctrlParameterSpecifyInStageErrMsg, stageNo)
+		}
+	}
+	return nil
+}
+
+// func checkCtrlParameterOnlyOne(argTables []argtables.ArgTable) error {
+// 	stageNo := 0
+// 	count := 0
+// 	for _, argTable := range argTables {
+// 		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+// 		if stageNo > 0 {
+// 			break
+// 		}
+// 		if argTable.IsVersion || argTable.IsHelp {
+// 			count++
+// 		}
+// 	}
+// 	if count > 1 {
+// 		return fmt.Errorf(ctrParameterOnlyOneErrMsg)
+// 	}
+// 	return nil
+// }
+
+func checkStageParameterSpecifyInCtrlErr(
+	argTables []argtabledtos.ArgTableDto,
+) error {
+	checkers := []struct {
+		targetParameterCheckFn func(argtable argtabledtos.ArgTableDto) bool
+		targetParameterSignal  string
+	}{
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			targetParameterSignal:  argtables.CmdOpSignal,
+		},
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsSvc },
+			targetParameterSignal:  argtables.SvcOpSignal,
+		},
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsAct },
+			targetParameterSignal:  argtables.ActOpSignal,
+		},
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsArg },
+			targetParameterSignal:  argtables.ArgOpSignal,
+		},
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			targetParameterSignal:  argtables.OptOpSignal,
+		},
+		{
+			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsLopt },
+			targetParameterSignal:  argtables.LoptOpSignal,
+		},
+	}
+
+	for _, c := range checkers {
+		if err := execCheckStageParameterSpecifyInCtrl(
+			argTables,
+			c.targetParameterCheckFn,
+			c.targetParameterSignal,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func execCheckStageParameterSpecifyInCtrl(
+	argTables []argtabledtos.ArgTableDto,
+	isCheckParameter func(t argtabledtos.ArgTableDto) bool,
+	parameterSignal string,
+) error {
+	stageNo := 0
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if stageNo > 0 {
+			break
+		}
+		if isCheckParameter(argTable) {
+			return fmt.Errorf(
+				stageParameterSpecifyedInCtrlErrMsg,
+				parameterSignal,
+			)
+		}
+	}
+	return nil
+}
+func checkOnlyOneOptionErr(
+	argTables []argtabledtos.ArgTableDto,
+) error {
+	checkers := []struct {
+		targetParameterCheckFn func(argtable argtabledtos.ArgTableDto) bool
+		targetParameters       string
+	}{
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsLog || a.IsNoLog
+			},
+			targetParameters: logNoLogSingnalWithAnd,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsLogFilter
+			},
+			targetParameters: logFilterWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsErrLogFilter
+			},
+			targetParameters: errLogFilterWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsCmd
+			},
+			targetParameters: cmdOpNameWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsSvc
+			},
+			targetParameters: svcOpNameWithQuote,
+		},
+		{
+			targetParameterCheckFn: func(
+				a argtabledtos.ArgTableDto,
+			) bool {
+				return a.IsAct
+			},
+			targetParameters: actOpNameWithQuote,
+		},
+	}
+
+	for _, c := range checkers {
+		if err := execCheckOnlyOneOptionErr(
+			argTables,
+			c.targetParameterCheckFn,
+			c.targetParameters,
+		); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func execCheckOnlyOneOptionErr(
+	argTables []argtabledtos.ArgTableDto,
+	targetPrameterCheckFn func(argtabledtos.ArgTableDto) bool,
+	targetParametersSignal string,
+) error {
+	stageNo := 0
+	count := 0
+	for _, argTable := range argTables {
+		incStageNo := argtablecounter.IncrementStageNo(argTable.IsStage)
+		if incStageNo > 0 {
+			count = 0
+		}
+		stageNo += incStageNo
+		if targetPrameterCheckFn(argTable) {
+			count++
+		}
+		if count > 1 {
+			return fmt.Errorf(
+				onlyOneErrMsg,
+				targetParametersSignal,
+				stageNo,
+			)
+		}
+	}
+	return nil
+}
+
+func checkCmdSvcActOrderErr(argTables []argtabledtos.ArgTableDto) error {
+	stageNo := 0
+	curMainArgNum := 0
+	cmdOrder := 1
+	svcOrder := 2
+	actOrder := 3
+	for _, argTable := range argTables {
+		incStageNo := argtablecounter.IncrementStageNo(argTable.IsStage)
+		if incStageNo > 0 {
+			curMainArgNum = 0
+		}
+		switch true {
+		case argTable.IsCmd:
+			if curMainArgNum > cmdOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
+			}
+			curMainArgNum = cmdOrder
+		case argTable.IsSvc:
+			if curMainArgNum > svcOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
+			}
+			curMainArgNum = svcOrder
+		case argTable.IsAct:
+			if curMainArgNum > actOrder {
+				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
+			}
+			curMainArgNum = actOrder
+		}
+		stageNo += incStageNo
+	}
+	return nil
+}
+func checkQuoteOptionIrregularPositionErr(
+	argTables []argtabledtos.ArgTableDto,
+) error {
+	stageNo := 0
+	for index, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+		if argTable.QuoteTypeSignal == argtables.DoubleQuote {
+			continue
+		}
+		if index <= 0 {
+			continue
+		}
+		prevArgTable := argTables[index-1]
+		if prevArgTable.IsValue ||
+			prevArgTable.IsArg {
+			continue
+		}
+		return fmt.Errorf(
+			quoteOptionIrregularPositionErrMsg,
+			stageNo,
+		)
 	}
 	return nil
 }

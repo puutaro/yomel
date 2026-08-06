@@ -1,4 +1,4 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
@@ -11,26 +11,26 @@ import (
 func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when quote option is immediately after arg or value",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsArg: true},
-				{StageNo: 1, QuoteTypeSignal: argtabledtos.SingleQuote},
+				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 			},
 			wantError: "",
 		},
 		{
 			name: "should return error when quote option is in irregular position",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsOpt: true},
-				{StageNo: 1, QuoteTypeSignal: argtabledtos.SingleQuote},
+				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 			},
 			wantError: "'--s/--single' and '--n/--no-quote' must be immediately after '--arg' and '--val'\nstageNo: 1",
 		},

@@ -1,21 +1,21 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkOnlyOneOptionErr(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when options appear only once",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsOpt: true},
@@ -24,7 +24,7 @@ func Test_checkOnlyOneOptionErr(t *testing.T) {
 		},
 		{
 			name: "should return error when cmd is duplicated in a single stage",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsCmd: true},

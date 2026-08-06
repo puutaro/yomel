@@ -1,21 +1,21 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when control parameters are not specified in stage fields",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsVersion: true},
 				{StageNo: 0, IsHelp: true},
 				{StageNo: 0, IsDirect: true},
@@ -27,7 +27,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 		},
 		{
 			name: "should return error when version is specified in stage field",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsVersion: true},
 			},
@@ -35,7 +35,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 		},
 		{
 			name: "should return error when help is specified in stage field",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsHelp: true},
 			},
@@ -43,7 +43,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 		},
 		{
 			name: "should return error when direct is specified in stage field",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsDirect: true},
 			},
@@ -51,7 +51,7 @@ func Test_checkCtrlParameterSpecifyInStageErr(t *testing.T) {
 		},
 		{
 			name: "should return error when gen is specified in stage field",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsGen: true},
 			},

@@ -1,21 +1,21 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkUnkownOptionSpecifyedErrMsg(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when there are no unknown options",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsLog: true},
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
@@ -25,14 +25,14 @@ func Test_checkUnkownOptionSpecifyedErrMsg(t *testing.T) {
 		},
 		{
 			name: "should return error when unknown option is specified in control section (stage 0)",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, UnkownOption: "--unknown-ctrl"},
 			},
 			wantError: "'--unknown-ctrl' is unknown option\nstageNo: 0",
 		},
 		{
 			name: "should return error with correct stage number when unknown option is specified in a stage",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, UnkownOption: "--unknown-stage"},
 			},
@@ -40,7 +40,7 @@ func Test_checkUnkownOptionSpecifyedErrMsg(t *testing.T) {
 		},
 		{
 			name: "should return error with subsequent stage number when unknown option is specified in later stage",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 2, IsStage: true},
 				{StageNo: 2, UnkownOption: "-u"},

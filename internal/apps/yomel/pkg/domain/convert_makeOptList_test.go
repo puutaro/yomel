@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "e",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("s/aa/bb/g"),
-							QuoteType: argtabledtos.SingleQuote,
+							QuoteType: argtables.SingleQuote,
 						},
 					},
 				},
@@ -66,7 +66,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "v",
 						Param: model.ParamType{
 							Str:       nil,
-							QuoteType: argtabledtos.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 				},
@@ -91,7 +91,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "f",
 						Param: model.ParamType{
 							Str:       nil,
-							QuoteType: argtabledtos.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 					{
@@ -99,7 +99,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "n",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("100"),
-							QuoteType: argtabledtos.NoQuote,
+							QuoteType: argtables.NoQuote,
 						},
 					},
 					{
@@ -107,7 +107,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "m",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("message text"),
-							QuoteType: argtabledtos.SingleQuote,
+							QuoteType: argtables.SingleQuote,
 						},
 					},
 					{
@@ -115,7 +115,7 @@ func Test_makeOptList(t *testing.T) {
 						OptStr: "c",
 						Param: model.ParamType{
 							Str:       testutil.Ptr("config.json"),
-							QuoteType: argtabledtos.DoubleQuote,
+							QuoteType: argtables.DoubleQuote,
 						},
 					},
 				},

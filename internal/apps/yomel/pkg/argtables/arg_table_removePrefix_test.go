@@ -1,4 +1,4 @@
-package argtabledtos
+package argtables
 
 import (
 	"testing"

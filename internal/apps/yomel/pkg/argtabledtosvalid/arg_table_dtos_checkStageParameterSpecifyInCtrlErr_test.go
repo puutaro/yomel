@@ -1,21 +1,21 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkStageParameterSpecifyInCtrlErr(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when stage parameters are not in control section",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsLog: true},
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
@@ -25,21 +25,21 @@ func Test_checkStageParameterSpecifyInCtrlErr(t *testing.T) {
 		},
 		{
 			name: "should return error when cmd is specified in control section",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsCmd: true},
 			},
 			wantError: "'-cmd' must be specfied in stage field",
 		},
 		{
 			name: "should return error when svc is specified in control section",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsSvc: true},
 			},
 			wantError: "'-svc' must be specfied in stage field",
 		},
 		{
 			name: "should return error when act is specified in control section",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsAct: true},
 			},
 			wantError: "'-act' must be specfied in stage field",

@@ -1,60 +1,7 @@
 package argtabledtos
 
 import (
-	"strings"
-)
-
-const (
-	Version            = "version"
-	Help               = "help"
-	DirectMode         = "direct"
-	GenMode            = "gen"
-	StageArgName       = "stage"
-	LogOpName          = "log"
-	NoLogOpName        = "no-log"
-	LogFilter          = "log-filter"
-	ErrLogFilter       = "err-log-filter"
-	CmdOpName          = "cmd"
-	SvcOpName          = "svc"
-	ActOpName          = "act"
-	OptOpName          = "opt"
-	LoptOpName         = "lop"
-	ArgOpName          = "arg"
-	ValueOpName        = "val"
-	SingleOpName       = "single"
-	SingleShortOpName  = "s"
-	NoQuoteOpName      = "no-quote"
-	NoQuoteShortOpName = "n"
-)
-const (
-	VersionOpSignal      = "--" + Version
-	HelpOpSignal         = "--" + Help
-	DirectModeFlagSignal = "--" + DirectMode
-	GenModeFlagSignal    = "--" + GenMode
-	StageSignal          = StageArgName
-	CmdOpSignal          = "-" + CmdOpName
-	LogFlagSignal        = "--" + LogOpName
-	NoLogFlagSignal      = "--" + NoLogOpName
-	LogFilterOpSignal    = "--" + LogFilter
-	ErrLogFilterOpSignal = "--" + ErrLogFilter
-	SvcOpSignal          = "-" + SvcOpName
-	ActOpSignal          = "-" + ActOpName
-	OptOpSignal          = "--" + OptOpName
-	LoptOpSignal         = "--" + LoptOpName
-	ArgOpSignal          = "--" + ArgOpName
-	ValueOptSignal       = "--" + ValueOpName
-	SingleOpSignal       = "--" + SingleOpName
-	SingleShortOpSignal  = "--" + SingleShortOpName
-	NoQuoteOpSignal      = "--" + NoQuoteOpName
-	NoQuoteShortOpSignal = "--" + NoQuoteShortOpName
-)
-
-type QuoteType int
-
-const (
-	DoubleQuote QuoteType = iota
-	SingleQuote
-	NoQuote
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
 type ArgTableDto struct {
@@ -72,130 +19,47 @@ type ArgTableDto struct {
 	IsCmd           bool
 	IsSvc           bool
 	IsAct           bool
-	OptStr          *string
-	LoptStr         *string
-	ValueStr        *string
-	ArgStr          *string
-	QuoteTypeSignal QuoteType
-	UnknownOption   string
+	IsOpt           bool
+	IsLopt          bool
+	IsValue         bool
+	IsArg           bool
+	QuoteTypeSignal argtables.QuoteType
+	UnkownOption    string
 	Str             *string
 }
-type ExpectedNext int
 
-const (
-	ExpectNormalStr ExpectedNext = iota
-	ExpectUp2StageStr
-	ExpectUp2HyphenStr
-)
-
-// TODO judge option or str about --s, --n
-// I escape this judge for rare case considering --s, --n as str
-// So this implement apply --s, --n as option always
-func GenArgTableDto(inputArgs []string) []ArgTableDto {
-	var argTableDtos []ArgTableDto
-	stageNum := 0
-	expectedNext := ExpectNormalStr
-
-	for i, inputArg := range inputArgs {
-		displayNum := i + 1
+func GenArgTableDto(argTableDtos []argtables.ArgTableDto) []ArgTableDto {
+	var argTables []ArgTableDto
+	for _, argTableDto := range argTableDtos {
 		argTable := ArgTableDto{
-			No:      displayNum,
-			StageNo: stageNum,
-		}
-		// Primary judge expectedNext about str or special option or stage
-		switch true {
-		case
-			// Apply --s, --n as option always
-			expectedNext == ExpectUp2HyphenStr &&
-				(inputArg != NoQuoteOpSignal &&
-					inputArg != NoQuoteShortOpSignal &&
-					inputArg != SingleOpSignal &&
-					inputArg != SingleShortOpSignal):
-			val := inputArg
-			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
-			expectedNext = ExpectNormalStr
-			continue
-		case
-			expectedNext == ExpectUp2StageStr &&
-				!strings.HasPrefix(inputArg, "-"):
-			val := inputArg
-			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
-			expectedNext = ExpectNormalStr
-			continue
-		case
-			expectedNext == ExpectNormalStr &&
-				!strings.HasPrefix(inputArg, "-") &&
-				inputArg != StageSignal:
-			val := inputArg
-			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
-			expectedNext = ExpectNormalStr
-			continue
+			No:              argTableDto.No,
+			IsVersion:       argTableDto.IsVersion,
+			IsHelp:          argTableDto.IsHelp,
+			IsGen:           argTableDto.IsGen,
+			IsDirect:        argTableDto.IsDirect,
+			IsLogFilter:     argTableDto.IsLogFilter,
+			IsErrLogFilter:  argTableDto.IsErrLogFilter,
+			StageNo:         argTableDto.StageNo,
+			IsStage:         argTableDto.IsStage,
+			IsLog:           argTableDto.IsLog,
+			IsNoLog:         argTableDto.IsNoLog,
+			IsCmd:           argTableDto.IsCmd,
+			IsSvc:           argTableDto.IsSvc,
+			IsAct:           argTableDto.IsAct,
+			IsOpt:           isSetStr(argTableDto.OptStr),
+			IsLopt:          isSetStr(argTableDto.LoptStr),
+			IsValue:         isSetStr(argTableDto.ValueStr),
+			IsArg:           isSetStr(argTableDto.ArgStr),
+			QuoteTypeSignal: argTableDto.QuoteTypeSignal,
+			UnkownOption:    argTableDto.UnknownOption,
+			Str:             argTableDto.Str,
 		}
 
-		switch true {
-		case inputArg == VersionOpSignal:
-			argTable.IsVersion = true
-		case inputArg == HelpOpSignal:
-			argTable.IsHelp = true
-		case inputArg == GenModeFlagSignal:
-			argTable.IsGen = true
-		case inputArg == DirectModeFlagSignal:
-			argTable.IsDirect = true
-		case inputArg == LogFlagSignal:
-			argTable.IsLog = true
-		case inputArg == NoLogFlagSignal:
-			argTable.IsNoLog = true
-		case inputArg == LogFilterOpSignal:
-			argTable.IsLogFilter = true
-		case inputArg == ErrLogFilterOpSignal:
-			argTable.IsErrLogFilter = true
-		// stage interpret as special arg always in this line by first switch sentence
-		case inputArg == StageArgName:
-			stageNum++
-			argTable.StageNo = stageNum
-			argTable.IsStage = true
-			expectedNext = ExpectUp2StageStr
-		case inputArg == CmdOpSignal:
-			argTable.IsCmd = true
-			expectedNext = ExpectUp2StageStr
-		case inputArg == SvcOpSignal:
-			argTable.IsSvc = true
-			expectedNext = ExpectUp2StageStr
-		case inputArg == ActOpSignal:
-			argTable.IsAct = true
-			expectedNext = ExpectUp2StageStr
-		case strings.HasPrefix(inputArg, OptOpSignal):
-			argTable.OptStr = removePrefix(inputArg, OptOpSignal)
-		case strings.HasPrefix(inputArg, LoptOpSignal):
-			argTable.LoptStr = removePrefix(inputArg, LoptOpSignal)
-		case strings.HasPrefix(inputArg, ValueOptSignal):
-			argTable.ValueStr = removePrefix(inputArg, ValueOptSignal)
-			expectedNext = ExpectUp2HyphenStr
-		case strings.HasPrefix(inputArg, ArgOpSignal):
-			argTable.ArgStr = removePrefix(inputArg, ArgOpSignal)
-			expectedNext = ExpectUp2HyphenStr
-		case
-			inputArg == SingleOpSignal,
-			inputArg == SingleShortOpSignal:
-			argTable.QuoteTypeSignal = SingleQuote
-		case
-			inputArg == NoQuoteOpSignal,
-			inputArg == NoQuoteShortOpSignal:
-			argTable.QuoteTypeSignal = NoQuote
-		default:
-			argTable.UnknownOption = inputArg
-			expectedNext = ExpectNormalStr
-		}
-
-		argTableDtos = append(argTableDtos, argTable)
+		argTables = append(argTables, argTable)
 	}
-	return argTableDtos
+	return argTables
 }
 
-func removePrefix(str, prefix string) *string {
-	rest, _ := strings.CutPrefix(str, prefix)
-	return &rest
+func isSetStr(ptrStr *string) bool {
+	return ptrStr != nil
 }

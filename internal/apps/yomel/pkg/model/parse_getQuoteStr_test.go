@@ -12,52 +12,52 @@ import (
 func Test_getQuoteStr(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []argtables.ArgTable
+		input    []argtabledtos.ArgTableDto
 		curIndex int
 		want     ParamType
 		wantIdx  int
 	}{
 		{
 			name: "should return double quoted string and next index when quote type signal is DoubleQuote",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{}, // index 0
 				{}, // index 1 (curIndex)
-				{QuoteTypeSignal: argtabledtos.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
+				{QuoteTypeSignal: argtables.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("double-val"),
-				QuoteType: argtabledtos.DoubleQuote, // note: getQuoteStr implementation doesn't explicitly set quoteType for DoubleQuote, it stays zero-value or whatever is in struct, let's verify exact fields
+				QuoteType: argtables.DoubleQuote, // note: getQuoteStr implementation doesn't explicitly set quoteType for DoubleQuote, it stays zero-value or whatever is in struct, let's verify exact fields
 			},
 			wantIdx: 2,
 		},
 		{
 			name: "should return single quoted string, quote type, and updated index when quote type signal is SingleQuote",
-			input: []argtables.ArgTable{
-				{}, // index 0
-				{}, // index 1 (curIndex)
-				{QuoteTypeSignal: argtabledtos.SingleQuote},      // index 2 (afterFirstIndex)
+			input: []argtabledtos.ArgTableDto{
+				{},                                       // index 0
+				{},                                       // index 1 (curIndex)
+				{QuoteTypeSignal: argtables.SingleQuote}, // index 2 (afterFirstIndex)
 				{Str: testutil.Ptr("single-val"), IsValue: true}, // index 3 (afterNextIndex)
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("single-val"),
-				QuoteType: argtabledtos.SingleQuote,
+				QuoteType: argtables.SingleQuote,
 			},
 			wantIdx: 3,
 		},
 		{
 			name: "should return no-quote string, quote type, and updated index when quote type signal is NoQuote",
-			input: []argtables.ArgTable{
-				{},                                      // index 0
-				{},                                      // index 1 (curIndex)
-				{QuoteTypeSignal: argtabledtos.NoQuote}, // index 2 (afterFirstIndex)
+			input: []argtabledtos.ArgTableDto{
+				{},                                   // index 0
+				{},                                   // index 1 (curIndex)
+				{QuoteTypeSignal: argtables.NoQuote}, // index 2 (afterFirstIndex)
 				{Str: testutil.Ptr("no-quote-val"), IsValue: true}, // index 3 (afterNextIndex)
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("no-quote-val"),
-				QuoteType: argtabledtos.NoQuote,
+				QuoteType: argtables.NoQuote,
 			},
 			wantIdx: 3,
 		},

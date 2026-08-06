@@ -1,21 +1,21 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkIsStage(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTable
+		input     []argtabledtos.ArgTableDto
 		wantError string
 	}{
 		{
 			name: "should return nil when stage is present",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsLog: true},
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
@@ -25,14 +25,14 @@ func Test_checkIsStage(t *testing.T) {
 		},
 		{
 			name: "should return error when stage is missing",
-			input: []argtables.ArgTable{
+			input: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsLog: true},
 			},
 			wantError: "'stage' not found",
 		},
 		{
 			name:      "should return error when input slice is empty",
-			input:     []argtables.ArgTable{},
+			input:     []argtabledtos.ArgTableDto{},
 			wantError: "'stage' not found",
 		},
 	}

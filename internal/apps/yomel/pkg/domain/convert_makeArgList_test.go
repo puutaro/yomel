@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -22,21 +22,21 @@ func Test_makeArgList(t *testing.T) {
 					Index: 10,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("arg10"),
-						QuoteType: argtabledtos.DoubleQuote,
+						QuoteType: argtables.DoubleQuote,
 					},
 				},
 				{
 					Index: 12,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("arg12"),
-						QuoteType: argtabledtos.SingleQuote,
+						QuoteType: argtables.SingleQuote,
 					},
 				},
 				{
 					Index: 15,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("arg15"),
-						QuoteType: argtabledtos.NoQuote,
+						QuoteType: argtables.NoQuote,
 					},
 				},
 			},
@@ -67,7 +67,7 @@ func Test_makeArgList(t *testing.T) {
 					Index: 5,
 					Param: model.ParamType{
 						Str:       nil,
-						QuoteType: argtabledtos.NoQuote,
+						QuoteType: argtables.NoQuote,
 					},
 				},
 			},
@@ -85,28 +85,28 @@ func Test_makeArgList(t *testing.T) {
 					Index: 1,
 					Param: model.ParamType{
 						Str:       nil,
-						QuoteType: argtabledtos.DoubleQuote,
+						QuoteType: argtables.DoubleQuote,
 					},
 				},
 				{
 					Index: 3,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("raw-arg"),
-						QuoteType: argtabledtos.NoQuote,
+						QuoteType: argtables.NoQuote,
 					},
 				},
 				{
 					Index: 7,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("single-quoted-arg"),
-						QuoteType: argtabledtos.SingleQuote,
+						QuoteType: argtables.SingleQuote,
 					},
 				},
 				{
 					Index: 9,
 					Param: model.ParamType{
 						Str:       testutil.Ptr("double-quoted-arg"),
-						QuoteType: argtabledtos.DoubleQuote,
+						QuoteType: argtables.DoubleQuote,
 					},
 				},
 			},

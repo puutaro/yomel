@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 )
 
@@ -73,7 +73,7 @@ func checkNoBlankStrRequireErrForCmd(stModel model.StageModel) error {
 	if trimmed == "" {
 		return fmt.Errorf(
 			noBlankStrRequireErrMsg,
-			argtabledtos.CmdOpSignal,
+			argtables.CmdOpSignal,
 			stModel.No,
 		)
 	}
@@ -87,11 +87,11 @@ func checkNoBlankStrRequireErr(stModel model.StageModel) error {
 	}{
 		{
 			str:     stModel.Svc,
-			mainArg: argtabledtos.SvcOpSignal,
+			mainArg: argtables.SvcOpSignal,
 		},
 		{
 			str:     stModel.Act,
-			mainArg: argtabledtos.ActOpSignal,
+			mainArg: argtables.ActOpSignal,
 		},
 	}
 	stageNo := stModel.No

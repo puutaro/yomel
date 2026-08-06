@@ -1,36 +1,36 @@
-package argtablevalid
+package argtabledtosvalid
 
 import (
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
 const (
-	logFlagWithQuote       = "'" + argtabledtos.LogFlagSignal + "'"
-	noLogFlagWithQuote     = "'" + argtabledtos.NoLogFlagSignal + "'"
+	logFlagWithQuote       = "'" + argtables.LogFlagSignal + "'"
+	noLogFlagWithQuote     = "'" + argtables.NoLogFlagSignal + "'"
 	logNoLogSingnalWithAnd = logFlagWithQuote + " and " + noLogFlagWithQuote
 
-	versionWithQuote = "'" + argtabledtos.VersionOpSignal + "'"
-	helpWithQuote    = "'" + argtabledtos.HelpOpSignal + "'"
-	genWithQuote     = "'" + argtabledtos.GenModeFlagSignal + "'"
-	directWithQuote  = "'" + argtabledtos.DirectModeFlagSignal + "'"
+	versionWithQuote = "'" + argtables.VersionOpSignal + "'"
+	helpWithQuote    = "'" + argtables.HelpOpSignal + "'"
+	genWithQuote     = "'" + argtables.GenModeFlagSignal + "'"
+	directWithQuote  = "'" + argtables.DirectModeFlagSignal + "'"
 
 	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote + " and " + genWithQuote + " and " + directWithQuote
 
-	logFilterWithQuote    = "'" + argtabledtos.LogFilterOpSignal + "'"
-	errLogFilterWithQuote = "'" + argtabledtos.ErrLogFilterOpSignal + "'"
+	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
+	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
 
-	cmdOpNameWithQuote = "'" + argtabledtos.CmdOpSignal + "'"
-	svcOpNameWithQuote = "'" + argtabledtos.SvcOpSignal + "'"
-	actOpNameWithQuote = "'" + argtabledtos.ActOpSignal + "'"
+	cmdOpNameWithQuote = "'" + argtables.CmdOpSignal + "'"
+	svcOpNameWithQuote = "'" + argtables.SvcOpSignal + "'"
+	actOpNameWithQuote = "'" + argtables.ActOpSignal + "'"
 
 	cmdSvcActOpNameWithAnd = cmdOpNameWithQuote + " and " + svcOpNameWithQuote + " and " + actOpNameWithQuote
 
-	argOpSignalWithQuote     = "'" + argtabledtos.ArgOpSignal + "'"
-	valueOpSignalWithQuote   = "'" + argtabledtos.ValueOptSignal + "'"
+	argOpSignalWithQuote     = "'" + argtables.ArgOpSignal + "'"
+	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
 	argValueWithAnd          = argOpSignalWithQuote + " and " + valueOpSignalWithQuote
-	optOpSignalWithQuote     = "'" + argtabledtos.OptOpSignal + "'"
-	singleOpSignalWithQuote  = "'" + argtabledtos.SingleShortOpSignal + "/" + argtabledtos.SingleOpSignal + "'"
-	noQuoteOpSignalWithQuote = "'" + argtabledtos.NoQuoteShortOpSignal + "/" + argtabledtos.NoQuoteOpSignal + "'"
+	optOpSignalWithQuote     = "'" + argtables.OptOpSignal + "'"
+	singleOpSignalWithQuote  = "'" + argtables.SingleShortOpSignal + "/" + argtables.SingleOpSignal + "'"
+	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteShortOpSignal + "/" + argtables.NoQuoteOpSignal + "'"
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
 
 	stageNoSuffix   = "\nstageNo: %d"
@@ -48,7 +48,7 @@ const (
 	// this validateion omit, becuase I wont to soft for --version and --help judge
 	// ctrParameterOnlyOneErrMsg           = ctrlParameterWithAnd + onlyOneStr + ctrlFieldSuffix
 	stageParameterSpecifyedInCtrlErrMsg = "'%s' must be specfied in stage field"
-	stageNotFound                       = "'" + argtabledtos.StageSignal + "'" + " not found"
+	stageNotFound                       = "'" + argtables.StageSignal + "'" + " not found"
 	cmdNotFound                         = cmdOpNameWithQuote + " not found" + stageNoSuffix
 
 	ctrlParameterSpecifyInStageErrMsg = "must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix

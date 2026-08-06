@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -68,13 +68,13 @@ func Test_GetHelpByOption(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTableDto
 		wantHelp  *string
 		wantError error
 	}{
 		{
 			name: "should return help content when IsHelp is true in control section",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTableDto{
 				{StageNo: 0, IsHelp: true},
 			},
 			wantHelp:  &expectedHelp,
@@ -82,7 +82,7 @@ func Test_GetHelpByOption(t *testing.T) {
 		},
 		{
 			name: "should return nil when help option is not triggered",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTableDto{
 				{StageNo: 1, IsStage: true},
 			},
 			wantHelp:  nil,

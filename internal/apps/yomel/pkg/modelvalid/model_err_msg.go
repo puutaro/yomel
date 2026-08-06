@@ -1,11 +1,11 @@
 package modelvalid
 
-import "github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+import "github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 
 const (
 	stageNoSuffix             = "\nstageNo: %d"
 	stageDesc                 = "\ndesc: '%s'"
-	stageSignalWithQuote      = "'" + argtabledtos.StageSignal + "'"
+	stageSignalWithQuote      = "'" + argtables.StageSignal + "'"
 	stageDescriptionIrregular = stageSignalWithQuote + " description must be meaning sentence" + stageNoSuffix + stageDesc
 	stageDescriptionDuplicate = stageSignalWithQuote + " description must be unique across stages" + stageNoSuffix + stageDesc
 
