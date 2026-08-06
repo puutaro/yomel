@@ -4,59 +4,6 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 )
 
-const (
-	Version            = "version"
-	Help               = "help"
-	DirectMode         = "direct"
-	GenMode            = "gen"
-	StageArgName       = "stage"
-	LogOpName          = "log"
-	NoLogOpName        = "no-log"
-	LogFilter          = "log-filter"
-	ErrLogFilter       = "err-log-filter"
-	CmdOpName          = "cmd"
-	SvcOpName          = "svc"
-	ActOpName          = "act"
-	OptOpName          = "opt"
-	LoptOpName         = "lop"
-	ArgOpName          = "arg"
-	ValueOpName        = "val"
-	SingleOpName       = "single"
-	SingleShortOpName  = "s"
-	NoQuoteOpName      = "no-quote"
-	NoQuoteShortOpName = "n"
-)
-const (
-	VersionOpSignal      = "--" + Version
-	HelpOpSignal         = "--" + Help
-	DirectModeFlagSignal = "--" + DirectMode
-	GenModeFlagSingnal   = "--" + GenMode
-	StageSignal          = StageArgName
-	CmdOpSignal          = "-" + CmdOpName
-	LogFlagSignal        = "--" + LogOpName
-	NoLogFlagSignal      = "--" + NoLogOpName
-	LogFilterOpSignal    = "--" + LogFilter
-	ErrLogFilterOpSignal = "--" + ErrLogFilter
-	SvcOpSignal          = "-" + SvcOpName
-	ActOpSignal          = "-" + ActOpName
-	OptOpSignal          = "--" + OptOpName
-	LoptOpSignal         = "--" + LoptOpName
-	ArgOpSignal          = "--" + ArgOpName
-	ValueOptSignal       = "--" + ValueOpName
-	SingleOpSignal       = "--" + SingleOpName
-	SingleShortOpSignal  = "--" + SingleShortOpName
-	NoQuoteOpSignal      = "--" + NoQuoteOpName
-	NoQuoteShortOpSignal = "--" + NoQuoteShortOpName
-)
-
-type QuoteType int
-
-const (
-	DoubleQuote QuoteType = iota
-	SingleQuote
-	NoQuote
-)
-
 type ArgTable struct {
 	No              int
 	IsVersion       bool
@@ -76,21 +23,11 @@ type ArgTable struct {
 	IsLopt          bool
 	IsValue         bool
 	IsArg           bool
-	QuoteTypeSignal QuoteType
+	QuoteTypeSignal argtabledtos.QuoteType
 	UnkownOption    string
 	Str             *string
 }
-type ExpectedNext int
 
-const (
-	ExpectNormalStr ExpectedNext = iota
-	ExpectUp2StageStr
-	ExpectUp2HyphenStr
-)
-
-// TODO judge option or str about --s, --n
-// I escape this judge for rare case considering --s, --n as str
-// So this implement apply --s, --n as option always
 func GenArgTable(argTableDtos []argtabledtos.ArgTableDto) []ArgTable {
 	var argTables []ArgTable
 	for _, argTableDto := range argTableDtos {
@@ -113,7 +50,7 @@ func GenArgTable(argTableDtos []argtabledtos.ArgTableDto) []ArgTable {
 			IsLopt:          isSetStr(argTableDto.LoptStr),
 			IsValue:         isSetStr(argTableDto.ValueStr),
 			IsArg:           isSetStr(argTableDto.ArgStr),
-			QuoteTypeSignal: QuoteType(argTableDto.QuoteTypeSignal),
+			QuoteTypeSignal: argTableDto.QuoteTypeSignal,
 			UnkownOption:    argTableDto.UnknownOption,
 			Str:             argTableDto.Str,
 		}

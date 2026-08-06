@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
@@ -119,27 +120,27 @@ func checkStageParameterSpecifyInCtrlErr(
 	}{
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
-			targetParameterSignal:  argtables.CmdOpSignal,
+			targetParameterSignal:  argtabledtos.CmdOpSignal,
 		},
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsSvc },
-			targetParameterSignal:  argtables.SvcOpSignal,
+			targetParameterSignal:  argtabledtos.SvcOpSignal,
 		},
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsAct },
-			targetParameterSignal:  argtables.ActOpSignal,
+			targetParameterSignal:  argtabledtos.ActOpSignal,
 		},
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsArg },
-			targetParameterSignal:  argtables.ArgOpSignal,
+			targetParameterSignal:  argtabledtos.ArgOpSignal,
 		},
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsOpt },
-			targetParameterSignal:  argtables.OptOpSignal,
+			targetParameterSignal:  argtabledtos.OptOpSignal,
 		},
 		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsLopt },
-			targetParameterSignal:  argtables.LoptOpSignal,
+			targetParameterSignal:  argtabledtos.LoptOpSignal,
 		},
 	}
 
@@ -307,7 +308,7 @@ func checkQuoteOptionIrregularPositionErr(
 	stageNo := 0
 	for index, argTable := range argTables {
 		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
-		if argTable.QuoteTypeSignal == argtables.DoubleQuote {
+		if argTable.QuoteTypeSignal == argtabledtos.DoubleQuote {
 			continue
 		}
 		if index <= 0 {

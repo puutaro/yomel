@@ -6,17 +6,17 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 )
 
-func GetVersion(argTables []argtables.ArgTable) (*string, error) {
+func GetVersion(argTableDtos []argtabledtos.ArgTableDto) (*string, error) {
 	stageNo := 0
-	for _, argTable := range argTables {
-		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+	for _, argTableDto := range argTableDtos {
+		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)
 		if stageNo > 0 {
 			return nil, nil
 		}
-		if argTable.IsVersion {
+		if argTableDto.IsVersion {
 			return execGetVersion()
 		}
 	}

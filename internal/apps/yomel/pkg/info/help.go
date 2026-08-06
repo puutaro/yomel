@@ -7,7 +7,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 )
 
 const detail = `Usage:
@@ -88,14 +88,14 @@ func GetHelpByDefault(argList []string) (*string, error) {
 	}
 	return execGetHelp()
 }
-func GetHelpByOption(argTables []argtables.ArgTable) (*string, error) {
+func GetHelpByOption(argTablesDto []argtabledtos.ArgTableDto) (*string, error) {
 	stageNo := 0
-	for _, argTable := range argTables {
-		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
+	for _, argTableDto := range argTablesDto {
+		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)
 		if stageNo > 0 {
 			return nil, nil
 		}
-		if argTable.IsHelp {
+		if argTableDto.IsHelp {
 			return execGetHelp()
 		}
 	}

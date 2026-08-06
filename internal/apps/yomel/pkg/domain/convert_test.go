@@ -3,7 +3,7 @@ package domain
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +41,7 @@ func Test_Convert(t *testing.T) {
 							Index: 4,
 							Param: model.ParamType{
 								Str:       testutil.Ptr("hello yomel"),
-								QuoteType: argtables.SingleQuote,
+								QuoteType: argtabledtos.SingleQuote,
 							},
 						},
 					},
@@ -100,7 +100,7 @@ func Test_Convert(t *testing.T) {
 							Index: 8,
 							Param: model.ParamType{
 								Str:       testutil.Ptr("s3://my-bucket/path"),
-								QuoteType: argtables.NoQuote,
+								QuoteType: argtabledtos.NoQuote,
 							},
 						},
 					},

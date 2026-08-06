@@ -3,6 +3,7 @@ package model
 import (
 	"testing"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func Test_parseOptions(t *testing.T) {
 			input: []argtables.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: argtables.SingleQuote}, tStr("file.txt"),
+				tVal(), {QuoteTypeSignal: argtabledtos.SingleQuote}, tStr("file.txt"),
 			},
 			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
@@ -45,7 +46,7 @@ func Test_parseOptions(t *testing.T) {
 					OptStr: "f",
 					Param: ParamType{
 						Str:       testutil.Ptr("file.txt"),
-						QuoteType: argtables.SingleQuote,
+						QuoteType: argtabledtos.SingleQuote,
 					},
 				},
 			},
@@ -74,7 +75,7 @@ func Test_parseOptions(t *testing.T) {
 			input: []argtables.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("file1"),
+				tVal(), {QuoteTypeSignal: argtabledtos.NoQuote}, tStr("file1"),
 				tSvc(), // Boundary to next main arg
 				tOpt(), tStr("ignored"),
 			},
@@ -87,7 +88,7 @@ func Test_parseOptions(t *testing.T) {
 					OptStr: "f",
 					Param: ParamType{
 						Str:       testutil.Ptr("file1"),
-						QuoteType: argtables.NoQuote,
+						QuoteType: argtabledtos.NoQuote,
 					},
 				},
 			},
@@ -109,7 +110,7 @@ func Test_parseOptions(t *testing.T) {
 			nextStartIndex: 4,
 			input: []argtables.ArgTable{
 				tCmd(), tOpt(), tStr("a"), tVal(), tStr("val-skip"),
-				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("val-target"),
+				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: argtabledtos.NoQuote}, tStr("val-target"),
 			},
 			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
 			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
@@ -120,7 +121,7 @@ func Test_parseOptions(t *testing.T) {
 					OptStr: "b",
 					Param: ParamType{
 						Str:       testutil.Ptr("val-target"),
-						QuoteType: argtables.NoQuote,
+						QuoteType: argtabledtos.NoQuote,
 					},
 				},
 			},

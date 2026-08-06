@@ -3,6 +3,7 @@ package model
 import (
 	"testing"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 4, StageNo: 1, IsCmd: true},
 				{No: 5, StageNo: 1, Str: testutil.Ptr("echo")},
 				{No: 6, StageNo: 1, IsArg: true},
-				{No: 7, StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
+				{No: 7, StageNo: 1, QuoteTypeSignal: argtabledtos.NoQuote},
 				{No: 8, StageNo: 1, Str: testutil.Ptr("hello")},
 			},
 			wantCtrl: ControlModel{
@@ -45,7 +46,7 @@ func Test_parseStageModels(t *testing.T) {
 							Index: 6,
 							Param: ParamType{
 								Str:       testutil.Ptr("hello"),
-								QuoteType: argtables.NoQuote,
+								QuoteType: argtabledtos.NoQuote,
 							},
 						},
 					},
@@ -125,7 +126,7 @@ func Test_parseStageModels(t *testing.T) {
 				{No: 21, StageNo: 1, IsLopt: true},
 				{No: 22, StageNo: 1, Str: testutil.Ptr("recursive")},
 				{No: 23, StageNo: 1, IsArg: true},
-				{No: 24, StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
+				{No: 24, StageNo: 1, QuoteTypeSignal: argtabledtos.SingleQuote},
 				{No: 25, StageNo: 1, Str: testutil.Ptr("arg-val")},
 			},
 			wantCtrl: ControlModel{
@@ -145,7 +146,7 @@ func Test_parseStageModels(t *testing.T) {
 					SvcOps:       []OptParam{{Index: 12, OptStr: "r", Param: ParamType{}}},
 					Act:          testutil.Ptr("cp"),
 					ActLops:      []OptParam{{Index: 16, OptStr: "recursive", Param: ParamType{}}},
-					ActArgs:      []ArgParam{{Index: 19, Param: ParamType{Str: testutil.Ptr("arg-val"), QuoteType: argtables.SingleQuote}}},
+					ActArgs:      []ArgParam{{Index: 19, Param: ParamType{Str: testutil.Ptr("arg-val"), QuoteType: argtabledtos.SingleQuote}}},
 					IsLog:        testutil.Ptr(false),
 					ErrLogFilter: "stage-err-filter",
 				},

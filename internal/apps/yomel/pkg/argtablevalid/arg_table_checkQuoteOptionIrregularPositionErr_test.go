@@ -3,6 +3,7 @@ package argtablevalid
 import (
 	"testing"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +20,7 @@ func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsArg: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
+				{StageNo: 1, QuoteTypeSignal: argtabledtos.SingleQuote},
 			},
 			wantError: "",
 		},
@@ -29,7 +30,7 @@ func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsOpt: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
+				{StageNo: 1, QuoteTypeSignal: argtabledtos.SingleQuote},
 			},
 			wantError: "'--s/--single' and '--n/--no-quote' must be immediately after '--arg' and '--val'\nstageNo: 1",
 		},

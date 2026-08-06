@@ -1,12 +1,13 @@
 package model
 
 import (
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
 type ParamType struct {
 	Str       *string
-	QuoteType argtables.QuoteType
+	QuoteType argtabledtos.QuoteType
 }
 
 type OptParam struct {
@@ -433,7 +434,7 @@ func parseArg(
 func getQuoteStr(curStageArgTables []argtables.ArgTable, curIndex int) (ParamType, int) {
 	param := ParamType{}
 	afterFirstIndex := curIndex + 1
-	if curStageArgTables[afterFirstIndex].QuoteTypeSignal == argtables.DoubleQuote {
+	if curStageArgTables[afterFirstIndex].QuoteTypeSignal == argtabledtos.DoubleQuote {
 		param.Str = curStageArgTables[afterFirstIndex].Str
 		return param, afterFirstIndex
 	}

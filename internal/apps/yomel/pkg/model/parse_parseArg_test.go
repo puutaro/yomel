@@ -3,6 +3,7 @@ package model
 import (
 	"testing"
 
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -32,10 +33,10 @@ func Test_parseArg(t *testing.T) {
 			input: []argtables.ArgTable{
 				tAct(),
 				tArg(),
-				{QuoteTypeSignal: argtables.SingleQuote},
+				{QuoteTypeSignal: argtabledtos.SingleQuote},
 				tStr("arg1"),
 				tArg(),
-				{QuoteTypeSignal: argtables.NoQuote},
+				{QuoteTypeSignal: argtabledtos.NoQuote},
 				tStr("arg2"),
 			},
 			isNextMainArg:   func(t argtables.ArgTable) bool { return false },
@@ -44,8 +45,8 @@ func Test_parseArg(t *testing.T) {
 				// Default append logic can be placed here or handled dynamically
 			},
 			wantParam: []ParamType{
-				{Str: testutil.Ptr("arg1"), QuoteType: argtables.SingleQuote},
-				{Str: testutil.Ptr("arg2"), QuoteType: argtables.NoQuote},
+				{Str: testutil.Ptr("arg1"), QuoteType: argtabledtos.SingleQuote},
+				{Str: testutil.Ptr("arg2"), QuoteType: argtabledtos.NoQuote},
 			},
 			wantIndices:        []int{3, 6},
 			wantNextStartIndex: 6,
@@ -55,16 +56,16 @@ func Test_parseArg(t *testing.T) {
 			nextStartIndex: 0,
 			input: []argtables.ArgTable{
 				tAct(),
-				tArg(), {QuoteTypeSignal: argtables.NoQuote}, tStr("arg1"),
+				tArg(), {QuoteTypeSignal: argtabledtos.NoQuote}, tStr("arg1"),
 				tSvc(), // Next main arg boundary
-				tArg(), {QuoteTypeSignal: argtables.NoQuote}, tStr("arg-skipped"),
+				tArg(), {QuoteTypeSignal: argtabledtos.NoQuote}, tStr("arg-skipped"),
 			},
 			isNextMainArg:   func(t argtables.ArgTable) bool { return t.IsSvc },
 			isTargetMainArg: func(t argtables.ArgTable) bool { return t.IsAct },
 			appendFn: func(ind int, p ParamType) {
 			},
 			wantParam: []ParamType{
-				{Str: testutil.Ptr("arg1"), QuoteType: argtables.NoQuote},
+				{Str: testutil.Ptr("arg1"), QuoteType: argtabledtos.NoQuote},
 			},
 			wantIndices:        []int{3},
 			wantNextStartIndex: 3,

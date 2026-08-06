@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,26 +15,26 @@ func Test_GetVersion(t *testing.T) {
 	version := info.Yomel.Version
 	tests := []struct {
 		name      string
-		argTables []argtables.ArgTable
+		argTables []argtabledtos.ArgTableDto
 		want      *string
 	}{
 		{
 			name: "should return version string when IsVersion is true",
-			argTables: []argtables.ArgTable{
+			argTables: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsVersion: true},
 			},
 			want: &version,
 		},
 		{
 			name: "should return nil when IsVersion is false",
-			argTables: []argtables.ArgTable{
+			argTables: []argtabledtos.ArgTableDto{
 				{StageNo: 0, IsVersion: false},
 			},
 			want: nil,
 		},
 		{
 			name:      "should return nil when argTables is empty",
-			argTables: []argtables.ArgTable{},
+			argTables: []argtabledtos.ArgTableDto{},
 			want:      nil,
 		},
 	}
