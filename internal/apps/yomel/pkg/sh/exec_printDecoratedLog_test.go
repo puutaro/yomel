@@ -10,31 +10,33 @@ import (
 
 func Test_printDecoratedLog(t *testing.T) {
 	tests := []struct {
-		name              string
-		no                int
-		desc              string
-		cmdName           string
-		logFilterShell    string
-		errLogFilterShell string
-		stderrBuf         string
-		stdoutBuf         string
-		shouldStdErr      bool
-		cmdHasError       bool
-		wantOutputSubstr  []string
+		name                string
+		no                  int
+		desc                string
+		cmdName             string
+		logFilterShell      string
+		errLogFilterShell   string
+		stderrBuf           string
+		stdoutBuf           string
+		shouldStdErr        bool
+		cmdHasError         bool
+		firstPipeLogNewLine string
+		wantOutputSubstr    []string
 	}{
 		{
-			name:              "should print decorated log with stdout and normal progress stderr when shouldStdErr is true",
-			no:                1,
-			desc:              "test-stage",
-			cmdName:           "echo 'hello'",
-			logFilterShell:    "",
-			errLogFilterShell: "",
-			stderrBuf:         "some progress info\n",
-			stdoutBuf:         "hello\n",
-			shouldStdErr:      true,
-			cmdHasError:       false,
+			name:                "should print decorated log with stdout and normal progress stderr when shouldStdErr is true",
+			no:                  1,
+			desc:                "test-stage",
+			cmdName:             "echo 'hello'",
+			logFilterShell:      "",
+			errLogFilterShell:   "",
+			stderrBuf:           "some progress info\n",
+			stdoutBuf:           "hello\n",
+			shouldStdErr:        true,
+			cmdHasError:         false,
+			firstPipeLogNewLine: "\n",
 			wantOutputSubstr: []string{
-				"#### YOMEL-LOG[1]_",
+				"\n#### YOMEL-LOG[1]_",
 				"# Stage: \nTest-stage",
 				"# Cmd: \necho 'hello'",
 				"# Progress:",
@@ -106,6 +108,7 @@ func Test_printDecoratedLog(t *testing.T) {
 				stdoutBuffer,
 				tt.shouldStdErr,
 				tt.cmdHasError,
+				tt.firstPipeLogNewLine,
 			)
 
 			wErr.Close()

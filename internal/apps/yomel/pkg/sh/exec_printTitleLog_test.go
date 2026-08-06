@@ -17,7 +17,7 @@ func Test_printTitleLog(t *testing.T) {
 		{
 			name:       "should print title when title is not empty",
 			title:      "My-pipeline-title",
-			wantOutput: "\x1b[1m#### YOMEL-TITLE:\x1b[0m\n\x1b[1mMy-pipeline-title\x1b[0m\n\n",
+			wantOutput: "\n\x1b[1m#### YOMEL-TITLE:\x1b[0m\n\x1b[1mMy-pipeline-title\x1b[0m\n\n",
 		},
 		{
 			name:       "should do nothing when title is empty",
