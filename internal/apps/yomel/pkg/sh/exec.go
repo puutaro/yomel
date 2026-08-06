@@ -87,10 +87,9 @@ func Exec(yomelInfo YomelInfo) {
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
 	for i, stageInfo := range stageInfos {
-		stdoutLen := stdoutBuffers[i].Len()
+		// stdoutLen := stdoutBuffers[i].Len()
 
-		shouldLog := (stageInfo.IsLog && stdoutLen > 0) ||
-			cmdHasError
+		shouldLog := stageInfo.IsLog || cmdHasError
 
 		if !cmdHasError && !shouldLog {
 			continue
