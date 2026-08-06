@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 const (
@@ -37,6 +38,7 @@ func Exec(yomelInfo YomelInfo) {
 
 	var nextStdin io.Reader = os.Stdin
 
+	var wg sync.WaitGroup
 	// 1. Build the pipeline structure
 	for i, stageInfo := range stageInfos {
 		cmd := exec.Command("bash", "-c", stageInfo.CmdStrs)
@@ -45,7 +47,13 @@ func Exec(yomelInfo YomelInfo) {
 		cmd.Stdin = nextStdin
 		stdoutBuffers[i] = new(bytes.Buffer)
 		stderrBuffers[i] = new(bytes.Buffer)
-		cmd.Stderr = stderrBuffers[i]
+		stderrPipe, _ := cmd.StderrPipe()
+		stderrTee := io.TeeReader(stderrPipe, stderrBuffers[i])
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _ = io.Copy(os.Stderr, stderrTee)
+		}()
 
 		stdoutPipe, _ := cmd.StdoutPipe()
 		// Forward data to the next command while simultaneously writing to its own log buffer
@@ -66,6 +74,7 @@ func Exec(yomelInfo YomelInfo) {
 
 	// 4. Wait for all data to flow through (consumption to finish)
 	<-lastCmdDone
+	wg.Wait()
 
 	// 5. Wait for each command process itself to terminate
 	cmdHasError := false

@@ -33,7 +33,7 @@ func Test_GetHelpByDefault(t *testing.T) {
 			wantError: nil,
 		},
 		{
-			name:      "should return nil when help flag is not present",
+			name:      "should return nil when input args are not empty",
 			input:     []string{"--log"},
 			wantHelp:  nil,
 			wantError: nil,
@@ -58,12 +58,28 @@ func Test_GetHelpByDefault(t *testing.T) {
 }
 
 func Test_GetHelpByOption(t *testing.T) {
+	var info YomelInfo
+	toml.Decode(YomelInfoRaw, &info)
+	description := info.Yomel.Description
+	expectedHelp := strings.Join(
+		[]string{description, "", detail},
+		"\n",
+	)
+
 	tests := []struct {
 		name      string
 		input     []argtables.ArgTable
 		wantHelp  *string
 		wantError error
 	}{
+		{
+			name: "should return help content when IsHelp is true in control section",
+			input: []argtables.ArgTable{
+				{StageNo: 0, IsHelp: true},
+			},
+			wantHelp:  &expectedHelp,
+			wantError: nil,
+		},
 		{
 			name: "should return nil when help option is not triggered",
 			input: []argtables.ArgTable{
@@ -82,7 +98,11 @@ func Test_GetHelpByOption(t *testing.T) {
 			} else {
 				assert.NoError(t, gotErr)
 			}
-			assert.Equal(t, tt.wantHelp, gotHelp)
+			if tt.wantHelp != nil {
+				assert.Equal(t, *tt.wantHelp, *gotHelp)
+			} else {
+				assert.Equal(t, tt.wantHelp, gotHelp)
+			}
 		})
 	}
 }
