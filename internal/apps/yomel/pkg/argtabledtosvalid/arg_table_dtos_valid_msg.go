@@ -12,5 +12,5 @@ const (
 	opLopArgValueWithAnd   = optOpSignalWithQuote + " and " + lOptOpSignalWithQuote + " and " + argOpSignalWithQuote + " and " + valueOpSignalWithQuote
 	stageNoSuffix          = "\nstageNo: %d"
 
-	descriptionSuffixMustBealPhanumericPascalCaseErrMsg = opLopArgValueWithAnd + " Description suffix is must be alphanumeric pascalCase in " + opLopArgValueWithAnd + stageNoSuffix
+	descriptionSuffixMustBealPhanumericPascalCaseErrMsg = "Description suffix is must be alphanumeric pascalCase in " + opLopArgValueWithAnd + stageNoSuffix
 )

@@ -84,7 +84,7 @@ func Test_ArgTableDtosValid(t *testing.T) {
 					OptStr:  testutil.Ptr("lowerCase"),
 				},
 			},
-			wantError: "'--opt' and '--lop' and '--arg' and '--val' Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 1",
+			wantError: "Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 1",
 		},
 		{
 			name: "should return error when option suffix contains non-alphanumeric characters",
@@ -102,7 +102,7 @@ func Test_ArgTableDtosValid(t *testing.T) {
 					LoptStr: testutil.Ptr("Invalid-Name"),
 				},
 			},
-			wantError: "'--opt' and '--lop' and '--arg' and '--val' Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 2",
+			wantError: "Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 2",
 		},
 	}
 
