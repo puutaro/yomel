@@ -96,6 +96,7 @@ func Exec(yomelInfo YomelInfo) error {
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
+	yomelTitle := yomelInfo.Title
 	for i, stageInfo := range stageInfos {
 		// stdoutLen := stdoutBuffers[i].Len()
 
@@ -103,6 +104,9 @@ func Exec(yomelInfo YomelInfo) error {
 
 		if !cmdHasError && !shouldLog {
 			continue
+		}
+		if i == 0 {
+			printTitleLog(yomelTitle)
 		}
 		printDecoratedLog(
 			stageInfo.No,
@@ -152,6 +156,22 @@ func makeDirectCmd(stageInfos []StageInfo) string {
 	return cmdPipeline
 }
 
+func printTitleLog(
+	title string,
+) {
+	if title == "" {
+		return
+	}
+	boldStart := "\x1b[1m"
+	titleHolder := fmt.Sprintf("%s%s YOMEL-TITLE:%s", boldStart, logGuard, colorEnd)
+	titleSentence := boldStart + title + colorEnd
+	fmt.Fprintf(
+		os.Stderr,
+		"%s\n%s\n",
+		titleHolder,
+		titleSentence,
+	)
+}
 func printDecoratedLog(
 	no int,
 	desc,
@@ -165,7 +185,7 @@ func printDecoratedLog(
 ) {
 
 	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
-	title := fmt.Sprintf("%s YOMEL-LOG[%d]_%s", logGuard, no, timestamp)
+	title := fmt.Sprintf("%s YOMEL-LOG[%d]_%s:", logGuard, no, timestamp)
 
 	fmt.Fprintf(
 		os.Stderr,

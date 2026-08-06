@@ -69,6 +69,11 @@ func main() {
 		os.Exit(errorExitSignal)
 		return
 	}
+	if ctrlModelValidErr := modelvalid.CtrlModeValidate(ctrl, len(stageModels)); ctrlModelValidErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", ctrlModelValidErr)
+		os.Exit(errorExitSignal)
+		return
+	}
 	yomel := domain.Convert(ctrl, stageModels)
 	yomelInfo := sh.Gen(yomel)
 	execErr := sh.Exec(yomelInfo)

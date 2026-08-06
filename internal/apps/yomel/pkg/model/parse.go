@@ -51,6 +51,7 @@ type ControlModel struct {
 	IsDirect     bool
 	IsLiveStdout bool
 	IsLiveStderr bool
+	Title        string
 }
 
 func Parse(argTables []argtabledtos.ArgTableDto) (ControlModel, []StageModel) {
@@ -105,6 +106,13 @@ func Parse(argTables []argtabledtos.ArgTableDto) (ControlModel, []StageModel) {
 		},
 		false,
 	)
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtabledtos.ArgTableDto) bool { return t.IsTitle },
+	); strPtr != nil {
+		ctrl.Title = *strPtr
+	}
 	if flagBool := getFlagByPtr(
 		0,
 		curCtrlArgTables,

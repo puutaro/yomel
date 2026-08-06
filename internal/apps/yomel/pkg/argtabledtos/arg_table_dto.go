@@ -12,6 +12,7 @@ type ArgTableDto struct {
 	IsDirect        bool
 	IsNoLiveStdout  bool
 	IsNoLiveStderr  bool
+	IsTitle         bool
 	IsLogFilter     bool
 	IsErrLogFilter  bool
 	StageNo         int
@@ -41,6 +42,7 @@ func GenArgTableDto(argTableDtos []argtables.ArgTableDto) []ArgTableDto {
 			IsDirect:        argTableDto.IsDirect,
 			IsNoLiveStdout:  argTableDto.IsNoLiveStdout,
 			IsNoLiveStderr:  argTableDto.IsNoLiveStderr,
+			IsTitle:         argTableDto.IsTitle,
 			IsLogFilter:     argTableDto.IsLogFilter,
 			IsErrLogFilter:  argTableDto.IsErrLogFilter,
 			StageNo:         argTableDto.StageNo,

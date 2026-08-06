@@ -1,6 +1,7 @@
 package argtables
 
 import (
+	"slices"
 	"strings"
 )
 
@@ -9,6 +10,7 @@ const (
 	Help                 = "help"
 	DirectMode           = "direct"
 	GenMode              = "gen"
+	Title                = "title"
 	StageArgName         = "stage"
 	NoLiveStdoutFlagName = "no-live-stdout"
 	NoLiveStderrFlagName = "no-live-stderr"
@@ -33,6 +35,7 @@ const (
 	HelpOpSignal           = "--" + Help
 	DirectModeFlagSignal   = "--" + DirectMode
 	GenModeFlagSignal      = "--" + GenMode
+	TitleSignal            = Title
 	StageSignal            = StageArgName
 	CmdOpSignal            = "-" + CmdOpName
 	NoLiveStdoutFlagSignal = "--" + NoLiveStdoutFlagName
@@ -68,6 +71,7 @@ type ArgTableDto struct {
 	IsGen           bool
 	IsNoLiveStdout  bool
 	IsNoLiveStderr  bool
+	IsTitle         bool
 	IsDirect        bool
 	IsLogFilter     bool
 	IsErrLogFilter  bool
@@ -90,7 +94,7 @@ type ExpectedNext int
 
 const (
 	ExpectNormalStr ExpectedNext = iota
-	ExpectUp2StageStr
+	ExpectUp2PureParameterStr
 	ExpectUp2HyphenStr
 )
 
@@ -102,6 +106,10 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 	stageNum := 0
 	expectedNext := ExpectNormalStr
 
+	pureStrParameters := []string{
+		TitleSignal,
+		StageSignal,
+	}
 	for i, inputArg := range inputArgs {
 		displayNum := i + 1
 		argTable := ArgTableDto{
@@ -123,7 +131,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			expectedNext = ExpectNormalStr
 			continue
 		case
-			expectedNext == ExpectUp2StageStr &&
+			expectedNext == ExpectUp2PureParameterStr &&
 				!strings.HasPrefix(inputArg, "-"):
 			val := inputArg
 			argTable.Str = &val
@@ -133,7 +141,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 		case
 			expectedNext == ExpectNormalStr &&
 				!strings.HasPrefix(inputArg, "-") &&
-				inputArg != StageSignal:
+				!slices.Contains(pureStrParameters, inputArg):
 			val := inputArg
 			argTable.Str = &val
 			argTableDtos = append(argTableDtos, argTable)
@@ -154,6 +162,9 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			argTable.IsNoLiveStdout = true
 		case inputArg == NoLiveStderrFlagSignal:
 			argTable.IsNoLiveStderr = true
+		case inputArg == TitleSignal:
+			argTable.IsTitle = true
+			expectedNext = ExpectUp2PureParameterStr
 		case inputArg == LogFlagSignal:
 			argTable.IsLog = true
 		case inputArg == NoLogFlagSignal:
@@ -167,16 +178,16 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			stageNum++
 			argTable.StageNo = stageNum
 			argTable.IsStage = true
-			expectedNext = ExpectUp2StageStr
+			expectedNext = ExpectUp2PureParameterStr
 		case inputArg == CmdOpSignal:
 			argTable.IsCmd = true
-			expectedNext = ExpectUp2StageStr
+			expectedNext = ExpectUp2PureParameterStr
 		case inputArg == SvcOpSignal:
 			argTable.IsSvc = true
-			expectedNext = ExpectUp2StageStr
+			expectedNext = ExpectUp2PureParameterStr
 		case inputArg == ActOpSignal:
 			argTable.IsAct = true
-			expectedNext = ExpectUp2StageStr
+			expectedNext = ExpectUp2PureParameterStr
 		case strings.HasPrefix(inputArg, OptOpSignal):
 			argTable.OptStr = removePrefix(inputArg, OptOpSignal)
 		case strings.HasPrefix(inputArg, LoptOpSignal):

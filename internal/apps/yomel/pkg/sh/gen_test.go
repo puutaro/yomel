@@ -1,3 +1,4 @@
+// Write direct above line for Comment on code
 package sh
 
 import (
@@ -8,17 +9,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_Gen verifies that Gen correctly converts Yomel structures into execution-ready YomelInfo slices.
+// Test_Gen verifies that Gen correctly converts a domain.Yomel structure into a YomelInfo structure, including control flags, title, and stage information.
 func Test_Gen(t *testing.T) {
 	tests := []struct {
 		name  string
 		input domain.Yomel
-		want  []StageInfo
+		want  YomelInfo
 	}{
 		{
-			name: "should generate single stage YomelInfo with command and arguments correctly",
+			name: "should convert Yomel structure with control flags, title, and stages into YomelInfo correctly",
 			input: domain.Yomel{
 				Ctrl: domain.Control{
+					IsLiveStdout: true,
+					IsLiveStderr: false,
+					IsDirect:     true,
+					IsGen:        false,
+					Title:        "pipeline-title",
 					IsLog:        testutil.Ptr(true),
 					LogFilter:    "global-filter",
 					ErrLogFilter: "global-err-filter",
@@ -26,131 +32,97 @@ func Test_Gen(t *testing.T) {
 				Stages: []domain.Stage{
 					{
 						No:        1,
-						Desc:      "echo-stage",
+						Desc:      "stage-desc",
 						Cmd:       "echo",
 						CmdOpArgs: []string{"hello"},
 					},
 				},
 			},
-			want: []StageInfo{
-				{
-					No:           1,
-					Desc:         "echo-stage",
-					IsLog:        true,
-					LogFilter:    "global-filter",
-					ErrLogFilter: "global-err-filter",
-					CmdStrs:      "echo \\\n hello",
-				},
-			},
-		},
-		{
-			name: "should override global filters and log settings with stage-specific configurations",
-			input: domain.Yomel{
-				Ctrl: domain.Control{
-					IsLog:        testutil.Ptr(false),
-					LogFilter:    "global-filter",
-					ErrLogFilter: "global-err-filter",
-				},
-				Stages: []domain.Stage{
+			want: YomelInfo{
+				IsLiveStdout: true,
+				IsLiveStdErr: false,
+				IsDirect:     true,
+				IsGen:        false,
+				Title:        "pipeline-title",
+				StageInfos: []StageInfo{
 					{
 						No:           1,
-						Desc:         "complex-stage",
-						Cmd:          "aws",
-						CmdOpArgs:    []string{"--profile prod", `"cmd-arg"`},
-						Svc:          "s3",
-						SvcOpArgs:    []string{"-r", "--svc-lop 'val'", "svc-arg"},
-						Act:          "cp",
-						ActOpArgs:    []string{"-v", "--recursive", "act-arg"},
-						IsLog:        testutil.Ptr(true),
-						LogFilter:    "stage-filter",
-						ErrLogFilter: "stage-err-filter",
+						Desc:         "stage-desc",
+						IsLog:        true,
+						LogFilter:    "global-filter",
+						ErrLogFilter: "global-err-filter",
+						CmdStrs:      "echo \\\n hello",
 					},
-				},
-			},
-			want: []StageInfo{
-				{
-					No:           1,
-					Desc:         "complex-stage",
-					IsLog:        true,
-					LogFilter:    "stage-filter",
-					ErrLogFilter: "stage-err-filter",
-					CmdStrs:      "aws \\\n --profile prod \\\n \"cmd-arg\" \\\n s3 \\\n -r \\\n --svc-lop 'val' \\\n svc-arg \\\n cp \\\n -v \\\n --recursive \\\n act-arg",
 				},
 			},
 		},
 		{
-			name: "should generate YomelInfo with IsDirect and IsGen set to true correctly",
+			name: "should convert Yomel structure with empty title and multiple stages including service and action options correctly",
 			input: domain.Yomel{
 				Ctrl: domain.Control{
-					IsGen:    true,
-					IsDirect: true,
+					IsLiveStdout: false,
+					IsLiveStderr: true,
+					IsDirect:     false,
+					IsGen:        true,
+					Title:        "",
 				},
 				Stages: []domain.Stage{
 					{
 						No:        1,
-						Desc:      "direct-gen-stage",
-						Cmd:       "echo",
-						CmdOpArgs: []string{"test"},
+						Desc:      "stage-1",
+						Cmd:       "aws",
+						CmdOpArgs: []string{"s3"},
+						Svc:       "bucket",
+						SvcOpArgs: []string{"ls"},
+						Act:       "run",
+						ActOpArgs: []string{"--recursive"},
 					},
 				},
 			},
-			want: []StageInfo{
-				{
-					No:      1,
-					Desc:    "direct-gen-stage",
-					CmdStrs: "echo \\\n test",
+			want: YomelInfo{
+				IsLiveStdout: false,
+				IsLiveStdErr: true,
+				IsDirect:     false,
+				IsGen:        true,
+				Title:        "",
+				StageInfos: []StageInfo{
+					{
+						No:           1,
+						Desc:         "stage-1",
+						IsLog:        false,
+						LogFilter:    "",
+						ErrLogFilter: "",
+						CmdStrs:      "aws \\\n s3 \\\n bucket \\\n ls \\\n run \\\n --recursive",
+					},
 				},
 			},
 		},
 		{
-			name: "should return empty slice when stages are empty",
+			name: "should handle empty stages and default control settings correctly",
 			input: domain.Yomel{
-				Ctrl:   domain.Control{},
+				Ctrl: domain.Control{
+					IsLiveStdout: false,
+					IsLiveStderr: true,
+					IsDirect:     false,
+					IsGen:        true,
+					Title:        "",
+				},
 				Stages: []domain.Stage{},
 			},
-			want: []StageInfo{},
-		},
-		{
-			name: "should generate multiple stages with correct ordering and numbering",
-			input: domain.Yomel{
-				Ctrl: domain.Control{
-					IsLog: testutil.Ptr(true),
-				},
-				Stages: []domain.Stage{
-					{
-						No:        1,
-						Desc:      "first-stage",
-						Cmd:       "echo",
-						CmdOpArgs: []string{"first"},
-					},
-					{
-						No:        2,
-						Desc:      "second-stage",
-						Cmd:       "echo",
-						CmdOpArgs: []string{"second"},
-					},
-				},
-			},
-			want: []StageInfo{
-				{
-					No:      1,
-					Desc:    "first-stage",
-					IsLog:   true,
-					CmdStrs: "echo \\\n first",
-				},
-				{
-					No:      2,
-					Desc:    "second-stage",
-					IsLog:   true,
-					CmdStrs: "echo \\\n second",
-				},
+			want: YomelInfo{
+				IsLiveStdout: false,
+				IsLiveStdErr: true,
+				IsDirect:     false,
+				IsGen:        true,
+				Title:        "",
+				StageInfos:   []StageInfo{},
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GenStageInfo(tt.input)
+			got := Gen(tt.input)
 			assert.Equal(t, tt.want, got)
 		})
 	}

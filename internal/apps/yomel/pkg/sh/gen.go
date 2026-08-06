@@ -29,6 +29,7 @@ type YomelInfo struct {
 	IsGen        bool
 	IsLiveStdout bool
 	IsLiveStdErr bool
+	Title        string
 	StageInfos   []StageInfo
 }
 
@@ -40,6 +41,7 @@ func Gen(yomel domain.Yomel) YomelInfo {
 		IsLiveStdErr: ctrl.IsLiveStderr,
 		IsDirect:     ctrl.IsDirect,
 		IsGen:        ctrl.IsGen,
+		Title:        ctrl.Title,
 		StageInfos:   stageInfos,
 	}
 }

@@ -21,6 +21,8 @@ func Test_GenArgTable(t *testing.T) {
 			name: "make argTable from args",
 			input: []string{
 				"yomel",
+				"title",
+				"test cmd title",
 				"--no-live-stdout",
 				"--no-live-stderr",
 				"--log",
@@ -64,6 +66,8 @@ func Test_GenArgTable(t *testing.T) {
 				"--arg", "/aa/bb/",
 			},
 			want: []argtables.ArgTableDto{
+				{StageNo: 0, IsTitle: true},
+				{StageNo: 0, Str: testutil.Ptr("test cmd title")},
 				{StageNo: 0, IsNoLiveStdout: true},
 				{StageNo: 0, IsNoLiveStderr: true},
 				// parse --log option

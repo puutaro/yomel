@@ -17,6 +17,7 @@ type Control struct {
 	IsLog        *bool
 	LogFilter    string
 	ErrLogFilter string
+	Title        string
 	IsVersion    bool
 	IsHelp       bool
 	IsDirect     bool
@@ -51,6 +52,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 	ctrl := Control{
 		IsGen:        ctrlModel.IsGen,
 		IsLog:        ctrlModel.IsLog,
+		Title:        ctrlModel.Title,
 		LogFilter:    ctrlModel.LogFilter,
 		ErrLogFilter: ctrlModel.ErrLogFilter,
 		IsVersion:    ctrlModel.IsVersion,
