@@ -22,20 +22,19 @@ const (
 	colorEnd         = "\x1b[0m"
 )
 
-func Exec(yomelInfo YomelInfo) error {
+func Exec(yomelInfo YomelInfo) int {
 	stageInfos := yomelInfo.StageInfos
 	numCmds := len(stageInfos)
 	if numCmds == 0 {
-		return nil
+		return ExitSuccess
 	}
 	totalPipeCmdStr := makeTotalPipeCmd(stageInfos)
 	if yomelInfo.IsGen {
 		outputCmd(totalPipeCmdStr)
-		return nil
+		return ExitSuccess
 	}
 	if yomelInfo.IsDirect {
-		directExec(totalPipeCmdStr)
-		return nil
+		return directExec(totalPipeCmdStr)
 	}
 
 	cmds := make([]*exec.Cmd, numCmds)
@@ -92,11 +91,14 @@ func Exec(yomelInfo YomelInfo) error {
 
 	// 5. Wait for each command process itself to terminate
 	cmdHasError := false
+	var exitCode int = 0
 	for _, cmd := range cmds {
-		if err := cmd.Wait(); err == nil {
+		cmdErr := cmd.Wait()
+		if cmdErr == nil {
 			continue
 		}
 		cmdHasError = true
+		exitCode = extractErrCode(cmdErr)
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
@@ -131,9 +133,16 @@ func Exec(yomelInfo YomelInfo) error {
 		)
 	}
 	if cmdHasError {
-		return errors.New("failed")
+		return exitCode
 	}
-	return nil
+	return ExitSuccess
+}
+func extractErrCode(err error) int {
+	var exitError *exec.ExitError
+	if errors.As(err, &exitError) {
+		return exitError.ExitCode()
+	}
+	return ExitErrGeneral
 }
 func outputCmd(totalPipeCmdStr string) {
 	fmt.Fprintln(
@@ -141,17 +150,18 @@ func outputCmd(totalPipeCmdStr string) {
 		totalPipeCmdStr,
 	)
 }
-func directExec(totalPipeCmdStr string) {
+func directExec(totalPipeCmdStr string) int {
 	if len(totalPipeCmdStr) == 0 {
-		return
+		return ExitSuccess
 	}
 	cmd := exec.Command("bash", "-c", totalPipeCmdStr)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
+		return extractErrCode(err)
 	}
+	return ExitSuccess
 }
 func makeTotalPipeCmd(stageInfos []StageInfo) string {
 	var cmdPipeline string
@@ -190,12 +200,6 @@ func printTitleLog(
 		os.Stderr,
 		titleSectionStr+totalCmdSectionStr,
 	)
-	// fmt.Fprintf(
-	// 	os.Stderr,
-	// 	"%s\n%s\n\n",
-	// 	titleHolder,
-	// 	titleSentence,
-	// )
 }
 func capitalizeFirst(s string) string {
 	if s == "" {

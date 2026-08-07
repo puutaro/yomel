@@ -1,3 +1,4 @@
+// Write direct above line for Comment on code
 package sh
 
 import (
@@ -8,39 +9,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_directExec verifies that directExec executes the pipeline command directly and returns the correct exit code.
 func Test_directExec(t *testing.T) {
 	tests := []struct {
-		name         string
-		stageInfos   []StageInfo
-		wantContains string
+		name            string
+		totalPipeCmdStr string
+		wantExitCode    int
+		wantContains    string
 	}{
 		{
-			name: "should execute single stage pipeline correctly in direct mode",
-			stageInfos: []StageInfo{
-				{
-					No:      1,
-					Desc:    "direct-echo",
-					CmdStrs: "echo 'direct hello'",
-				},
-			},
-			wantContains: "direct hello",
+			name:            "should execute single stage pipeline successfully and return ExitSuccess",
+			totalPipeCmdStr: "echo 'direct hello'",
+			wantExitCode:    ExitSuccess,
+			wantContains:    "direct hello",
 		},
 		{
-			name: "should handle invalid command with error message",
-			stageInfos: []StageInfo{
-				{
-					No:      1,
-					Desc:    "invalid-cmd",
-					CmdStrs: "invalid_command_xyz",
-				},
-			},
-			wantContains: "pipeline failed",
+			name:            "should return ExitSuccess when totalPipeCmdStr is empty",
+			totalPipeCmdStr: "",
+			wantExitCode:    ExitSuccess,
+			wantContains:    "",
+		},
+		{
+			name:            "should return error code when invalid command is executed",
+			totalPipeCmdStr: "invalid_command_xyz",
+			wantExitCode:    127,
+			wantContains:    "",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// 標準出力をキャプチャするためのパイプを作成
 			oldStdout := os.Stdout
 			oldStderr := os.Stderr
 			rOut, wOut, _ := os.Pipe()
@@ -48,11 +46,8 @@ func Test_directExec(t *testing.T) {
 			os.Stdout = wOut
 			os.Stderr = wErr
 
-			// テスト対象の実行
-			totalPipeCmdStr := makeTotalPipeCmd(tt.stageInfos)
-			directExec(totalPipeCmdStr)
+			gotExitCode := directExec(tt.totalPipeCmdStr)
 
-			// パイプを閉じて出力を取得
 			wOut.Close()
 			wErr.Close()
 			os.Stdout = oldStdout
@@ -65,6 +60,7 @@ func Test_directExec(t *testing.T) {
 
 			output := bufOut.String() + bufErr.String()
 
+			assert.Equal(t, tt.wantExitCode, gotExitCode)
 			if tt.wantContains != "" {
 				assert.Contains(t, output, tt.wantContains)
 			}

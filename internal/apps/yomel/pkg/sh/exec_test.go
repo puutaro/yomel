@@ -9,19 +9,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_Exec verifies that Exec executes pipelines correctly under various configurations, failure states, and exit statuses.
 func Test_Exec(t *testing.T) {
 	tests := []struct {
-		name       string
-		yomelInfo  YomelInfo
-		wantSubstr string
+		name           string
+		yomelInfo      YomelInfo
+		wantSubstr     string
+		expectedStatus int
 	}{
 		{
-			name: "should do nothing when stageInfos is empty",
+			name: "should do nothing and return ExitSuccess when stageInfos is empty",
 			yomelInfo: YomelInfo{
 				IsDirect:   false,
 				StageInfos: []StageInfo{},
 			},
-			wantSubstr: "",
+			wantSubstr:     "",
+			expectedStatus: ExitSuccess,
 		},
 		{
 			name: "should execute single stage pipeline successfully in normal mode",
@@ -35,7 +38,8 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "",
+			wantSubstr:     "",
+			expectedStatus: ExitSuccess,
 		},
 		{
 			name: "should execute multi-stage pipeline successfully in normal mode",
@@ -54,7 +58,8 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "",
+			wantSubstr:     "",
+			expectedStatus: ExitSuccess,
 		},
 		{
 			name: "should print log when IsLog is true and stdout has content",
@@ -69,7 +74,8 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "YOMEL-LOG",
+			wantSubstr:     "YOMEL-LOG",
+			expectedStatus: ExitSuccess,
 		},
 		{
 			name: "should execute direct mode successfully when IsDirect is true",
@@ -83,21 +89,23 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "",
+			wantSubstr:     "",
+			expectedStatus: ExitSuccess,
 		},
 		{
-			name: "should print log and handle error when command fails in normal mode",
+			name: "should print log and return failure exit status when command fails in normal mode",
 			yomelInfo: YomelInfo{
 				IsDirect: false,
 				StageInfos: []StageInfo{
 					{
 						No:      1,
 						Desc:    "error-stage",
-						CmdStrs: "echo 'error message' 1>&2; exit 1",
+						CmdStrs: "echo 'error message' 1>&2; exit 42",
 					},
 				},
 			},
-			wantSubstr: "YOMEL-LOG",
+			wantSubstr:     "YOMEL-LOG",
+			expectedStatus: 42,
 		},
 		{
 			name: "should execute successfully with live stdout and live stderr enabled",
@@ -115,7 +123,24 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr: "YOMEL-LOG",
+			wantSubstr:     "YOMEL-LOG",
+			expectedStatus: ExitSuccess,
+		},
+		{
+			name: "should print title log and return error status when yomel title is provided and command errors",
+			yomelInfo: YomelInfo{
+				IsDirect: false,
+				Title:    "pipeline-test-title",
+				StageInfos: []StageInfo{
+					{
+						No:      1,
+						Desc:    "title-error-stage",
+						CmdStrs: "exit 1",
+					},
+				},
+			},
+			wantSubstr:     "YOMEL-LOG-TITLE:",
+			expectedStatus: ExitErrGeneral,
 		},
 	}
 
@@ -128,7 +153,7 @@ func Test_Exec(t *testing.T) {
 			os.Stdout = wOut
 			os.Stderr = wErr
 
-			_ = Exec(tt.yomelInfo)
+			status := Exec(tt.yomelInfo)
 
 			wOut.Close()
 			wErr.Close()
@@ -138,6 +163,8 @@ func Test_Exec(t *testing.T) {
 			var bufErr bytes.Buffer
 			_, _ = bufErr.ReadFrom(rErr)
 			errOutput := bufErr.String()
+
+			assert.Equal(t, tt.expectedStatus, status)
 
 			if tt.wantSubstr != "" {
 				assert.True(t, strings.Contains(errOutput, tt.wantSubstr))
