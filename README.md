@@ -54,7 +54,8 @@ yomel \
 
 We can grasp in progress in pipeline by modern structure log.  
 Ordinaly shellscript pipline don't disclose in progress log.  
-But `yomel` open in progress log.    
+But `yomel` open in progress log.   
+
 
 <img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
 
@@ -65,7 +66,7 @@ By `yomel`'s log, we can find err factore more fastly.
 
 <img width="661" height="686" alt="image" src="https://github.com/user-attachments/assets/75886821-9b1a-4631-b349-2eea6b3fe9ac" />
 
-
+#### This log is extremely powerful when used in a `subshell`.
 
 ---
 
