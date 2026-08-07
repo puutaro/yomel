@@ -10,13 +10,66 @@
 
 # yomel
 
-`yomel` is a command-line utility designed to write multi-stage shell script pipelines using a structured, flat, and human-readable argument layout—inspired by the clear, nested visual style of YAML configuration files.
+`yomel` is a command-line utility designed to write multi-stage shell script pipelines using a structured, flat, and human-readable argument layout—inspired by the clear, nested visual style of `YAML` configuration files.
 
 By breaking down complex, nested one-liners or lengthy shell scripts into highly visible declarative steps (`stage`), `yomel` simplifies shell automation without abandoning native command-line paradigms.
 
+
+## Key Features
+
+`yomel` gave us bellow merits
+
+- Readable shellscript code
+- Structure log in shellscript pipeline
+
+
+### `yomel` cmd
+
+We can grasp what a command does just from its `title`, `stage` and `arg`  description, without reading the code.  
+Ordinary command is `ls "${HOME}" | tr '\n' '\t'`.  
+But normal command is no readable. Description is not exist.   
+So we take more time.   
+If it is `yomel`, we save reading time by description of `title` , `stage`, and `arg`.    
+
+```sh.sh
+yomel \
+	title "list home dir con by smart"\
+	--no-live-stderr \
+	--no-live-stdout \
+	--log \
+	stage "list bellow home directory" \
+	-cmd ls \
+	--argTargetDir "${HOME}" \
+	--log-filter "shuf | head -5 | sort" \
+	--err-log-filter "shuf | head -5 | sort" \
+	stage "newline to tab" \
+	-cmd tr \
+	--argRepSrc '\n' \
+	--argRepDst '\t'
+
+```
+
+
+### log
+
+We can grasp in progress in pipeline by modern structure log.  
+Ordinaly shellscript pipline don't disclose in progress log.  
+But `yomel` open in progress log.    
+
+<img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
+
+
+Bellow, `yomel`'s err log.  
+By `yomel`'s log, we can find err factore more fastly.  
+
+
+<img width="661" height="686" alt="image" src="https://github.com/user-attachments/assets/75886821-9b1a-4631-b349-2eea6b3fe9ac" />
+
+
+
 ---
 
-## 📦 Installation (Linux/Mac)
+## Installation (Linux/Mac)
 
 ### General
 
@@ -32,17 +85,8 @@ go install github.com/puutaro/yomel/cmd/yomel@latest
 
 ---
 
-## 🚀 Key Features
 
-- 🛠️ **YAML-Like Structure:** Compose sequentially grouped pipelines via continuous CLI arguments using explicit components (`stage`, `-cmd`, `-svc`, `-act`, etc.).
-- 🔄 **Auto-Chaining Pipelines:** Standard output (`stdout`) from an earlier stage automatically streams directly into the standard input (`stdin`) of the next stage using concurrent `io.TeeReader` pipes.
-- 📝 **Smart Logging & Isolation:** Enable automated logging (`--log`) per stage with standalone error capturing.
-- 🧽 **Asynchronous Stream Filtering:** Apply global or stage-specific custom shell hooks (`--log-filter` or `--err-log-filter`) to process log fragments on-the-fly (e.g., streaming only specific info lines).
-- 🔤 **Granular Quote & Description Management:** Control parameter escaping instantly with semantic operators (`--val --s`, `--val --n`, `--arg --s`, `--arg --n`) and append optional Alphanumeric PascalCase description suffixes (e.g., `--optS3Path`, `--lopRegion`, `--valDest`, `--argPattern`) to document argument intent clearly.
-
----
-
-## 🛠️ Complete Option Reference & Deep Dive
+## Complete Option Reference & Deep Dive
 
 `yomel` parses arguments sequentially from left to right. Arguments are divided into global/stage telemetry controllers, structural elements, and value/option modifiers.
 
@@ -130,37 +174,6 @@ Modifiers specify how parameters, options, and trailing arguments are constructe
     * `--arg[PascalCase] --s "<string>"`: Appends a single-quoted positional argument.
     * `--arg[PascalCase] --n "<string>"`: Appends an unquoted positional argument.
   * **Usage:** `--argPattern --s "/pattern/d"` appends `'/pattern/d'`.
-
----
-
-## 💡 Practical Examples & Use Cases
-
-### Example 1: 
-
-- cmd
-
-```sh.sh
-yomel \
-	title "list home dir con by smart"\
-	--no-live-stderr \
-	--no-live-stdout \
-	--log \
-	stage "list bellow home directory" \
-	-cmd ls \
-	--argTargetDir "${HOME}" \
-	--log-filter "shuf | head -5 | sort" \
-	--err-log-filter "shuf | head -5 | sort" \
-	stage "newline to tab" \
-	-cmd tr \
-	--argRepSrc '\n' \
-	--argRepDst '\t' \
-
-```
-
-- log
-
-<img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
-
 
 ---
 
