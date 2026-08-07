@@ -20,11 +20,15 @@ By breaking down complex, nested one-liners or lengthy shell scripts into highly
 
 ### General
 
+```sh.sh
 curl https://raw.githubusercontent.com/puutaro/yomel/refs/heads/master/install.sh | sh
+```
 
 ### go install
 
+```sh.sh
 go install github.com/puutaro/yomel/cmd/yomel@latest
+```
 
 ---
 
