@@ -131,8 +131,9 @@ Modifiers specify how parameters, options, and trailing arguments are constructe
 
 ## 💡 Practical Examples & Use Cases
 
-### Example 1: Multi-Stage Cloud & Data Processing with PascalCase Suffixes
-This example showcases how option and argument modifiers can be paired with Alphanumeric PascalCase description suffixes for high readability.
+### Example 1: 
+
+- cmd
 
 ```sh.sh
 yomel \
@@ -153,6 +154,7 @@ yomel \
 ```
 
 - log
+
 <img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
 
 
