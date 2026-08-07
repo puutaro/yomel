@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	logGuard       = "####"
-	labelPrefix    = "#"
-	redStart       = "\x1b[31m"
-	blueGreenStart = "\x1b[30m"
-	colorEnd       = "\x1b[0m"
+	logGuard         = "####"
+	titleLabelPrefix = "##"
+	labelPrefix      = "#"
+	redStart         = "\x1b[31m"
+	blueGreenStart   = "\x1b[30m"
+	colorEnd         = "\x1b[0m"
 )
 
 func Exec(yomelInfo YomelInfo) error {
@@ -27,12 +28,13 @@ func Exec(yomelInfo YomelInfo) error {
 	if numCmds == 0 {
 		return nil
 	}
+	totalPipeCmdStr := makeTotalPipeCmd(stageInfos)
 	if yomelInfo.IsGen {
-		outputCmd(stageInfos)
+		outputCmd(totalPipeCmdStr)
 		return nil
 	}
 	if yomelInfo.IsDirect {
-		directExec(stageInfos)
+		directExec(totalPipeCmdStr)
 		return nil
 	}
 
@@ -109,7 +111,10 @@ func Exec(yomelInfo YomelInfo) error {
 		}
 		firstPipeLogNewLine := '\n'
 		if i == 0 && yomelTitle != "" {
-			printTitleLog(yomelTitle)
+			printTitleLog(
+				yomelTitle,
+				totalPipeCmdStr,
+			)
 			firstPipeLogNewLine = ' '
 		}
 		printDecoratedLog(
@@ -130,18 +135,17 @@ func Exec(yomelInfo YomelInfo) error {
 	}
 	return nil
 }
-func outputCmd(stageInfo []StageInfo) {
+func outputCmd(totalPipeCmdStr string) {
 	fmt.Fprintln(
 		os.Stdout,
-		makeDirectCmd(stageInfo),
+		totalPipeCmdStr,
 	)
 }
-func directExec(stageInfos []StageInfo) {
-	if len(stageInfos) == 0 {
+func directExec(totalPipeCmdStr string) {
+	if len(totalPipeCmdStr) == 0 {
 		return
 	}
-	cmdPipeline := makeDirectCmd(stageInfos)
-	cmd := exec.Command("bash", "-c", cmdPipeline)
+	cmd := exec.Command("bash", "-c", totalPipeCmdStr)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
@@ -149,7 +153,7 @@ func directExec(stageInfos []StageInfo) {
 		fmt.Fprintf(os.Stderr, "%serror: pipeline failed: %v%s\n", redStart, err, colorEnd)
 	}
 }
-func makeDirectCmd(stageInfos []StageInfo) string {
+func makeTotalPipeCmd(stageInfos []StageInfo) string {
 	var cmdPipeline string
 	for i, info := range stageInfos {
 		if i == 0 {
@@ -163,19 +167,35 @@ func makeDirectCmd(stageInfos []StageInfo) string {
 
 func printTitleLog(
 	title string,
+	totalPipeCmdStr string,
 ) {
 	if title == "" {
 		return
 	}
 	boldStart := "\x1b[1m"
-	titleHolder := fmt.Sprintf("\n%s%s YOMEL-TITLE:%s", boldStart, logGuard, colorEnd)
+	titleHolder := fmt.Sprintf("\n%s%s YOMEL-LOG-TITLE:%s", boldStart, logGuard, colorEnd)
 	titleSentence := boldStart + capitalizeFirst(title) + colorEnd
-	fmt.Fprintf(
-		os.Stderr,
+	titleSectionStr := fmt.Sprintf(
 		"%s\n%s\n\n",
 		titleHolder,
 		titleSentence,
 	)
+	totalCmdSectionStr := fmt.Sprintf(
+		"%s %s\n%s\n\n",
+		logGuard,
+		"TotalCmd:",
+		totalPipeCmdStr,
+	)
+	fmt.Fprint(
+		os.Stderr,
+		titleSectionStr+totalCmdSectionStr,
+	)
+	// fmt.Fprintf(
+	// 	os.Stderr,
+	// 	"%s\n%s\n\n",
+	// 	titleHolder,
+	// 	titleSentence,
+	// )
 }
 func capitalizeFirst(s string) string {
 	if s == "" {

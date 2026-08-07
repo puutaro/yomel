@@ -1,3 +1,4 @@
+// Write direct above line for Comment on code
 package sh
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_printDecoratedLog verifies that printDecoratedLog correctly outputs formatted logs to stderr under various conditions.
 func Test_printDecoratedLog(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -47,16 +49,17 @@ func Test_printDecoratedLog(t *testing.T) {
 			},
 		},
 		{
-			name:              "should print decorated log with red error label when cmdHasError is true",
-			no:                2,
-			desc:              "error-stage",
-			cmdName:           "exit 1",
-			logFilterShell:    "",
-			errLogFilterShell: "",
-			stderrBuf:         "error occurred\n",
-			stdoutBuf:         "",
-			shouldStdErr:      true,
-			cmdHasError:       true,
+			name:                "should print decorated log with red error label when cmdHasError is true",
+			no:                  2,
+			desc:                "error-stage",
+			cmdName:             "exit 1",
+			logFilterShell:      "",
+			errLogFilterShell:   "",
+			stderrBuf:           "error occurred\n",
+			stdoutBuf:           "",
+			shouldStdErr:        true,
+			cmdHasError:         true,
+			firstPipeLogNewLine: ' ',
 			wantOutputSubstr: []string{
 				"#### YOMEL-LOG[2]_",
 				"# Stage: \nError-stage",
@@ -67,16 +70,17 @@ func Test_printDecoratedLog(t *testing.T) {
 			},
 		},
 		{
-			name:              "should print only stdout when shouldStdErr is false",
-			no:                3,
-			desc:              "stdout-only-stage",
-			cmdName:           "ls",
-			logFilterShell:    "",
-			errLogFilterShell: "",
-			stderrBuf:         "",
-			stdoutBuf:         "file1\nfile2\n",
-			shouldStdErr:      false,
-			cmdHasError:       false,
+			name:                "should print only stdout when shouldStdErr is false",
+			no:                  3,
+			desc:                "stdout-only-stage",
+			cmdName:             "ls",
+			logFilterShell:      "",
+			errLogFilterShell:   "",
+			stderrBuf:           "",
+			stdoutBuf:           "file1\nfile2\n",
+			shouldStdErr:        false,
+			cmdHasError:         false,
+			firstPipeLogNewLine: '\n',
 			wantOutputSubstr: []string{
 				"#### YOMEL-LOG[3]_",
 				"# Stage: \nStdout-only-stage",

@@ -8,21 +8,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_printTitleLog verifies that printTitleLog correctly formats and prints title logs to stderr.
 func Test_printTitleLog(t *testing.T) {
 	tests := []struct {
-		name       string
-		title      string
-		wantOutput string
+		name             string
+		title            string
+		cmdPipeline      string
+		wantOutputSubstr []string
 	}{
 		{
-			name:       "should print title when title is not empty",
-			title:      "My-pipeline-title",
-			wantOutput: "\n\x1b[1m#### YOMEL-TITLE:\x1b[0m\n\x1b[1mMy-pipeline-title\x1b[0m\n\n",
+			name:        "should print title log with title and pipeline command",
+			title:       "initialize-environment",
+			cmdPipeline: "go mod download",
+			wantOutputSubstr: []string{
+				"YOMEL-LOG-TITLE:",
+				"Initialize-environment",
+				"TotalCmd:",
+				"go mod download",
+			},
 		},
 		{
-			name:       "should do nothing when title is empty",
-			title:      "",
-			wantOutput: "",
+			name:             "should handle empty title gracefully",
+			title:            "",
+			cmdPipeline:      "some-cmd",
+			wantOutputSubstr: []string{},
 		},
 	}
 
@@ -32,16 +41,23 @@ func Test_printTitleLog(t *testing.T) {
 			rErr, wErr, _ := os.Pipe()
 			os.Stderr = wErr
 
-			printTitleLog(tt.title)
+			printTitleLog(tt.title, tt.cmdPipeline)
 
 			wErr.Close()
 			os.Stderr = oldStderr
 
 			var bufErr bytes.Buffer
 			_, _ = bufErr.ReadFrom(rErr)
-			gotOutput := bufErr.String()
+			output := bufErr.String()
 
-			assert.Equal(t, tt.wantOutput, gotOutput)
+			if tt.title == "" {
+				assert.Equal(t, "", output)
+				return
+			}
+
+			for _, substr := range tt.wantOutputSubstr {
+				assert.Contains(t, output, substr)
+			}
 		})
 	}
 }
