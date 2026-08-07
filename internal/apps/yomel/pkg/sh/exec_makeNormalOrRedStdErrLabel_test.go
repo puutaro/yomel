@@ -1,3 +1,4 @@
+// Write direct above line for Comment on code
 package sh
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_makeNormalOrRedStdErrLabel verifies that makeNormalOrRedStdErrLabel returns the correct decorated progress or error label based on the hasErr flag.
 func Test_makeNormalOrRedStdErrLabel(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -15,12 +17,12 @@ func Test_makeNormalOrRedStdErrLabel(t *testing.T) {
 		{
 			name:   "should return red error label when hasErr is true",
 			hasErr: true,
-			want:   "#\x1b[31m Error:\x1b[0m\n",
+			want:   "\x1b[31m\x1b[4m\x1b[1mE\x1b[22mrror\x1b[24m\x1b[39m\n",
 		},
 		{
 			name:   "should return normal progress label when hasErr is false",
 			hasErr: false,
-			want:   "# Progress:\n",
+			want:   "\x1b[4m\x1b[1mP\x1b[22mrogress\x1b[24m\n",
 		},
 	}
 

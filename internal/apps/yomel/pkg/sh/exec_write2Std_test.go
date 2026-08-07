@@ -21,7 +21,7 @@ func Test_write2Std(t *testing.T) {
 			label:       "stdout:\n",
 			buffer:      "hello world\n",
 			filterShell: "",
-			wantOutput:  "stdout:\nhello world\n\n",
+			wantOutput:  "stdout:\nhello world\n",
 		},
 		{
 			name:        "should write buffer directly and append newline when filterShell is empty and buffer lacks newline",
@@ -42,7 +42,7 @@ func Test_write2Std(t *testing.T) {
 			label:       "stdout:\n",
 			buffer:      "apple\nbanana\napplet\n",
 			filterShell: "grep 'app'",
-			wantOutput:  "stdout:\napple\napplet\n\n",
+			wantOutput:  "stdout:\napple\napplet\n",
 		},
 		{
 			name:        "should append newline to filtered output if missing",

@@ -1,15 +1,20 @@
-// Write direct above line for Comment on code
+// Test_printDecoratedLog verifies that printDecoratedLog correctly outputs formatted logs to the writer under various conditions.
 package sh
 
 import (
 	"bytes"
-	"os"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_printDecoratedLog verifies that printDecoratedLog correctly outputs formatted logs to stderr under various conditions.
+// stripANSI removes ANSI escape sequences (colors, underlines, bold, etc.) from the string.
+func stripANSI(str string) string {
+	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]*[mK]`)
+	return ansiRegex.ReplaceAllString(str, "")
+}
+
 func Test_printDecoratedLog(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -38,14 +43,15 @@ func Test_printDecoratedLog(t *testing.T) {
 			cmdHasError:         false,
 			firstPipeLogNewLine: '\n',
 			wantOutputSubstr: []string{
-				"\n#### YOMEL-LOG[1]_",
-				"# Stage: \nTest-stage",
-				"# Cmd: \necho 'hello'",
-				"# Progress:",
+				"Yomel-log[1]_",
+				"Stage",
+				"Test-stage",
+				"Cmd",
+				"echo 'hello'",
+				"Progress",
 				"some progress info",
-				"# Stdout:",
+				"Stdout",
 				"hello",
-				"####",
 			},
 		},
 		{
@@ -61,12 +67,13 @@ func Test_printDecoratedLog(t *testing.T) {
 			cmdHasError:         true,
 			firstPipeLogNewLine: ' ',
 			wantOutputSubstr: []string{
-				"#### YOMEL-LOG[2]_",
-				"# Stage: \nError-stage",
-				"# Cmd: \nexit 1",
-				"#\x1b[31m Error:\x1b[0m",
+				"Yomel-log[2]_",
+				"Stage",
+				"Error-stage",
+				"Cmd",
+				"exit 1",
+				"Error",
 				"error occurred",
-				"####",
 			},
 		},
 		{
@@ -82,27 +89,26 @@ func Test_printDecoratedLog(t *testing.T) {
 			cmdHasError:         false,
 			firstPipeLogNewLine: '\n',
 			wantOutputSubstr: []string{
-				"#### YOMEL-LOG[3]_",
-				"# Stage: \nStdout-only-stage",
-				"# Cmd: \nls",
-				"# Stdout:",
+				"Yomel-log[3]_",
+				"Stage",
+				"Stdout-only-stage",
+				"Cmd",
+				"ls",
+				"Stdout",
 				"file1",
 				"file2",
-				"####",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			oldStderr := os.Stderr
-			rErr, wErr, _ := os.Pipe()
-			os.Stderr = wErr
-
+			var combinedLog bytes.Buffer
 			stderrBuffer := bytes.NewBufferString(tt.stderrBuf)
 			stdoutBuffer := bytes.NewBufferString(tt.stdoutBuf)
 
 			printDecoratedLog(
+				&combinedLog,
 				tt.no,
 				tt.desc,
 				tt.cmdName,
@@ -115,12 +121,8 @@ func Test_printDecoratedLog(t *testing.T) {
 				tt.firstPipeLogNewLine,
 			)
 
-			wErr.Close()
-			os.Stderr = oldStderr
-
-			var bufErr bytes.Buffer
-			_, _ = bufErr.ReadFrom(rErr)
-			output := bufErr.String()
+			// ANSIエスケープシーケンスを除去してから比較する
+			output := stripANSI(combinedLog.String())
 
 			for _, substr := range tt.wantOutputSubstr {
 				assert.Contains(t, output, substr)

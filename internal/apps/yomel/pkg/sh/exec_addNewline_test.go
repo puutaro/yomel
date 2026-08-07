@@ -22,7 +22,7 @@ func Test_addNewline(t *testing.T) {
 		{
 			name:       "should not append newline when buffer already ends with newline",
 			buffer:     "already has newline\n",
-			wantOutput: "\n",
+			wantOutput: "",
 		},
 		{
 			name:       "should do nothing and not panic when buffer is empty",

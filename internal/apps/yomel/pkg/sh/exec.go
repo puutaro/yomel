@@ -14,12 +14,14 @@ import (
 )
 
 const (
-	logGuard         = "####"
-	titleLabelPrefix = "##"
-	labelPrefix      = "#"
-	redStart         = "\x1b[31m"
-	blueGreenStart   = "\x1b[30m"
-	colorEnd         = "\x1b[0m"
+	redStart       = "\x1b[31m"
+	colorEnd       = "\x1b[39m"
+	blueGreenStart = "\x1b[30m"
+	ansiEnd        = "\x1b[0m"
+	boldStart      = "\x1b[1m"
+	boldEnd        = "\x1b[22m"
+	underlineStart = "\x1b[4m"
+	underlineEnd   = "\x1b[24m"
 )
 
 func Exec(yomelInfo YomelInfo) int {
@@ -103,23 +105,23 @@ func Exec(yomelInfo YomelInfo) int {
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
 	yomelTitle := yomelInfo.Title
+	var combinedLog bytes.Buffer
 	for i, stageInfo := range stageInfos {
-		// stdoutLen := stdoutBuffers[i].Len()
-
 		shouldLog := stageInfo.IsLog || cmdHasError
-
 		if !cmdHasError && !shouldLog {
 			continue
 		}
 		firstPipeLogNewLine := '\n'
 		if i == 0 && yomelTitle != "" {
 			printTitleLog(
+				&combinedLog,
 				yomelTitle,
 				totalPipeCmdStr,
 			)
 			firstPipeLogNewLine = ' '
 		}
 		printDecoratedLog(
+			&combinedLog,
 			stageInfo.No,
 			stageInfo.Desc,
 			stageInfo.CmdStrs,
@@ -131,6 +133,9 @@ func Exec(yomelInfo YomelInfo) int {
 			cmdHasError,
 			firstPipeLogNewLine,
 		)
+	}
+	if combinedLog.Len() > 0 {
+		_, _ = os.Stderr.Write(combinedLog.Bytes())
 	}
 	if cmdHasError {
 		return exitCode
@@ -176,29 +181,41 @@ func makeTotalPipeCmd(stageInfos []StageInfo) string {
 }
 
 func printTitleLog(
+	w io.Writer,
 	title string,
 	totalPipeCmdStr string,
 ) {
 	if title == "" {
 		return
 	}
-	boldStart := "\x1b[1m"
-	titleHolder := fmt.Sprintf("\n%s%s YOMEL-LOG-TITLE:%s", boldStart, logGuard, colorEnd)
-	titleSentence := boldStart + capitalizeFirst(title) + colorEnd
-	titleSectionStr := fmt.Sprintf(
-		"%s\n%s\n\n",
-		titleHolder,
-		titleSentence,
+	var titleSectionBuffer bytes.Buffer
+	titleSectionBuffer.WriteString("\n")
+	titleSectionBuffer.WriteString(underlineStart)
+	titleSectionBuffer.WriteString(boldStart)
+	titleSectionBuffer.WriteString("Yomel-log-title")
+	titleSectionBuffer.WriteString(boldEnd)
+	titleSectionBuffer.WriteString(underlineEnd)
+	titleSectionBuffer.WriteString("\n")
+	titleSectionBuffer.WriteString(capitalizeFirst(title))
+	w.Write(
+		titleSectionBuffer.Bytes(),
 	)
-	totalCmdSectionStr := fmt.Sprintf(
-		"%s %s\n%s\n\n",
-		logGuard,
-		"TotalCmd:",
-		totalPipeCmdStr,
+	addNewline(
+		w,
+		&titleSectionBuffer,
 	)
-	fmt.Fprint(
-		os.Stderr,
-		titleSectionStr+totalCmdSectionStr,
+	var totalCmdSectionBuffer bytes.Buffer
+	totalCmdSectionBuffer.WriteString(
+		convertUnderAndFirstBold("Total-cmd"),
+	)
+	totalCmdSectionBuffer.WriteString("\n")
+	totalCmdSectionBuffer.WriteString(totalPipeCmdStr)
+	w.Write(
+		totalCmdSectionBuffer.Bytes(),
+	)
+	addNewline(
+		w,
+		&totalCmdSectionBuffer,
 	)
 }
 func capitalizeFirst(s string) string {
@@ -208,7 +225,15 @@ func capitalizeFirst(s string) string {
 	r, size := utf8.DecodeRuneInString(s)
 	return string(unicode.ToUpper(r)) + s[size:]
 }
+func convertUnderAndFirstBold(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return underlineStart + boldStart + string(r) + boldEnd + s[size:] + underlineEnd
+}
 func printDecoratedLog(
+	w io.Writer,
 	no int,
 	desc,
 	cmdName string,
@@ -220,38 +245,41 @@ func printDecoratedLog(
 	cmdHasError bool,
 	firstPipeLogNewLine rune,
 ) {
-
 	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
-	title := fmt.Sprintf("%s YOMEL-LOG[%d]_%s:", logGuard, no, timestamp)
+	title := convertUnderAndFirstBold(
+		fmt.Sprintf(
+			"%s[%d]_%s",
+			"Yomel-log",
+			no,
+			timestamp,
+		),
+	)
 	if firstPipeLogNewLine == '\n' {
 		title = string(firstPipeLogNewLine) + title
 	}
-
 	fmt.Fprintf(
-		os.Stderr,
-		"%s\n%s Stage: \n%s\n\n%s Cmd: \n%s\n\n",
+		w,
+		"%s\n%s \n%s\n\n%s \n%s\n\n",
 		title,
-		labelPrefix,
+		convertUnderAndFirstBold("Stage"),
 		capitalizeFirst(desc),
-		labelPrefix,
+		convertUnderAndFirstBold("Cmd"),
 		cmdName,
 	)
-
 	if shouldLog {
 		write2Std(
-			os.Stderr,
+			w,
 			makeNormalOrRedStdErrLabel(cmdHasError),
 			stderrBuf,
 			errLogFilterShell,
 		)
 	}
 	write2Std(
-		os.Stderr,
-		fmt.Sprintf("%s Stdout:\n", labelPrefix),
+		w,
+		fmt.Sprintf("%s\n", convertUnderAndFirstBold("Stdout")),
 		stdoutBuf,
 		logFilterShell,
 	)
-
 }
 
 func makeNormalOrRedStdErrLabel(hasErr bool) string {
@@ -259,17 +287,15 @@ func makeNormalOrRedStdErrLabel(hasErr bool) string {
 	if hasErr {
 		logGenre = "Error"
 		return fmt.Sprintf(
-			"%s%s %s:%s\n",
-			labelPrefix,
+			"%s%s%s\n",
 			redStart,
-			logGenre,
+			convertUnderAndFirstBold(logGenre),
 			colorEnd,
 		)
 	}
 	return fmt.Sprintf(
-		"%s %s:\n",
-		labelPrefix,
-		logGenre,
+		"%s\n",
+		convertUnderAndFirstBold(logGenre),
 	)
 }
 
@@ -283,7 +309,6 @@ func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string)
 		addNewline(w, buf)
 		return
 	}
-
 	filterShellCmd := exec.Command("bash", "-c", filterShell)
 	filterShellCmd.Stdin = buf
 	filterShellCmdStdoutBuf := new(bytes.Buffer)
@@ -295,7 +320,16 @@ func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string)
 		addNewline(w, filterShellCmdStdoutBuf)
 		return
 	}
-	fmt.Fprintf(w, "%sfilter shell err:%s\n", redStart, colorEnd)
+	fmt.Fprintf(
+		w,
+		"%s\n",
+		fmt.Sprintf(
+			"%s%s%s",
+			redStart,
+			convertUnderAndFirstBold("filter shell err"),
+			colorEnd,
+		),
+	)
 	w.Write(filterShellCmdStderrBuf.Bytes())
 	addNewline(w, filterShellCmdStderrBuf)
 }
@@ -304,8 +338,9 @@ func addNewline(w io.Writer, buf *bytes.Buffer) {
 	if buf.Len() == 0 {
 		return
 	}
-	if buf.Bytes()[buf.Len()-1] == '\n' {
-		fmt.Fprintln(w)
+	length := buf.Len()
+	bufBytes := buf.Bytes()
+	if bufBytes[length-1] == '\n' {
 		return
 	}
 	fmt.Fprintln(w)
