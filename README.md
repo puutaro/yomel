@@ -136,26 +136,25 @@ This example showcases how option and argument modifiers can be paired with Alph
 
 ```sh.sh
 yomel \
-  title "fetcyh aws cloud log by mask sensitive data"
-  --log \
-  --log-filter "grep 'Exception'" \
-  stage "fetch-cloud-logs" \
-  -cmd "aws" \
-  --lopRegion \
-  --valRegion --s "us-east-1" \
-  -svc "logs" \
-  -act "filter-log-events" \
-  --lopGroupName \
-  --valGroupName --s "/aws/lambda/my-prod-service" \
-  --lopLimit \
-  --valLimit --n "100" \
-  stage "mask-sensitive-data" \
-  -cmd "sed" \
-  --optExpr \
-  --opt "e" \
-  --s "s/[0-9]\{4\}-[0-9]\{4\}/XXXX-XXXX/g"
+	title "list home dir con by smart"\
+	--no-live-stderr \
+	--no-live-stdout \
+	--log \
+	stage "list bellow home directory" \
+	-cmd ls \
+	--argTargetDir "${HOME}" \
+	--log-filter "shuf | head -5 | sort" \
+	--err-log-filter "shuf | head -5 | sort" \
+	stage "newline to tab" \
+	-cmd tr \
+	--argRepSrc '\n' \
+	--argRepDst '\t' \
 
 ```
+
+- log
+<img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
+
 
 ---
 
