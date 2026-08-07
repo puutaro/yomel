@@ -178,6 +178,3 @@ Modifiers specify how parameters, options, and trailing arguments are constructe
 ---
 
 
-## 📜 License
-
-MIT License
