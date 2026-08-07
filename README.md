@@ -45,6 +45,24 @@ go install github.com/puutaro/yomel/cmd/yomel@latest
 ### 1. Telemetry and Filter Options
 These options control debugging output and stream filtering. They do not alter the data passing through the core pipeline but manage what is written to `stderr`.
 
+* **`title "<pipeline_title>"`**
+
+  * **Meaning:** Sets a title for the overall pipeline. When multiple stages are executed and a title is specified, it displays a distinct header banner (`YOMEL-LOG-TITLE:`) showing the title and the total generated pipeline command.
+
+  * **Usage:** Place it at the beginning of the command (global control section).
+
+* **`--no-live-stdout`**
+
+  * **Meaning:** Suppresses real-time streaming of standard output (stdout) to the console while the pipeline commands run in the background.
+
+  * **Usage:** Useful for muting noisy background stream outputs during execution.
+
+* **`--no-live-stderr`**
+
+  * **Meaning:** Suppresses real-time streaming of standard error (stderr) to the console during execution.
+
+  * **Usage:** Useful for hiding intermediate progress or warning logs until the final error handling or reporting stage.
+
 * **`--log`**
   * **Meaning:** Activates the internal logging system. When this flag is present, `yomel` prints detailed panel execution metrics, generated shell commands, and raw step statuses to `stderr`.
   * **Usage:** Place it at the very beginning of the command to apply globally, or within specific sections.
@@ -118,6 +136,7 @@ This example showcases how option and argument modifiers can be paired with Alph
 
 ```sh.sh
 yomel \
+  title "fetcyh aws cloud log by mask sensitive data"
   --log \
   --log-filter "grep 'Exception'" \
   stage "fetch-cloud-logs" \

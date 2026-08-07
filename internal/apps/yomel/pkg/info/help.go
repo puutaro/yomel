@@ -16,6 +16,9 @@ const detail = `Usage:
 Meta Flags:
   --version          Print version information
   --help             Print help information
+  title               Specify a title for the output report or the generated job.
+  --no-live-stdout      Disable live output of stdout.
+  --no-live-stderr      Disable live output of stderr.
   --gen              Output total pipeline command
   --direct           Exec shell directly (simple exec pipe shell without log)
 
