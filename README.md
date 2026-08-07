@@ -165,14 +165,6 @@ yomel \
 ---
 
 
-## 🧪 Development & Testing
-
-Run unit tests across all internal packages to verify functionality:
-
-go test ./... -v
-
----
-
 ## 📜 License
 
 MIT License
