@@ -54,7 +54,8 @@ yomel \
 
 We can grasp in progress in pipeline by modern structure log.  
 Ordinaly shellscript pipline don't disclose in progress log.  
-But `yomel` open in progress log.    
+But `yomel` open in progress log.   
+
 
 <img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
 
@@ -65,6 +66,32 @@ By `yomel`'s log, we can find err factore more fastly.
 
 <img width="661" height="686" alt="image" src="https://github.com/user-attachments/assets/75886821-9b1a-4631-b349-2eea6b3fe9ac" />
 
+
+### `yomel` sub shell
+
+`yomel`'s structure log is extremely powerful debugger when used in a `subshell`.  
+Of course, readable code is doing well.  
+
+```sh.sh
+destPath="$(\
+	yomel \
+		title "convert dest path from input mp4" \
+		--log \
+		stage "pass inputMp4 path" \
+		-cmd echo \
+		--argSrcMp4 "${inputMp4}"\
+		stage "convert dest path by replace" \
+		-cmd sed \
+		--optExtendRegex r \
+		--argSubstitute --s 's/(\.mp4)$/_fix_zure\1/'\
+)"
+```
+
+### log
+
+<img width="828" height="830" alt="image" src="https://github.com/user-attachments/assets/e0a12bff-8af2-4878-9440-357845618a76" />
+
+#### **`yomel` log flows to `stderr`. Therefore, `stdout` is successfully assigned to `destPath` variable.**  
 
 
 ---
