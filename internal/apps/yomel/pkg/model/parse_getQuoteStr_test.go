@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -12,14 +11,14 @@ import (
 func Test_getQuoteStr(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []argtabledtos.ArgTableDto
+		input    []argtables.ArgTable
 		curIndex int
 		want     ParamType
 		wantIdx  int
 	}{
 		{
 			name: "should return double quoted string and next index when quote type signal is DoubleQuote",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{}, // index 0
 				{}, // index 1 (curIndex)
 				{QuoteTypeSignal: argtables.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
@@ -33,7 +32,7 @@ func Test_getQuoteStr(t *testing.T) {
 		},
 		{
 			name: "should return single quoted string, quote type, and updated index when quote type signal is SingleQuote",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{},                                       // index 0
 				{},                                       // index 1 (curIndex)
 				{QuoteTypeSignal: argtables.SingleQuote}, // index 2 (afterFirstIndex)
@@ -48,7 +47,7 @@ func Test_getQuoteStr(t *testing.T) {
 		},
 		{
 			name: "should return no-quote string, quote type, and updated index when quote type signal is NoQuote",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{},                                   // index 0
 				{},                                   // index 1 (curIndex)
 				{QuoteTypeSignal: argtables.NoQuote}, // index 2 (afterFirstIndex)

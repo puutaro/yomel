@@ -1,21 +1,21 @@
-package argtabledtosvalid
+package argtablesvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_checkIsCmd(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTable
 		wantError string
 	}{
 		{
 			name: "should return nil when cmd is specified in each stage",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, Str: testutilPtr("echo")},
@@ -24,7 +24,7 @@ func Test_checkIsCmd(t *testing.T) {
 		},
 		{
 			name: "should return error when stage is defined but cmd is missing",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 			},
 			wantError: "'-cmd' not found\nstageNo: 1",

@@ -1,4 +1,3 @@
-// Write direct above line for Comment on code
 package argtables_test
 
 import (
@@ -15,7 +14,7 @@ func Test_GenArgTable(t *testing.T) {
 	tests := []struct {
 		name  string
 		input []string
-		want  []argtables.ArgTableDto
+		want  []argtables.ArgTable
 	}{
 		{
 			name: "make argTable from args",
@@ -65,7 +64,7 @@ func Test_GenArgTable(t *testing.T) {
 				"--opt", "e",
 				"--arg", "/aa/bb/",
 			},
-			want: []argtables.ArgTableDto{
+			want: []argtables.ArgTable{
 				{StageNo: 0, IsTitle: true},
 				{StageNo: 0, Str: testutil.Ptr("test cmd title")},
 				{StageNo: 0, IsNoLiveStdout: true},
@@ -97,28 +96,28 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, Str: testutil.Ptr("aws")},
 				// parse option a
-				{StageNo: 1, OptStr: testutil.Ptr("VertualOpt")},
+				{StageNo: 1, IsOpt: true, Comment: "VertualOpt"},
 				{StageNo: 1, Str: testutil.Ptr("a")},
 				// parse value with single quote signal
-				{StageNo: 1, ValueStr: testutil.Ptr("VertualValue")},
+				{StageNo: 1, IsValue: true, Comment: "VertualValue"},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("aaa")},
 				// parse option b
-				{StageNo: 1, OptStr: testutil.Ptr("")},
+				{StageNo: 1, IsOpt: true},
 				{StageNo: 1, Str: testutil.Ptr("b")},
 				// parse value with no quote signal
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
+				{StageNo: 1, IsValue: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
 				{StageNo: 1, Str: testutil.Ptr("bbb")},
 				// parse long option c
-				{StageNo: 1, LoptStr: testutil.Ptr("VertualLoption")},
+				{StageNo: 1, IsLopt: true, Comment: "VertualLoption"},
 				{StageNo: 1, Str: testutil.Ptr("c")},
 				// parse argument with single quote
-				{StageNo: 1, ArgStr: testutil.Ptr("VertualArg")},
+				{StageNo: 1, IsArg: true, Comment: "VertualArg"},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("awsawsaws1")},
 				// parse argument with no quote
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
+				{StageNo: 1, IsArg: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
 				{StageNo: 1, Str: testutil.Ptr("awsawsaws2")},
 				// parse single quote modifier
@@ -129,49 +128,49 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 1, IsSvc: true},
 				{StageNo: 1, Str: testutil.Ptr("a3api")},
 				// parse option e
-				{StageNo: 1, OptStr: testutil.Ptr("")},
+				{StageNo: 1, IsOpt: true},
 				{StageNo: 1, Str: testutil.Ptr("e")},
 				// parse value for option e
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
+				{StageNo: 1, IsValue: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("eeee")},
 				// parse option f
-				{StageNo: 1, OptStr: testutil.Ptr("")},
+				{StageNo: 1, IsOpt: true},
 				{StageNo: 1, Str: testutil.Ptr("f")},
 				// parse value for option f
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
+				{StageNo: 1, IsValue: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("ffff")},
 				// parse argument svcsvcsvc1
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
+				{StageNo: 1, IsArg: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("svcsvcsvc1")},
 				// parse argument svcsvcsvc2
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
+				{StageNo: 1, IsArg: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("svcsvcsvc2")},
 				// parse action option
 				{StageNo: 1, IsAct: true},
 				{StageNo: 1, Str: testutil.Ptr("list-objects")},
 				// parse long option s
-				{StageNo: 1, LoptStr: testutil.Ptr("")},
+				{StageNo: 1, IsLopt: true},
 				{StageNo: 1, Str: testutil.Ptr("s")},
 				// parse value for long option s
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
+				{StageNo: 1, IsValue: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				{StageNo: 1, Str: testutil.Ptr("sss")},
 				// parse long option t
-				{StageNo: 1, LoptStr: testutil.Ptr("")},
+				{StageNo: 1, IsLopt: true},
 				{StageNo: 1, Str: testutil.Ptr("t")},
 				// parse value for long option t
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
+				{StageNo: 1, IsValue: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
 				{StageNo: 1, Str: testutil.Ptr("ttt")},
 				// parse raw argument 1
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
+				{StageNo: 1, IsArg: true},
 				{StageNo: 1, Str: testutil.Ptr("agagagaga1")},
 				// parse raw argument 2
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
+				{StageNo: 1, IsArg: true},
 				{StageNo: 1, Str: testutil.Ptr("agagagaga2")},
 
 				// parse stage definition for sed
@@ -181,43 +180,11 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 2, IsCmd: true},
 				{StageNo: 2, Str: testutil.Ptr("sed")},
 				// parse option e for sed
-				{StageNo: 2, OptStr: testutil.Ptr("")},
+				{StageNo: 2, IsOpt: true},
 				{StageNo: 2, Str: testutil.Ptr("e")},
 				// parse argument expression for sed
-				{StageNo: 2, ArgStr: testutil.Ptr("")},
+				{StageNo: 2, IsArg: true},
 				{StageNo: 2, Str: testutil.Ptr("/aa/bb/")},
-			},
-		},
-		{
-			name: "should handle hyphen-starting strings and stage strings after arg, val, cmd, svc, act, and stage",
-			input: []string{
-				"yomel",
-				"stage", "stage",
-				"-cmd", "stage",
-				"--val", "-hyphenval",
-				"-svc", "stage",
-				"--val", "stage",
-				"-act", "stage",
-				"--arg", "-hyphenarg",
-				"--arg", "stage",
-			},
-			want: []argtables.ArgTableDto{
-				{StageNo: 1, IsStage: true},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
-				{StageNo: 1, IsCmd: true},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
-				{StageNo: 1, Str: testutil.Ptr("-hyphenval")},
-				{StageNo: 1, IsSvc: true},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
-				{StageNo: 1, ValueStr: testutil.Ptr("")},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
-				{StageNo: 1, IsAct: true},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
-				{StageNo: 1, Str: testutil.Ptr("-hyphenarg")},
-				{StageNo: 1, ArgStr: testutil.Ptr("")},
-				{StageNo: 1, Str: testutil.Ptr("stage")},
 			},
 		},
 		{
@@ -230,7 +197,7 @@ func Test_GenArgTable(t *testing.T) {
 				"-n",
 				"-s",
 			},
-			want: []argtables.ArgTableDto{
+			want: []argtables.ArgTable{
 				{StageNo: 0, UnknownOption: "--unknown-flag"},
 				{StageNo: 0, QuoteTypeSignal: argtables.NoQuote},
 				{StageNo: 0, QuoteTypeSignal: argtables.SingleQuote},

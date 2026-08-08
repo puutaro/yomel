@@ -1,21 +1,21 @@
-package argtabledtosvalid
+package argtablesvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ArgTableValidate(t *testing.T) {
+func Test_checkIsStage(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTable
 		wantError string
 	}{
 		{
-			name: "should return nil when arg tables are valid",
-			input: []argtabledtos.ArgTableDto{
+			name: "should return nil when stage is present",
+			input: []argtables.ArgTable{
 				{StageNo: 0, IsLog: true},
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
@@ -25,16 +25,21 @@ func Test_ArgTableValidate(t *testing.T) {
 		},
 		{
 			name: "should return error when stage is missing",
-			input: []argtabledtos.ArgTableDto{
-				{StageNo: 0, IsCmd: true},
+			input: []argtables.ArgTable{
+				{StageNo: 0, IsLog: true},
 			},
-			wantError: "'-cmd' must be specfied in stage field",
+			wantError: "'stage' not found",
+		},
+		{
+			name:      "should return error when input slice is empty",
+			input:     []argtables.ArgTable{},
+			wantError: "'stage' not found",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ArgTableValidate(tt.input)
+			err := checkIsStage(tt.input)
 			if tt.wantError == "" {
 				assert.NoError(t, err)
 			} else {
@@ -42,8 +47,4 @@ func Test_ArgTableValidate(t *testing.T) {
 			}
 		})
 	}
-}
-
-func testutilPtr[T any](v T) *T {
-	return &v
 }

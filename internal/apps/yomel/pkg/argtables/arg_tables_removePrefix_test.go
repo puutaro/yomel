@@ -3,40 +3,40 @@ package argtables
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_removePrefix verifies that removePrefix correctly strips the specified prefix from the input string.
 func Test_removePrefix(t *testing.T) {
 	tests := []struct {
 		name   string
 		str    string
 		prefix string
-		want   *string
+		want   string
 	}{
 		{
 			name:   "should remove prefix when string starts with prefix",
 			str:    "--opt",
 			prefix: "--",
-			want:   testutil.Ptr("opt"),
+			want:   "opt",
 		},
 		{
 			name:   "should remove prefix for single character prefix",
 			str:    "-cmd",
 			prefix: "-",
-			want:   testutil.Ptr("cmd"),
+			want:   "cmd",
 		},
 		{
 			name:   "should return original string without changes when prefix does not match",
 			str:    "opt",
 			prefix: "--",
-			want:   testutil.Ptr("opt"),
+			want:   "opt",
 		},
 		{
 			name:   "should handle empty string correctly",
 			str:    "",
 			prefix: "--",
-			want:   testutil.Ptr(""),
+			want:   "",
 		},
 	}
 

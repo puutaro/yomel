@@ -91,7 +91,7 @@ func GetHelpByDefault(argList []string) (*string, error) {
 	}
 	return execGetHelp()
 }
-func GetHelpByOption(argTablesDto []argtables.ArgTableDto) (*string, error) {
+func GetHelpByOption(argTablesDto []argtables.ArgTable) (*string, error) {
 	stageNo := 0
 	for _, argTableDto := range argTablesDto {
 		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)

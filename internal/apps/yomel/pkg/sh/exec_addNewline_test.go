@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_addNewline verifies that addNewline appends a newline character to the file if the buffer does not end with one.
 func Test_addNewline(t *testing.T) {
 	tests := []struct {
 		name       string

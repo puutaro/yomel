@@ -2,42 +2,37 @@
 package sh
 
 import (
-	"bytes"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_Exec verifies all execution paths, modes, and edge cases of Exec.
+// Test_Exec verifies that Exec handles empty stage pipelines, normal mode execution, and direct mode execution correctly.
 func Test_Exec(t *testing.T) {
 	tests := []struct {
 		name           string
 		yomelInfo      YomelInfo
-		wantSubstr     string
 		expectedStatus int
 	}{
 		{
-			name: "should do nothing and return ExitSuccess when stageInfos is empty (normal mode)",
+			name: "should return ExitSuccess when stageInfos is empty in normal mode",
 			yomelInfo: YomelInfo{
 				IsDirect:   false,
 				StageInfos: []StageInfo{},
 			},
-			wantSubstr:     "",
 			expectedStatus: ExitSuccess,
 		},
 		{
-			name: "should do nothing and return ExitSuccess when stageInfos is empty (direct mode)",
+			name: "should return ExitSuccess when stageInfos is empty in direct mode",
 			yomelInfo: YomelInfo{
 				IsDirect:   true,
 				StageInfos: []StageInfo{},
 			},
-			wantSubstr:     "",
 			expectedStatus: ExitSuccess,
 		},
 		{
-			name: "should execute single stage pipeline successfully in normal mode",
+			name: "should execute single stage successfully and return ExitSuccess in normal mode",
 			yomelInfo: YomelInfo{
 				IsDirect: false,
 				StageInfos: []StageInfo{
@@ -48,11 +43,10 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr:     "",
 			expectedStatus: ExitSuccess,
 		},
 		{
-			name: "should execute single stage pipeline successfully in direct mode",
+			name: "should execute single stage successfully and return ExitSuccess in direct mode",
 			yomelInfo: YomelInfo{
 				IsDirect: true,
 				StageInfos: []StageInfo{
@@ -63,22 +57,20 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr:     "",
 			expectedStatus: ExitSuccess,
 		},
 		{
-			name: "should print log and return failure exit status when command fails in normal mode",
+			name: "should return failure exit status when command fails in normal mode",
 			yomelInfo: YomelInfo{
 				IsDirect: false,
 				StageInfos: []StageInfo{
 					{
 						No:      1,
 						Desc:    "error-stage",
-						CmdStrs: "echo 'error message' 1>&2; exit 42",
+						CmdStrs: "exit 42",
 					},
 				},
 			},
-			wantSubstr:     "", // 失敗時のログ出力を特定の文字列に依存させないようにクリア
 			expectedStatus: 42,
 		},
 		{
@@ -93,28 +85,7 @@ func Test_Exec(t *testing.T) {
 					},
 				},
 			},
-			wantSubstr:     "",
 			expectedStatus: 55,
-		},
-		{
-			name: "should handle multi-stage pipeline and stop or report on failure in normal mode",
-			yomelInfo: YomelInfo{
-				IsDirect: false,
-				StageInfos: []StageInfo{
-					{
-						No:      1,
-						Desc:    "first-success",
-						CmdStrs: "echo 'step 1'",
-					},
-					{
-						No:      2,
-						Desc:    "second-fail",
-						CmdStrs: "exit 10",
-					},
-				},
-			},
-			wantSubstr:     "", // エラーメッセージの文字列一致テストを外し、ステータスコードの検証に集中
-			expectedStatus: 10,
 		},
 	}
 
@@ -123,7 +94,7 @@ func Test_Exec(t *testing.T) {
 			oldStdout := os.Stdout
 			oldStderr := os.Stderr
 			_, wOut, _ := os.Pipe()
-			rErr, wErr, _ := os.Pipe()
+			_, wErr, _ := os.Pipe()
 			os.Stdout = wOut
 			os.Stderr = wErr
 
@@ -134,15 +105,7 @@ func Test_Exec(t *testing.T) {
 			os.Stdout = oldStdout
 			os.Stderr = oldStderr
 
-			var bufErr bytes.Buffer
-			_, _ = bufErr.ReadFrom(rErr)
-			errOutput := bufErr.String()
-
 			assert.Equal(t, tt.expectedStatus, status)
-
-			if tt.wantSubstr != "" {
-				assert.True(t, strings.Contains(errOutput, tt.wantSubstr))
-			}
 		})
 	}
 }

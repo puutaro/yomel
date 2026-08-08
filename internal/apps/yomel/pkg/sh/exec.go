@@ -7,10 +7,13 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 )
 
 const (
@@ -24,18 +27,40 @@ const (
 	underlineEnd   = "\x1b[24m"
 )
 
+type yomelLog struct {
+	yomelInfo      YomelInfo
+	stageInfos     []StageInfo
+	stdoutBuffers  []*bytes.Buffer
+	stderrBuffers  []*bytes.Buffer
+	cmdHasError    bool
+	startTime      time.Time
+	stageEndTimes  []time.Time
+	stageDurations []time.Duration
+}
+
 func Exec(yomelInfo YomelInfo) int {
 	stageInfos := yomelInfo.StageInfos
 	numCmds := len(stageInfos)
 	if numCmds == 0 {
 		return ExitSuccess
 	}
-	totalPipeCmdStr := makeTotalPipeCmd(stageInfos)
 	if yomelInfo.IsGen {
+		totalPipeCmdStr := makeTotalPipeCmd(
+			stageInfos,
+			func(stInfo StageInfo) string {
+				return stInfo.CmdStrs
+			},
+		)
 		outputCmd(totalPipeCmdStr)
 		return ExitSuccess
 	}
 	if yomelInfo.IsDirect {
+		totalPipeCmdStr := makeTotalPipeCmd(
+			stageInfos,
+			func(stInfo StageInfo) string {
+				return stInfo.CmdStrs
+			},
+		)
 		return directExec(totalPipeCmdStr)
 	}
 
@@ -92,10 +117,15 @@ func Exec(yomelInfo YomelInfo) int {
 	wg.Wait()
 
 	// 5. Wait for each command process itself to terminate
+	startTime := time.Now()
+	stageDurations := make([]time.Duration, numCmds)
+	stageEndTimes := make([]time.Time, numCmds)
 	cmdHasError := false
 	var exitCode int = 0
-	for _, cmd := range cmds {
+	for i, cmd := range cmds {
 		cmdErr := cmd.Wait()
+		stageEndTimes[i] = time.Now()
+		stageDurations[i] = stageEndTimes[i].Sub(startTime)
 		if cmdErr == nil {
 			continue
 		}
@@ -104,36 +134,18 @@ func Exec(yomelInfo YomelInfo) int {
 	}
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
-	yomelTitle := yomelInfo.Title
-	var combinedLog bytes.Buffer
-	for i, stageInfo := range stageInfos {
-		shouldLog := stageInfo.IsLog || cmdHasError
-		if !cmdHasError && !shouldLog {
-			continue
-		}
-		firstPipeLogNewLine := '\n'
-		if i == 0 && yomelTitle != "" {
-			printTitleLog(
-				&combinedLog,
-				yomelTitle,
-				totalPipeCmdStr,
-			)
-			firstPipeLogNewLine = ' '
-		}
-		printDecoratedLog(
-			&combinedLog,
-			stageInfo.No,
-			stageInfo.Desc,
-			stageInfo.CmdStrs,
-			stageInfo.LogFilter,
-			stageInfo.ErrLogFilter,
-			stderrBuffers[i],
-			stdoutBuffers[i],
-			shouldLog,
-			cmdHasError,
-			firstPipeLogNewLine,
-		)
+	yl := yomelLog{
+		yomelInfo:      yomelInfo,
+		stageInfos:     stageInfos,
+		stdoutBuffers:  stdoutBuffers,
+		stderrBuffers:  stderrBuffers,
+		cmdHasError:    cmdHasError,
+		startTime:      startTime,
+		stageEndTimes:  stageEndTimes,
+		stageDurations: stageDurations,
 	}
+	combinedLog := yl.make()
+
 	if combinedLog.Len() > 0 {
 		_, _ = os.Stderr.Write(combinedLog.Bytes())
 	}
@@ -142,6 +154,58 @@ func Exec(yomelInfo YomelInfo) int {
 	}
 	return ExitSuccess
 }
+
+func (yl *yomelLog) make() bytes.Buffer {
+	yomelTitle := yl.yomelInfo.Title
+	totalPipeCmdStr := makeTotalPipeCmd(
+		yl.stageInfos,
+		func(stInfo StageInfo) string {
+			return stInfo.CmdStrsWithComment
+		},
+	)
+	var combinedLog bytes.Buffer
+	stageLen := len(yl.stageInfos)
+
+	// find first log output index
+	firstLogIdx := -1
+	for i, stageInfo := range yl.stageInfos {
+		shouldLog := stageInfo.IsLog || yl.cmdHasError
+		if yl.cmdHasError || shouldLog {
+			firstLogIdx = i
+			break
+		}
+	}
+	if firstLogIdx == -1 {
+		return combinedLog
+	}
+
+	yl.printYomelLogStartHolder(&combinedLog)
+	if stageLen > 1 {
+		yl.printTitleLog(&combinedLog, yomelTitle)
+		yl.printTotalCmd(&combinedLog, totalPipeCmdStr)
+	} else {
+		fmt.Fprintf(
+			&combinedLog,
+			"\n",
+		)
+	}
+	for i, stageInfo := range yl.stageInfos {
+		shouldLog := stageInfo.IsLog || yl.cmdHasError
+		if !yl.cmdHasError && !shouldLog {
+			continue
+		}
+		yl.printDecoratedLog(
+			&combinedLog,
+			stageInfo,
+			i,
+			yl.stderrBuffers[i],
+			yl.stdoutBuffers[i],
+			shouldLog,
+		)
+	}
+	return combinedLog
+}
+
 func extractErrCode(err error) int {
 	var exitError *exec.ExitError
 	if errors.As(err, &exitError) {
@@ -149,12 +213,14 @@ func extractErrCode(err error) int {
 	}
 	return ExitErrGeneral
 }
+
 func outputCmd(totalPipeCmdStr string) {
 	fmt.Fprintln(
 		os.Stdout,
 		totalPipeCmdStr,
 	)
 }
+
 func directExec(totalPipeCmdStr string) int {
 	if len(totalPipeCmdStr) == 0 {
 		return ExitSuccess
@@ -168,56 +234,71 @@ func directExec(totalPipeCmdStr string) int {
 	}
 	return ExitSuccess
 }
-func makeTotalPipeCmd(stageInfos []StageInfo) string {
+
+func makeTotalPipeCmd(
+	stageInfos []StageInfo,
+	cmdStrFn func(stageInfo StageInfo) string,
+) string {
 	var cmdPipeline string
 	for i, info := range stageInfos {
+		cmdStr := cmdStrFn(info)
 		if i == 0 {
-			cmdPipeline = info.CmdStrs
+			cmdPipeline = cmdStr
 		} else {
-			cmdPipeline = fmt.Sprintf("%s \\\n| %s", cmdPipeline, info.CmdStrs)
+			cmdPipeline = fmt.Sprintf("%s \\\n| %s", cmdPipeline, cmdStr)
 		}
 	}
 	return cmdPipeline
 }
 
-func printTitleLog(
+func (yl *yomelLog) printYomelLogStartHolder(
+	w io.Writer,
+) {
+	var yomelLogStartHolderBuffer bytes.Buffer
+	yomelLogStartHolderBuffer.WriteString("\n")
+	yomelLogStartHolderBuffer.WriteString(
+		fmt.Sprintf(
+			"%s%s%s_%s%s%s\n",
+			underlineStart,
+			boldStart,
+			"Yomel-log",
+			convertTimeStampStr(yl.startTime),
+			boldEnd,
+			underlineEnd,
+		),
+	)
+	w.Write(
+		yomelLogStartHolderBuffer.Bytes(),
+	)
+}
+
+func (yl *yomelLog) printTitleLog(
 	w io.Writer,
 	title string,
-	totalPipeCmdStr string,
 ) {
 	if title == "" {
 		return
 	}
-	var titleSectionBuffer bytes.Buffer
-	titleSectionBuffer.WriteString("\n")
-	titleSectionBuffer.WriteString(underlineStart)
-	titleSectionBuffer.WriteString(boldStart)
-	titleSectionBuffer.WriteString("Yomel-log-title")
-	titleSectionBuffer.WriteString(boldEnd)
-	titleSectionBuffer.WriteString(underlineEnd)
-	titleSectionBuffer.WriteString("\n")
-	titleSectionBuffer.WriteString(capitalizeFirst(title))
-	w.Write(
-		titleSectionBuffer.Bytes(),
-	)
-	addNewline(
+	fmt.Fprintf(
 		w,
-		&titleSectionBuffer,
-	)
-	var totalCmdSectionBuffer bytes.Buffer
-	totalCmdSectionBuffer.WriteString(
-		convertUnderAndFirstBold("Total-cmd"),
-	)
-	totalCmdSectionBuffer.WriteString("\n")
-	totalCmdSectionBuffer.WriteString(totalPipeCmdStr)
-	w.Write(
-		totalCmdSectionBuffer.Bytes(),
-	)
-	addNewline(
-		w,
-		&totalCmdSectionBuffer,
+		"%s\n%s\n\n",
+		convertUnderAndFirstBold("Title"),
+		capitalizeFirst(title),
 	)
 }
+
+func (yl *yomelLog) printTotalCmd(
+	w io.Writer,
+	totalPipeCmdStr string,
+) {
+	fmt.Fprintf(
+		w,
+		"%s\n%s\n\n",
+		convertUnderAndFirstBold("Total-cmd"),
+		formatSideComment(totalPipeCmdStr),
+	)
+}
+
 func capitalizeFirst(s string) string {
 	if s == "" {
 		return ""
@@ -225,6 +306,7 @@ func capitalizeFirst(s string) string {
 	r, size := utf8.DecodeRuneInString(s)
 	return string(unicode.ToUpper(r)) + s[size:]
 }
+
 func convertUnderAndFirstBold(s string) string {
 	if s == "" {
 		return ""
@@ -232,53 +314,48 @@ func convertUnderAndFirstBold(s string) string {
 	r, size := utf8.DecodeRuneInString(s)
 	return underlineStart + boldStart + string(r) + boldEnd + s[size:] + underlineEnd
 }
-func printDecoratedLog(
+
+func (yl *yomelLog) printDecoratedLog(
 	w io.Writer,
-	no int,
-	desc,
-	cmdName string,
-	logFilterShell string,
-	errLogFilterShell string,
+	stageInfo StageInfo,
+	index int,
 	stderrBuf,
 	stdoutBuf *bytes.Buffer,
 	shouldLog bool,
-	cmdHasError bool,
-	firstPipeLogNewLine rune,
 ) {
-	timestamp := time.Now().Format("2006/01/02-15:04:05.000000")
-	title := convertUnderAndFirstBold(
-		fmt.Sprintf(
-			"%s[%d]_%s",
-			"Yomel-log",
-			no,
-			timestamp,
-		),
+	duration := yl.stageDurations[index]
+	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
+	endTime := yl.stageEndTimes[index]
+	stageHeader := fmt.Sprintf(
+		"%s[%d]_%s(%s)",
+		"Stage",
+		stageInfo.No,
+		convertTimeStampStr(endTime),
+		durationStr,
 	)
-	if firstPipeLogNewLine == '\n' {
-		title = string(firstPipeLogNewLine) + title
-	}
 	fmt.Fprintf(
 		w,
-		"%s\n%s \n%s\n\n%s \n%s\n\n",
-		title,
-		convertUnderAndFirstBold("Stage"),
-		capitalizeFirst(desc),
+		"%s\n%s\n\n%s \n%s\n\n",
+		convertUnderAndFirstBold(
+			stageHeader,
+		),
+		capitalizeFirst(stageInfo.Desc),
 		convertUnderAndFirstBold("Cmd"),
-		cmdName,
+		formatSideComment(stageInfo.CmdStrsWithComment),
 	)
 	if shouldLog {
-		write2Std(
+		yl.write2Std(
 			w,
-			makeNormalOrRedStdErrLabel(cmdHasError),
+			makeNormalOrRedStdErrLabel(yl.cmdHasError),
 			stderrBuf,
-			errLogFilterShell,
+			stageInfo.ErrLogFilter,
 		)
 	}
-	write2Std(
+	yl.write2Std(
 		w,
 		fmt.Sprintf("%s\n", convertUnderAndFirstBold("Stdout")),
 		stdoutBuf,
-		logFilterShell,
+		stageInfo.LogFilter,
 	)
 }
 
@@ -299,7 +376,7 @@ func makeNormalOrRedStdErrLabel(hasErr bool) string {
 	)
 }
 
-func write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string) {
+func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string) {
 	if buf.Len() <= 0 {
 		return
 	}
@@ -345,4 +422,62 @@ func addNewline(w io.Writer, buf *bytes.Buffer) {
 	}
 	fmt.Fprintln(w)
 	fmt.Fprintln(w)
+}
+
+func formatSideComment(cmdStr string) string {
+	sideCommentBlank := domain.SideCommentBlank
+
+	lines := strings.Split(cmdStr, "\n")
+	var maxBaseRune int
+	baseRunes := make([]int, len(lines))
+	idxs := make([]int, len(lines))
+	for i, line := range lines {
+		idx := strings.Index(line, sideCommentBlank)
+		idxs[i] = idx
+		if idx == -1 {
+			continue
+		}
+		baseLine := line[:idx]
+		rNum := utf8.RuneCountInString(baseLine)
+		baseRunes[i] = rNum
+		if rNum > maxBaseRune {
+			maxBaseRune = rNum
+		}
+	}
+	var sb strings.Builder
+	sb.Grow(len(cmdStr) + len(lines)*4)
+	concatBlank := "    "
+	for i, line := range lines {
+		idx := idxs[i]
+		if idx == -1 {
+			sb.WriteString(line)
+			if i < len(lines)-1 {
+				sb.WriteByte('\n')
+			}
+			continue
+		}
+
+		baseLine := line[:idx]
+		commentLine := line[idx:]
+		diff := maxBaseRune - baseRunes[i]
+
+		sb.WriteString(baseLine)
+		if diff > 0 {
+			for d := 0; d < diff; d++ {
+				sb.WriteByte(' ')
+			}
+		}
+		sb.WriteString(concatBlank)
+
+		commentBody := commentLine[len(sideCommentBlank):]
+		sb.WriteString(commentBody)
+
+		if i < len(lines)-1 {
+			sb.WriteByte('\n')
+		}
+	}
+	return sb.String()
+}
+func convertTimeStampStr(t time.Time) string {
+	return t.Format("2006/01/02-15:04:05.000000")
 }

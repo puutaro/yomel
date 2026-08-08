@@ -1,17 +1,17 @@
-package argtabledtosvalid
+package argtablesvalid
 
 import (
 	"errors"
 	"fmt"
+	"unicode"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
-func ArgTableValidate(argTables []argtabledtos.ArgTableDto) error {
-	validators := []func([]argtabledtos.ArgTableDto) error{
-		checkUnkownOptionSpecifyedErrMsg,
+func ArgTableValidate(argTables []argtables.ArgTable) error {
+	validators := []func([]argtables.ArgTable) error{
+		checkUnknownOptionSpecifyedErrMsg,
 		// checkCtrlParameterOnlyOne,
 		checkStageParameterSpecifyInCtrlErr,
 		checkIsStage,
@@ -20,6 +20,7 @@ func ArgTableValidate(argTables []argtabledtos.ArgTableDto) error {
 		checkOnlyOneOptionErr,
 		checkCmdSvcActOrderErr,
 		checkQuoteOptionIrregularPositionErr,
+		checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr,
 	}
 	for _, validate := range validators {
 		if err := validate(argTables); err != nil {
@@ -29,14 +30,14 @@ func ArgTableValidate(argTables []argtabledtos.ArgTableDto) error {
 	return nil
 }
 
-func checkUnkownOptionSpecifyedErrMsg(argTables []argtabledtos.ArgTableDto) error {
+func checkUnknownOptionSpecifyedErrMsg(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	for _, argTable := range argTables {
 		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
-		if argTable.UnkownOption != "" {
+		if argTable.UnknownOption != "" {
 			return fmt.Errorf(
 				unknownParameterSpecifyedErrMsg,
-				argTable.UnkownOption,
+				argTable.UnknownOption,
 				stageNo,
 			)
 		}
@@ -44,7 +45,7 @@ func checkUnkownOptionSpecifyedErrMsg(argTables []argtabledtos.ArgTableDto) erro
 	return nil
 }
 
-func checkIsStage(argTables []argtabledtos.ArgTableDto) error {
+func checkIsStage(argTables []argtables.ArgTable) error {
 	for _, argTable := range argTables {
 		if argTable.IsStage {
 			return nil
@@ -52,7 +53,7 @@ func checkIsStage(argTables []argtabledtos.ArgTableDto) error {
 	}
 	return errors.New(stageNotFound)
 }
-func checkIsCmd(argTables []argtabledtos.ArgTableDto) error {
+func checkIsCmd(argTables []argtables.ArgTable) error {
 	stageNum := 0
 	for _, argTable := range argTables {
 		if !argTable.IsStage {
@@ -79,7 +80,7 @@ func checkIsCmd(argTables []argtabledtos.ArgTableDto) error {
 	return nil
 }
 
-func checkCtrlParameterSpecifyInStageErr(argTables []argtabledtos.ArgTableDto) error {
+func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	for _, argTable := range argTables {
 		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
@@ -112,34 +113,34 @@ func checkCtrlParameterSpecifyInStageErr(argTables []argtabledtos.ArgTableDto) e
 // }
 
 func checkStageParameterSpecifyInCtrlErr(
-	argTables []argtabledtos.ArgTableDto,
+	argTables []argtables.ArgTable,
 ) error {
 	checkers := []struct {
-		targetParameterCheckFn func(argtable argtabledtos.ArgTableDto) bool
+		targetParameterCheckFn func(argtable argtables.ArgTable) bool
 		targetParameterSignal  string
 	}{
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
 			targetParameterSignal:  argtables.CmdOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsSvc },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsSvc },
 			targetParameterSignal:  argtables.SvcOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsAct },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsAct },
 			targetParameterSignal:  argtables.ActOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsArg },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsArg },
 			targetParameterSignal:  argtables.ArgOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsOpt },
 			targetParameterSignal:  argtables.OptOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsLopt },
+			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsLopt },
 			targetParameterSignal:  argtables.LoptOpSignal,
 		},
 	}
@@ -156,8 +157,8 @@ func checkStageParameterSpecifyInCtrlErr(
 	return nil
 }
 func execCheckStageParameterSpecifyInCtrl(
-	argTables []argtabledtos.ArgTableDto,
-	isCheckParameter func(t argtabledtos.ArgTableDto) bool,
+	argTables []argtables.ArgTable,
+	isCheckParameter func(t argtables.ArgTable) bool,
 	parameterSignal string,
 ) error {
 	stageNo := 0
@@ -176,15 +177,15 @@ func execCheckStageParameterSpecifyInCtrl(
 	return nil
 }
 func checkOnlyOneOptionErr(
-	argTables []argtabledtos.ArgTableDto,
+	argTables []argtables.ArgTable,
 ) error {
 	checkers := []struct {
-		targetParameterCheckFn func(argtable argtabledtos.ArgTableDto) bool
+		targetParameterCheckFn func(argtable argtables.ArgTable) bool
 		targetParameters       string
 	}{
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsLog || a.IsNoLog
 			},
@@ -192,7 +193,7 @@ func checkOnlyOneOptionErr(
 		},
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsLogFilter
 			},
@@ -200,7 +201,7 @@ func checkOnlyOneOptionErr(
 		},
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsErrLogFilter
 			},
@@ -208,7 +209,7 @@ func checkOnlyOneOptionErr(
 		},
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsCmd
 			},
@@ -216,7 +217,7 @@ func checkOnlyOneOptionErr(
 		},
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsSvc
 			},
@@ -224,7 +225,7 @@ func checkOnlyOneOptionErr(
 		},
 		{
 			targetParameterCheckFn: func(
-				a argtabledtos.ArgTableDto,
+				a argtables.ArgTable,
 			) bool {
 				return a.IsAct
 			},
@@ -244,8 +245,8 @@ func checkOnlyOneOptionErr(
 	return nil
 }
 func execCheckOnlyOneOptionErr(
-	argTables []argtabledtos.ArgTableDto,
-	targetPrameterCheckFn func(argtabledtos.ArgTableDto) bool,
+	argTables []argtables.ArgTable,
+	targetPrameterCheckFn func(argtables.ArgTable) bool,
 	targetParametersSignal string,
 ) error {
 	stageNo := 0
@@ -270,7 +271,7 @@ func execCheckOnlyOneOptionErr(
 	return nil
 }
 
-func checkCmdSvcActOrderErr(argTables []argtabledtos.ArgTableDto) error {
+func checkCmdSvcActOrderErr(argTables []argtables.ArgTable) error {
 	stageNo := 0
 	curMainArgNum := 0
 	cmdOrder := 1
@@ -303,7 +304,7 @@ func checkCmdSvcActOrderErr(argTables []argtabledtos.ArgTableDto) error {
 	return nil
 }
 func checkQuoteOptionIrregularPositionErr(
-	argTables []argtabledtos.ArgTableDto,
+	argTables []argtables.ArgTable,
 ) error {
 	stageNo := 0
 	for index, argTable := range argTables {
@@ -323,6 +324,44 @@ func checkQuoteOptionIrregularPositionErr(
 			quoteOptionIrregularPositionErrMsg,
 			stageNo,
 		)
+	}
+	return nil
+}
+
+func checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(argtables []argtables.ArgTable) error {
+	for _, argTable := range argtables {
+		if !argTable.IsOpt &&
+			!argTable.IsLopt &&
+			!argTable.IsValue &&
+			!argTable.IsArg {
+			continue
+		}
+		err := execCheckDescriptionSuffixMustBealPhanumericPascalCaseErr(
+			argTable.Comment,
+			argTable.StageNo,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func execCheckDescriptionSuffixMustBealPhanumericPascalCaseErr(
+	str string,
+	stageNo int,
+) error {
+	if str == "" {
+		return nil
+	}
+	runes := []rune(str)
+	if !unicode.IsUpper(runes[0]) || !unicode.IsLetter(runes[0]) {
+		return fmt.Errorf(descriptionSuffixMustBealPhanumericPascalCaseErrMsg, stageNo)
+	}
+	for _, r := range runes[1:] {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			return fmt.Errorf(descriptionSuffixMustBealPhanumericPascalCaseErrMsg, stageNo)
+		}
 	}
 	return nil
 }

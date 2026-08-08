@@ -1,4 +1,4 @@
-package argtabledtosvalid
+package argtablesvalid
 
 import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
@@ -29,6 +29,8 @@ const (
 	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
 	argValueWithAnd          = argOpSignalWithQuote + " and " + valueOpSignalWithQuote
 	optOpSignalWithQuote     = "'" + argtables.OptOpSignal + "'"
+	lOptOpSignalWithQuote    = "'" + argtables.LoptOpSignal + "'"
+	opLopArgValueWithAnd     = optOpSignalWithQuote + " and " + lOptOpSignalWithQuote + " and " + argOpSignalWithQuote + " and " + valueOpSignalWithQuote
 	singleOpSignalWithQuote  = "'" + argtables.SingleShortOpSignal + "/" + argtables.SingleOpSignal + "'"
 	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteShortOpSignal + "/" + argtables.NoQuoteOpSignal + "'"
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
@@ -58,4 +60,6 @@ const (
 	cmdSvcActOrdrerIrregularErrMsg = cmdSvcActOpNameWithAnd + " must be" + cmdOpNameWithQuote + " -> " + svcOpNameWithQuote + " -> " + actOpNameWithQuote + " order " + stageNoSuffix
 
 	quoteOptionIrregularPositionErrMsg = quoteSingnalWithAnd + " must be immediately after " + argValueWithAnd + stageNoSuffix
+
+	descriptionSuffixMustBealPhanumericPascalCaseErrMsg = "Description suffix is must be alphanumeric pascalCase in " + opLopArgValueWithAnd + stageNoSuffix
 )

@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -11,35 +10,35 @@ import (
 
 func Test_parseOptions(t *testing.T) {
 	// Tiny helpers to minimize structural boilerplate
-	tStr := func(s string) argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{Str: &s} }
-	tCmd := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsCmd: true} }
-	tSvc := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsSvc: true} }
+	tStr := func(s string) argtables.ArgTable { return argtables.ArgTable{Str: &s} }
+	tCmd := func() argtables.ArgTable { return argtables.ArgTable{IsCmd: true} }
+	tSvc := func() argtables.ArgTable { return argtables.ArgTable{IsSvc: true} }
 	// tAct := func() args.ArgTable { return args.ArgTable{IsAct: true} }
-	tOpt := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsOpt: true} }
-	tLopt := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsLopt: true} }
-	tVal := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsValue: true} }
+	tOpt := func() argtables.ArgTable { return argtables.ArgTable{IsOpt: true} }
+	tLopt := func() argtables.ArgTable { return argtables.ArgTable{IsLopt: true} }
+	tVal := func() argtables.ArgTable { return argtables.ArgTable{IsValue: true} }
 	// tArg := func() args.ArgTable { return args.ArgTable{IsArg: true} }
 
 	tests := []struct {
 		name            string
 		nextStartIndex  int
-		input           []argtabledtos.ArgTableDto
-		isTargetMainArg func(argtabledtos.ArgTableDto) bool
-		isNextMainArg   func(argtabledtos.ArgTableDto) bool
-		isTargetOpt     func(argtabledtos.ArgTableDto) bool
+		input           []argtables.ArgTable
+		isTargetMainArg func(argtables.ArgTable) bool
+		isNextMainArg   func(argtables.ArgTable) bool
+		isTargetOpt     func(argtables.ArgTable) bool
 		want            []OptParam
 	}{
 		{
 			name:           "should parse short options with values correctly",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
 				tVal(), {QuoteTypeSignal: argtables.SingleQuote}, tStr("file.txt"),
 			},
-			isTargetMainArg: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtabledtos.ArgTableDto) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  2,
@@ -54,13 +53,13 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should parse long options without values correctly",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(),
 				tLopt(), tStr("verbose"),
 			},
-			isTargetMainArg: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtabledtos.ArgTableDto) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtabledtos.ArgTableDto) bool { return a.IsLopt },
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsLopt },
 			want: []OptParam{
 				{
 					Index:  2,
@@ -72,16 +71,16 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should stop parsing when next main argument is encountered",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(),
 				tOpt(), tStr("f"),
 				tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("file1"),
 				tSvc(), // Boundary to next main arg
 				tOpt(), tStr("ignored"),
 			},
-			isTargetMainArg: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtabledtos.ArgTableDto) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  2,
@@ -96,25 +95,25 @@ func Test_parseOptions(t *testing.T) {
 		{
 			name:           "should return empty slice when target main argument is not found",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tSvc(),
 				tOpt(), tStr("v"),
 			},
-			isTargetMainArg: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtabledtos.ArgTableDto) bool { return a.IsAct },
-			isTargetOpt:     func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
 			want:            nil,
 		},
 		{
 			name:           "should skip elements before nextStartIndex",
 			nextStartIndex: 4,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(), tOpt(), tStr("a"), tVal(), tStr("val-skip"),
 				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("val-target"),
 			},
-			isTargetMainArg: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtabledtos.ArgTableDto) bool { return a.IsAct },
-			isTargetOpt:     func(a argtabledtos.ArgTableDto) bool { return a.IsOpt },
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
 			want: []OptParam{
 				{
 					Index:  7,

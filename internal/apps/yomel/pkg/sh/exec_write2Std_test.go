@@ -1,3 +1,4 @@
+// internal/apps/yomel/pkg/sh/exec_write2Std_test.go
 package sh
 
 import (
@@ -58,7 +59,8 @@ func Test_write2Std(t *testing.T) {
 			var out bytes.Buffer
 			buf := bytes.NewBufferString(tt.buffer)
 
-			write2Std(&out, tt.label, buf, tt.filterShell)
+			yl := &yomelLog{}
+			yl.write2Std(&out, tt.label, buf, tt.filterShell)
 			assert.Equal(t, tt.wantOutput, out.String())
 		})
 	}

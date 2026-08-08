@@ -1,4 +1,3 @@
-// Write direct above line for Comment on code
 package sh
 
 import (
@@ -9,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_Gen verifies that Gen correctly converts a domain.Yomel structure into a YomelInfo structure, including control flags, title, and stage information.
 func Test_Gen(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -46,12 +44,13 @@ func Test_Gen(t *testing.T) {
 				Title:        "pipeline-title",
 				StageInfos: []StageInfo{
 					{
-						No:           1,
-						Desc:         "stage-desc",
-						IsLog:        true,
-						LogFilter:    "global-filter",
-						ErrLogFilter: "global-err-filter",
-						CmdStrs:      "echo \\\n hello",
+						No:                 1,
+						Desc:               "stage-desc",
+						IsLog:              true,
+						LogFilter:          "global-filter",
+						ErrLogFilter:       "global-err-filter",
+						CmdStrs:            "echo \\\n hello",
+						CmdStrsWithComment: "echo",
 					},
 				},
 			},
@@ -87,12 +86,13 @@ func Test_Gen(t *testing.T) {
 				Title:        "",
 				StageInfos: []StageInfo{
 					{
-						No:           1,
-						Desc:         "stage-1",
-						IsLog:        false,
-						LogFilter:    "",
-						ErrLogFilter: "",
-						CmdStrs:      "aws \\\n s3 \\\n bucket \\\n ls \\\n run \\\n --recursive",
+						No:                 1,
+						Desc:               "stage-1",
+						IsLog:              false,
+						LogFilter:          "",
+						ErrLogFilter:       "",
+						CmdStrs:            "aws \\\n s3 \\\n bucket \\\n ls \\\n run \\\n --recursive",
+						CmdStrsWithComment: "aws \\\n bucket \\\n run",
 					},
 				},
 			},

@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_directExec verifies that directExec executes the pipeline command directly and returns the correct exit code.
 func Test_directExec(t *testing.T) {
 	tests := []struct {
 		name            string

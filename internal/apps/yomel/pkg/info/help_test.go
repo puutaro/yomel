@@ -68,13 +68,13 @@ func Test_GetHelpByOption(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     []argtables.ArgTableDto
+		input     []argtables.ArgTable
 		wantHelp  *string
 		wantError error
 	}{
 		{
 			name: "should return help content when IsHelp is true in control section",
-			input: []argtables.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 0, IsHelp: true},
 			},
 			wantHelp:  &expectedHelp,
@@ -82,7 +82,7 @@ func Test_GetHelpByOption(t *testing.T) {
 		},
 		{
 			name: "should return nil when help option is not triggered",
-			input: []argtables.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 			},
 			wantHelp:  nil,

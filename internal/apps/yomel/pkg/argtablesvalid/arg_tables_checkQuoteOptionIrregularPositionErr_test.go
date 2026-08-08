@@ -1,9 +1,8 @@
-package argtabledtosvalid
+package argtablesvalid
 
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,12 +10,12 @@ import (
 func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTable
 		wantError string
 	}{
 		{
 			name: "should return nil when quote option is immediately after arg or value",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsArg: true},
@@ -26,7 +25,7 @@ func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 		},
 		{
 			name: "should return error when quote option is in irregular position",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsOpt: true},

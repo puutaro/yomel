@@ -3,9 +3,21 @@ package domain
 import (
 	"fmt"
 	"slices"
+	"strings"
+	"unicode"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+)
+
+const (
+	SideCommentBlank            = "SIED_COmMetN_BAlNk"
+	Commentout                  = "#"
+	OpArgCommentPrefixBlank     = " "
+	SpaceCommentout             = OpArgCommentPrefixBlank + Commentout
+	BackslashNewline            = "\\\n"
+	BackslashNewlineOpArgPrefix = OpArgCommentPrefixBlank + BackslashNewline +
+		OpArgCommentPrefixBlank
 )
 
 type opArgType struct {
@@ -25,17 +37,20 @@ type Control struct {
 	IsLiveStderr bool
 }
 type Stage struct {
-	No           int
-	Desc         string
-	Cmd          string
-	CmdOpArgs    []string
-	Svc          string
-	SvcOpArgs    []string
-	Act          string
-	ActOpArgs    []string
-	IsLog        *bool
-	LogFilter    string
-	ErrLogFilter string
+	No                   int
+	Desc                 string
+	Cmd                  string
+	CmdOpArgs            []string
+	CmdOpArgsWithComment []string
+	Svc                  string
+	SvcOpArgs            []string
+	SvcOpArgsWithComment []string
+	Act                  string
+	ActOpArgs            []string
+	ActOpArgsWithComment []string
+	IsLog                *bool
+	LogFilter            string
+	ErrLogFilter         string
 }
 type Yomel struct {
 	Ctrl   Control
@@ -83,6 +98,14 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 				stage.CmdOpArgs = opArgList
 			},
 		)
+		pushOpArgsWithComment(
+			stModel.CmdOps,
+			stModel.CmdLops,
+			stModel.CmdArgs,
+			func(opArgList []string) {
+				stage.CmdOpArgsWithComment = opArgList
+			},
+		)
 		pushOpArgs(
 			stModel.SvcOps,
 			stModel.SvcLops,
@@ -91,7 +114,23 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 				stage.SvcOpArgs = opArgList
 			},
 		)
+		pushOpArgsWithComment(
+			stModel.SvcOps,
+			stModel.SvcLops,
+			stModel.SvcArgs,
+			func(opArgList []string) {
+				stage.SvcOpArgsWithComment = opArgList
+			},
+		)
 		pushOpArgs(
+			stModel.ActOps,
+			stModel.ActLops,
+			stModel.ActArgs,
+			func(opArgList []string) {
+				stage.ActOpArgs = opArgList
+			},
+		)
+		pushOpArgsWithComment(
 			stModel.ActOps,
 			stModel.ActLops,
 			stModel.ActArgs,
@@ -117,6 +156,34 @@ func pushOpArgs(
 	opTypes := makeOptList(ops, shortOpPrefix)
 	lOpTypes := makeOptList(lOps, longOpPrefix)
 	argTypes := makeArgList(args)
+	totalArgOpLen := len(opTypes) +
+		len(lOpTypes) +
+		len(argTypes)
+	opArgTypeList := make([]opArgType, 0, totalArgOpLen)
+
+	opArgTypeList = append(opArgTypeList, opTypes...)
+	opArgTypeList = append(opArgTypeList, lOpTypes...)
+	opArgTypeList = append(opArgTypeList, argTypes...)
+	slices.SortFunc(opArgTypeList, func(a, b opArgType) int {
+		return a.Index - b.Index
+	})
+	for _, cmdLOpArgType := range opArgTypeList {
+		opArgStrs = append(opArgStrs, cmdLOpArgType.Str)
+	}
+	insertFn(opArgStrs)
+}
+func pushOpArgsWithComment(
+	ops []model.OptParam,
+	lOps []model.OptParam,
+	args []model.ArgParam,
+	insertFn func([]string),
+) {
+	shortOpPrefix := "-"
+	longOpPrefix := "--"
+	var opArgStrs []string
+	opTypes := makeOptListWithComment(ops, shortOpPrefix)
+	lOpTypes := makeOptListWithComment(lOps, longOpPrefix)
+	argTypes := makeArgListWithComment(args)
 	totalArgOpLen := len(opTypes) +
 		len(lOpTypes) +
 		len(argTypes)
@@ -164,6 +231,53 @@ func makeOptList(
 	}
 	return cmdLOpTypes
 }
+func makeOptListWithComment(
+	optPs []model.OptParam,
+	opPrefix string,
+) []opArgType {
+	var cmdLOpTypes []opArgType
+	for _, op := range optPs {
+		optStr := op.OptStr
+		p := op.Param
+		oat := opArgType{
+			Index: op.Index,
+		}
+		strP := p.Str
+		escapeOpComment := makeEscapeComment(op.Comment)
+		if strP == nil {
+			oat.Str = fmt.Sprintf(`%s%s`, opPrefix, optStr) +
+				SideCommentBlank + escapeOpComment
+			cmdLOpTypes = append(cmdLOpTypes, oat)
+			continue
+		}
+		oatStr := ""
+		if escapeOpComment != "" {
+			oatStr = fmt.Sprintf(
+				"%s%s",
+				escapeOpComment,
+				BackslashNewlineOpArgPrefix,
+			)
+		}
+		str := *strP
+		switch p.QuoteType {
+		case argtables.DoubleQuote:
+			oatStr += fmt.Sprintf(`%s%s "%s"`, opPrefix, optStr, str)
+		case argtables.SingleQuote:
+			oatStr += fmt.Sprintf(`%s%s '%s'`, opPrefix, optStr, str)
+		case argtables.NoQuote:
+			oatStr += fmt.Sprintf(`%s%s %s`, opPrefix, optStr, str)
+		}
+		escapeValComemnt := makeEscapeComment(p.Comment)
+		if escapeValComemnt == "" {
+			oat.Str = oatStr
+		} else {
+			oat.Str = oatStr +
+				SideCommentBlank + escapeValComemnt
+		}
+		cmdLOpTypes = append(cmdLOpTypes, oat)
+	}
+	return cmdLOpTypes
+}
 
 func makeArgList(
 	argPs []model.ArgParam,
@@ -192,4 +306,76 @@ func makeArgList(
 		cmdArgTypes = append(cmdArgTypes, oat)
 	}
 	return cmdArgTypes
+}
+func makeArgListWithComment(
+	argPs []model.ArgParam,
+) []opArgType {
+	var cmdArgTypes []opArgType
+	for _, arg := range argPs {
+		p := arg.Param
+		strP := p.Str
+		oat := opArgType{
+			Index: arg.Index,
+		}
+		if strP == nil {
+			oat.Str = ""
+			cmdArgTypes = append(cmdArgTypes, oat)
+			continue
+		}
+		str := *strP
+		oatStr := ""
+		switch p.QuoteType {
+		case argtables.DoubleQuote:
+			oatStr = fmt.Sprintf(`"%s"`, str)
+		case argtables.SingleQuote:
+			oatStr = fmt.Sprintf(`'%s'`, str)
+		case argtables.NoQuote:
+			oatStr = fmt.Sprintf(`%s`, str)
+		}
+		escapeArgComemnt := makeEscapeComment(p.Comment)
+		if escapeArgComemnt == "" {
+			oat.Str = oatStr
+		} else {
+			oat.Str = oatStr +
+				SideCommentBlank + escapeArgComemnt
+		}
+		cmdArgTypes = append(cmdArgTypes, oat)
+	}
+	return cmdArgTypes
+}
+
+func makeEscapeComment(comment string) string {
+	if comment == "" {
+		return ""
+	}
+	grayStart := "\x1b[38;5;244m"
+	colorEnd := "\x1b[39m"
+	return fmt.Sprintf(
+		"%s`%s%s`%s",
+		grayStart,
+		Commentout,
+		toLowerWithSpaces(comment),
+		colorEnd,
+	)
+}
+
+func toLowerWithSpaces(s string) string {
+	var sb strings.Builder
+	runes := []rune(s)
+	runesLen := len(runes)
+	for i := 0; i < runesLen; i++ {
+		r := runes[i]
+		nextRuneIndex := i + 1
+		if !unicode.IsUpper(r) ||
+			(nextRuneIndex < runesLen &&
+				unicode.IsUpper(runes[nextRuneIndex])) {
+			sb.WriteRune(r)
+			continue
+		}
+		if i > 0 {
+			sb.WriteRune(' ')
+		}
+		sb.WriteRune(unicode.ToLower(r))
+	}
+	return sb.String()
 }

@@ -6,10 +6,8 @@ import (
 	"os"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arglist"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtosvalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablevalid"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablesvalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
@@ -53,17 +51,11 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", *version)
 		os.Exit(normalExitSignal)
 	}
-	if argTableDtosValidErr := argtablevalid.ArgTableValid(argTables); argTableDtosValidErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", argTableDtosValidErr)
+	if argtablesValidErr := argtablesvalid.ArgTableValidate(argTables); argtablesValidErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", argtablesValidErr)
 		os.Exit(errorExitSignal)
 	}
-	argTableDtos := argtabledtos.GenArgTableDto(argTables)
-	if argTableValidateErr := argtabledtosvalid.ArgTableValidate(argTableDtos); argTableValidateErr != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", argTableValidateErr)
-		os.Exit(errorExitSignal)
-		return
-	}
-	ctrl, stageModels := model.Parse(argTableDtos)
+	ctrl, stageModels := model.Parse(argTables)
 	if modelValidErr := modelvalid.ModelValidate(stageModels); modelValidErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", modelValidErr)
 		os.Exit(errorExitSignal)

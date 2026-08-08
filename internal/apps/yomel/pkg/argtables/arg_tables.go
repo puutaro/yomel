@@ -64,7 +64,7 @@ const (
 	NoQuote
 )
 
-type ArgTableDto struct {
+type ArgTable struct {
 	No              int
 	IsVersion       bool
 	IsHelp          bool
@@ -82,10 +82,11 @@ type ArgTableDto struct {
 	IsCmd           bool
 	IsSvc           bool
 	IsAct           bool
-	OptStr          *string
-	LoptStr         *string
-	ValueStr        *string
-	ArgStr          *string
+	IsOpt           bool
+	IsLopt          bool
+	IsValue         bool
+	IsArg           bool
+	Comment         string
 	QuoteTypeSignal QuoteType
 	UnknownOption   string
 	Str             *string
@@ -101,8 +102,8 @@ const (
 // TODO judge option or str about --s, --n
 // I escape this judge for rare case considering --s, --n as str
 // So this implement apply --s, --n as option always
-func GenArgTable(inputArgs []string) []ArgTableDto {
-	var argTableDtos []ArgTableDto
+func GenArgTable(inputArgs []string) []ArgTable {
+	var argtables []ArgTable
 	stageNum := 0
 	expectedNext := ExpectNormalStr
 
@@ -112,7 +113,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 	}
 	for i, inputArg := range inputArgs {
 		displayNum := i + 1
-		argTable := ArgTableDto{
+		argTable := ArgTable{
 			No:      displayNum,
 			StageNo: stageNum,
 		}
@@ -127,7 +128,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 					inputArg != SingleShortOpSignal):
 			val := inputArg
 			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
+			argtables = append(argtables, argTable)
 			expectedNext = ExpectNormalStr
 			continue
 		case
@@ -135,7 +136,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 				!strings.HasPrefix(inputArg, "-"):
 			val := inputArg
 			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
+			argtables = append(argtables, argTable)
 			expectedNext = ExpectNormalStr
 			continue
 		case
@@ -144,7 +145,7 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 				!slices.Contains(pureStrParameters, inputArg):
 			val := inputArg
 			argTable.Str = &val
-			argTableDtos = append(argTableDtos, argTable)
+			argtables = append(argtables, argTable)
 			expectedNext = ExpectNormalStr
 			continue
 		}
@@ -189,14 +190,18 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			argTable.IsAct = true
 			expectedNext = ExpectUp2PureParameterStr
 		case strings.HasPrefix(inputArg, OptOpSignal):
-			argTable.OptStr = removePrefix(inputArg, OptOpSignal)
+			argTable.IsOpt = true
+			argTable.Comment = removePrefix(inputArg, OptOpSignal)
 		case strings.HasPrefix(inputArg, LoptOpSignal):
-			argTable.LoptStr = removePrefix(inputArg, LoptOpSignal)
+			argTable.IsLopt = true
+			argTable.Comment = removePrefix(inputArg, LoptOpSignal)
 		case strings.HasPrefix(inputArg, ValueOptSignal):
-			argTable.ValueStr = removePrefix(inputArg, ValueOptSignal)
+			argTable.IsValue = true
+			argTable.Comment = removePrefix(inputArg, ValueOptSignal)
 			expectedNext = ExpectUp2HyphenStr
 		case strings.HasPrefix(inputArg, ArgOpSignal):
-			argTable.ArgStr = removePrefix(inputArg, ArgOpSignal)
+			argTable.IsArg = true
+			argTable.Comment = removePrefix(inputArg, ArgOpSignal)
 			expectedNext = ExpectUp2HyphenStr
 		case
 			inputArg == SingleOpSignal,
@@ -211,12 +216,12 @@ func GenArgTable(inputArgs []string) []ArgTableDto {
 			expectedNext = ExpectNormalStr
 		}
 
-		argTableDtos = append(argTableDtos, argTable)
+		argtables = append(argtables, argTable)
 	}
-	return argTableDtos
+	return argtables
 }
 
-func removePrefix(str, prefix string) *string {
+func removePrefix(str, prefix string) string {
 	rest, _ := strings.CutPrefix(str, prefix)
-	return &rest
+	return rest
 }

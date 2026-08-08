@@ -3,23 +3,21 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_Parse verifies that control flags and various stage models are parsed correctly.
 func Test_Parse(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTable
 		wantCtrl  ControlModel
 		wantStMod []StageModel
 	}{
 		{
 			name: "should parse control flags and single stage model correctly",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsLog: true},
 				{No: 2, StageNo: 1, IsStage: true},
 				{No: 3, StageNo: 1, Str: testutil.Ptr("stage1")},
@@ -57,7 +55,7 @@ func Test_Parse(t *testing.T) {
 		},
 		{
 			name: "should parse multiple stages with options, services, actions, and filters",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsTitle: true},
 				{No: 2, StageNo: 0, Str: testutil.Ptr("test title")},
 				{No: 3, StageNo: 0, IsLog: true},
@@ -109,7 +107,7 @@ func Test_Parse(t *testing.T) {
 		},
 		{
 			name: "should handle control version, help, no-log, err-log-filter, and comprehensive stage parameters with service/action options and lopts",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsVersion: true},
 				{No: 2, StageNo: 0, IsHelp: true},
 				{No: 3, StageNo: 0, IsNoLog: true},
@@ -167,7 +165,7 @@ func Test_Parse(t *testing.T) {
 		},
 		{
 			name: "should handle service and action specific options, lopts, and arguments correctly",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 1, IsStage: true},
 				{No: 2, StageNo: 1, Str: testutil.Ptr("svc-act-stage")},
 				{No: 3, StageNo: 1, IsCmd: true},

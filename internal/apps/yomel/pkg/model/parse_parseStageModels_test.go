@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -13,13 +12,13 @@ import (
 func Test_parseStageModels(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     []argtabledtos.ArgTableDto
+		input     []argtables.ArgTable
 		wantCtrl  ControlModel
 		wantStMod []StageModel
 	}{
 		{
 			name: "should parse control flags and single stage model correctly",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsLog: true},
 				{No: 2, StageNo: 1, IsStage: true},
 				{No: 3, StageNo: 1, Str: testutil.Ptr("stage1")},
@@ -57,7 +56,7 @@ func Test_parseStageModels(t *testing.T) {
 		},
 		{
 			name: "should parse multiple stages with options, services, actions, and filters",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsLog: true},
 				{No: 2, StageNo: 0, IsLogFilter: true},
 				{No: 3, StageNo: 0, Str: testutil.Ptr("global-filter")},
@@ -106,7 +105,7 @@ func Test_parseStageModels(t *testing.T) {
 		},
 		{
 			name: "should handle control version, help, no-log, err-log-filter, and comprehensive stage parameters with service/action options and lopts",
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				{No: 1, StageNo: 0, IsVersion: true},
 				{No: 2, StageNo: 0, IsHelp: true},
 				{No: 3, StageNo: 0, IsNoLog: true},

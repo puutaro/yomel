@@ -9,9 +9,9 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
-func GetVersion(argTableDtos []argtables.ArgTableDto) (*string, error) {
+func GetVersion(argtables []argtables.ArgTable) (*string, error) {
 	stageNo := 0
-	for _, argTableDto := range argTableDtos {
+	for _, argTableDto := range argtables {
 		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)
 		if stageNo > 0 {
 			return nil, nil

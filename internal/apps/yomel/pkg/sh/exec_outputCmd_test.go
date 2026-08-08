@@ -1,4 +1,4 @@
-// Write direct above line for Comment on code
+// Test_outputCmd verifies that outputCmd correctly prints the generated pipeline command string to stdout.
 package sh
 
 import (
@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_outputCmd verifies that outputCmd correctly prints the generated pipeline command string to stdout.
 func Test_outputCmd(t *testing.T) {
 	tests := []struct {
 		name            string

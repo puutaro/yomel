@@ -1,4 +1,4 @@
-// Test_printTitleLog verifies that printTitleLog correctly outputs the title and pipeline command log.
+// Test_printTitleLog verifies that printTitleLog correctly outputs the title.
 package sh
 
 import (
@@ -19,33 +19,39 @@ func Test_printTitleLog(t *testing.T) {
 	tests := []struct {
 		name             string
 		title            string
-		totalPipeCmdStr  string
 		wantOutputSubstr []string
 	}{
 		{
-			name:            "should_print_title_log_with_title_and_pipeline_command",
-			title:           "Initialize-environment",
-			totalPipeCmdStr: "go mod download",
+			name:  "should print title log when title is provided",
+			title: "Initialize-environment",
 			wantOutputSubstr: []string{
-				"Yomel-log-title",
+				"Title",
 				"Initialize-environment",
-				"Total-cmd",
-				"go mod download",
 			},
+		},
+		{
+			name:             "should output nothing when title is empty",
+			title:            "",
+			wantOutputSubstr: []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var combinedLog bytes.Buffer
+			yl := &yomelLog{}
 
-			printTitleLog(
+			yl.printTitleLog(
 				&combinedLog,
 				tt.title,
-				tt.totalPipeCmdStr,
 			)
 
 			output := stripTitleANSI(combinedLog.String())
+
+			if len(tt.wantOutputSubstr) == 0 {
+				assert.Empty(t, output)
+				return
+			}
 
 			for _, substr := range tt.wantOutputSubstr {
 				assert.Contains(t, output, substr)

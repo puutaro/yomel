@@ -3,78 +3,78 @@ package model
 import (
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtabledtos"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_getOneStr(t *testing.T) {
 	// Tiny helpers to minimize structural boilerplate
-	tStr := func(s string) argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{Str: &s} }
-	tCmd := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsCmd: true} }
-	tStage := func() argtabledtos.ArgTableDto { return argtabledtos.ArgTableDto{IsStage: true} }
+	tStr := func(s string) argtables.ArgTable { return argtables.ArgTable{Str: &s} }
+	tCmd := func() argtables.ArgTable { return argtables.ArgTable{IsCmd: true} }
+	tStage := func() argtables.ArgTable { return argtables.ArgTable{IsStage: true} }
 
 	tests := []struct {
 		name           string
 		nextStartIndex int
-		input          []argtabledtos.ArgTableDto
-		isCheckFn      func(argtabledtos.ArgTableDto) bool
+		input          []argtables.ArgTable
+		isCheckFn      func(argtables.ArgTable) bool
 		want           *string
 	}{
 		{
 			name:           "should return string pointer when target flag is matched and followed by a string",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(), tStr("aws"),
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
 			want:      testutil.Ptr("aws"),
 		},
 		{
 			name:           "should skip elements before nextStartIndex",
 			nextStartIndex: 2,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tStage(), tStr("skipped-stage"),
 				tStage(), tStr("target-stage"),
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsStage },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsStage },
 			want:      testutil.Ptr("target-stage"),
 		},
 		{
 			name:           "should return nil when matched flag is at the end of the slice",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(),
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
 			want:      nil,
 		},
 		{
 			name:           "should return nil when the next element's Str field is nil",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(),
 				tStage(), // Str field is nil
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
 			want:      nil,
 		},
 		{
 			name:           "should return nil when target flag does not exist in the slice",
 			nextStartIndex: 0,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(), tStr("aws"),
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsStage },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsStage },
 			want:      nil,
 		},
 		{
 			name:           "should return nil immediately when nextStartIndex exceeds input slice length",
 			nextStartIndex: 3,
-			input: []argtabledtos.ArgTableDto{
+			input: []argtables.ArgTable{
 				tCmd(), tStr("aws"),
 			},
-			isCheckFn: func(a argtabledtos.ArgTableDto) bool { return a.IsCmd },
+			isCheckFn: func(a argtables.ArgTable) bool { return a.IsCmd },
 			want:      nil,
 		},
 	}

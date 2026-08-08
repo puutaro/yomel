@@ -6,23 +6,16 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
 )
 
-const (
-	opArgPrefixBlank            = " "
-	backslashNewline            = "\\\n"
-	backslashNewlineOpArgPrefix = opArgPrefixBlank + backslashNewline +
-		opArgPrefixBlank
-	verticalbar
-)
-
 type stageCommand string
 
 type StageInfo struct {
-	No           int
-	Desc         string
-	IsLog        bool
-	LogFilter    string
-	ErrLogFilter string
-	CmdStrs      string
+	No                 int
+	Desc               string
+	IsLog              bool
+	LogFilter          string
+	ErrLogFilter       string
+	CmdStrs            string
+	CmdStrsWithComment string
 }
 type YomelInfo struct {
 	IsDirect     bool
@@ -70,31 +63,60 @@ func GenStageInfo(yomel domain.Yomel) []StageInfo {
 		var stageCmd stageCommand
 		stageCmd.insertStageEl(
 			[]string{stage.Cmd},
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			stage.CmdOpArgs,
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			[]string{stage.Svc},
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			stage.SvcOpArgs,
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			[]string{stage.Act},
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			stage.ActOpArgs,
-			backslashNewlineOpArgPrefix,
+			domain.BackslashNewlineOpArgPrefix,
 		)
 
 		yomelInfo.CmdStrs =
-			strings.Trim(string(stageCmd), backslashNewlineOpArgPrefix)
+			strings.Trim(string(stageCmd), domain.BackslashNewlineOpArgPrefix)
+
+		var stageCmdWithComment stageCommand
+		stageCmdWithComment.insertStageEl(
+			[]string{stage.Cmd},
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		stageCmdWithComment.insertStageEl(
+			stage.CmdOpArgsWithComment,
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		stageCmdWithComment.insertStageEl(
+			[]string{stage.Svc},
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		stageCmdWithComment.insertStageEl(
+			stage.SvcOpArgsWithComment,
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		stageCmdWithComment.insertStageEl(
+			[]string{stage.Act},
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		stageCmdWithComment.insertStageEl(
+			stage.ActOpArgsWithComment,
+			domain.BackslashNewlineOpArgPrefix,
+		)
+		yomelInfo.CmdStrsWithComment =
+			strings.Trim(string(stageCmdWithComment), domain.BackslashNewlineOpArgPrefix)
+
 		yomelInfos[i] = yomelInfo
 	}
 	return yomelInfos
@@ -108,7 +130,7 @@ func (tYomelStr *stageCommand) insertStageEl(insertStrs []string, prefix string)
 		prefix +
 			strings.Join(
 				insertStrs,
-				backslashNewlineOpArgPrefix,
+				domain.BackslashNewlineOpArgPrefix,
 			),
 	)
 }
