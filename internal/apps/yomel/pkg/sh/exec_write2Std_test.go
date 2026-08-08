@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_write2Std verifies that write2Std correctly processes buffer output with or without a filter shell.
 func Test_write2Std(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -29,7 +28,7 @@ func Test_write2Std(t *testing.T) {
 			label:       "stdout:\n",
 			buffer:      "hello world",
 			filterShell: "",
-			wantOutput:  "stdout:\nhello world\n\n",
+			wantOutput:  "stdout:\nhello world",
 		},
 		{
 			name:        "should do nothing when buffer is empty",
@@ -50,7 +49,7 @@ func Test_write2Std(t *testing.T) {
 			label:       "stdout:\n",
 			buffer:      "apple\nbanana\napplet\n",
 			filterShell: "grep 'app' | head -n 1 | tr -d '\n'",
-			wantOutput:  "stdout:\napple\n\n",
+			wantOutput:  "stdout:\napple",
 		},
 	}
 

@@ -39,7 +39,7 @@ func Test_makeArgListWithComment(t *testing.T) {
 			want: []opArgType{
 				{
 					Index: 1,
-					Str:   `'arg1'` + SideCommentBlank + "\x1b[37m`#arg comment`\x1b[39m",
+					Str:   `'arg1'` + SideCommentBlank + "\x1b[38;5;244m`# arg comment`\x1b[39m",
 				},
 				{
 					Index: 2,

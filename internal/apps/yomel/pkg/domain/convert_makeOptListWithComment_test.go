@@ -51,7 +51,7 @@ func Test_makeOptListWithComment(t *testing.T) {
 			want: []opArgType{
 				{
 					Index: 1,
-					Str:   "\x1b[37m`#opt comment`\x1b[39m \\\n --e 'val1'" + SideCommentBlank + "\x1b[37m`#val comment`\x1b[39m",
+					Str:   "\x1b[38;5;244m`# opt comment`\x1b[39m \\\n --e 'val1'" + SideCommentBlank + "\x1b[38;5;244m`# val comment`\x1b[39m",
 				},
 				{
 					Index: 2,

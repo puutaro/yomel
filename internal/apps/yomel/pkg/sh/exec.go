@@ -17,14 +17,16 @@ import (
 )
 
 const (
-	redStart       = "\x1b[31m"
-	colorEnd       = "\x1b[39m"
-	blueGreenStart = "\x1b[30m"
-	ansiEnd        = "\x1b[0m"
-	boldStart      = "\x1b[1m"
-	boldEnd        = "\x1b[22m"
-	underlineStart = "\x1b[4m"
-	underlineEnd   = "\x1b[24m"
+	redStart                              = "\x1b[31m"
+	colorEnd                              = "\x1b[39m"
+	blueGreenStart                        = "\x1b[30m"
+	ansiEnd                               = "\x1b[0m"
+	boldStart                             = "\x1b[1m"
+	boldEnd                               = "\x1b[22m"
+	underlineStart                        = "\x1b[4m"
+	underlineEnd                          = "\x1b[24m"
+	sectionPrefixNewlineNum               = 2
+	miniSectionOrContentsPrefixNewlineNum = 1
 )
 
 type yomelLog struct {
@@ -183,11 +185,6 @@ func (yl *yomelLog) make() bytes.Buffer {
 	if stageLen > 1 {
 		yl.printTitleLog(&combinedLog, yomelTitle)
 		yl.printTotalCmd(&combinedLog, totalPipeCmdStr)
-	} else {
-		fmt.Fprintf(
-			&combinedLog,
-			"\n",
-		)
 	}
 	for i, stageInfo := range yl.stageInfos {
 		shouldLog := stageInfo.IsLog || yl.cmdHasError
@@ -258,7 +255,7 @@ func (yl *yomelLog) printYomelLogStartHolder(
 	yomelLogStartHolderBuffer.WriteString("\n")
 	yomelLogStartHolderBuffer.WriteString(
 		fmt.Sprintf(
-			"%s%s%s_%s%s%s\n",
+			"%s%s%s_%s%s%s",
 			underlineStart,
 			boldStart,
 			"Yomel-log",
@@ -279,9 +276,11 @@ func (yl *yomelLog) printTitleLog(
 	if title == "" {
 		return
 	}
+	newLIneStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 	fmt.Fprintf(
 		w,
-		"%s\n%s\n\n",
+		"%s%s\n%s",
+		newLIneStr,
 		convertUnderAndFirstBold("Title"),
 		capitalizeFirst(title),
 	)
@@ -291,9 +290,11 @@ func (yl *yomelLog) printTotalCmd(
 	w io.Writer,
 	totalPipeCmdStr string,
 ) {
+	newlineStr := compNewLine(w, sectionPrefixNewlineNum)
 	fmt.Fprintf(
 		w,
-		"%s\n%s\n\n",
+		"%s%s\n%s",
+		newlineStr,
 		convertUnderAndFirstBold("Total-cmd"),
 		formatSideComment(totalPipeCmdStr),
 	)
@@ -326,6 +327,7 @@ func (yl *yomelLog) printDecoratedLog(
 	duration := yl.stageDurations[index]
 	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
 	endTime := yl.stageEndTimes[index]
+	newlineCompedForStage := compNewLine(w, sectionPrefixNewlineNum)
 	stageHeader := fmt.Sprintf(
 		"%s[%d]_%s(%s)",
 		"Stage",
@@ -335,28 +337,42 @@ func (yl *yomelLog) printDecoratedLog(
 	)
 	fmt.Fprintf(
 		w,
-		"%s\n%s\n\n%s \n%s\n\n",
+		"%s%s\n%s",
+		newlineCompedForStage,
 		convertUnderAndFirstBold(
 			stageHeader,
 		),
 		capitalizeFirst(stageInfo.Desc),
+	)
+	newlineCompedForCmd := compNewLine(w, sectionPrefixNewlineNum)
+	fmt.Fprintf(
+		w,
+		"%s%s \n%s",
+		newlineCompedForCmd,
 		convertUnderAndFirstBold("Cmd"),
 		formatSideComment(stageInfo.CmdStrsWithComment),
 	)
 	if shouldLog {
+		newlineForStdErr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 		yl.write2Std(
 			w,
-			makeNormalOrRedStdErrLabel(yl.cmdHasError),
+			newlineForStdErr+makeNormalOrRedStdErrLabel(yl.cmdHasError),
 			stderrBuf,
 			stageInfo.ErrLogFilter,
 		)
 	}
+	newlineCompedForStdout := compNewLine(w, sectionPrefixNewlineNum)
 	yl.write2Std(
 		w,
-		fmt.Sprintf("%s\n", convertUnderAndFirstBold("Stdout")),
+		fmt.Sprintf(
+			"%s%s",
+			newlineCompedForStdout,
+			convertUnderAndFirstBold("Stdout"),
+		),
 		stdoutBuf,
 		stageInfo.LogFilter,
 	)
+	fmt.Fprintln(w)
 }
 
 func makeNormalOrRedStdErrLabel(hasErr bool) string {
@@ -364,14 +380,14 @@ func makeNormalOrRedStdErrLabel(hasErr bool) string {
 	if hasErr {
 		logGenre = "Error"
 		return fmt.Sprintf(
-			"%s%s%s\n",
+			"%s%s%s",
 			redStart,
 			convertUnderAndFirstBold(logGenre),
 			colorEnd,
 		)
 	}
 	return fmt.Sprintf(
-		"%s\n",
+		"%s",
 		convertUnderAndFirstBold(logGenre),
 	)
 }
@@ -382,8 +398,9 @@ func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filt
 	}
 	fmt.Fprint(w, label)
 	if filterShell == "" {
+		newLineStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
+		w.Write([]byte(newLineStr))
 		w.Write(buf.Bytes())
-		addNewline(w, buf)
 		return
 	}
 	filterShellCmd := exec.Command("bash", "-c", filterShell)
@@ -393,13 +410,16 @@ func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filt
 	filterShellCmdStderrBuf := new(bytes.Buffer)
 	filterShellCmd.Stderr = filterShellCmdStderrBuf
 	if err := filterShellCmd.Run(); err == nil || filterShellCmdStderrBuf.Len() <= 0 {
+		newLineStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
+		w.Write([]byte(newLineStr))
 		w.Write(filterShellCmdStdoutBuf.Bytes())
-		addNewline(w, filterShellCmdStdoutBuf)
 		return
 	}
+	newlineForFilterShell := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 	fmt.Fprintf(
 		w,
-		"%s\n",
+		"%s%s",
+		newlineForFilterShell,
 		fmt.Sprintf(
 			"%s%s%s",
 			redStart,
@@ -407,21 +427,9 @@ func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filt
 			colorEnd,
 		),
 	)
+	newLineStrForFiltershellErrCon := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
+	w.Write([]byte(newLineStrForFiltershellErrCon))
 	w.Write(filterShellCmdStderrBuf.Bytes())
-	addNewline(w, filterShellCmdStderrBuf)
-}
-
-func addNewline(w io.Writer, buf *bytes.Buffer) {
-	if buf.Len() == 0 {
-		return
-	}
-	length := buf.Len()
-	bufBytes := buf.Bytes()
-	if bufBytes[length-1] == '\n' {
-		return
-	}
-	fmt.Fprintln(w)
-	fmt.Fprintln(w)
 }
 
 func formatSideComment(cmdStr string) string {
@@ -480,4 +488,25 @@ func formatSideComment(cmdStr string) string {
 }
 func convertTimeStampStr(t time.Time) string {
 	return t.Format("2006/01/02-15:04:05.000000")
+}
+
+func compNewLine(w io.Writer, newLIneNum int) string {
+	newlineStr := "\n"
+	buf, ok := w.(*bytes.Buffer)
+	if !ok {
+		return strings.Repeat(newlineStr, newLIneNum)
+	}
+	b := buf.Bytes()
+	newlineCount := 0
+	for i := len(b) - 1; i >= 0; i-- {
+		if b[i] != '\n' {
+			break
+		}
+		newlineCount++
+	}
+	addCount := newLIneNum - newlineCount
+	if addCount >= 0 {
+		return strings.Repeat("\n", addCount)
+	}
+	return ""
 }

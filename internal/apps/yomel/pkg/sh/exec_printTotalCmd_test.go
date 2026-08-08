@@ -19,13 +19,13 @@ func Test_printTotalCmd(t *testing.T) {
 			name:            "should print total command with side comments formatted correctly",
 			title:           "test-title",
 			totalPipeCmdStr: "echo 'hello'    `#first comment`\necho 'world'    `#second comment`",
-			want:            "\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'hello'    `#first comment`\necho 'world'    `#second comment`\n\n",
+			want:            "\n\n\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'hello'    `#first comment`\necho 'world'    `#second comment`",
 		},
 		{
 			name:            "should handle single line total command string correctly",
 			title:           "simple-title",
 			totalPipeCmdStr: "echo 'simple'",
-			want:            "\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'simple'\n\n",
+			want:            "\n\n\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'simple'",
 		},
 	}
 

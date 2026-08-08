@@ -14,7 +14,7 @@ const (
 	SideCommentBlank            = "SIED_COmMetN_BAlNk"
 	Commentout                  = "#"
 	OpArgCommentPrefixBlank     = " "
-	SpaceCommentout             = OpArgCommentPrefixBlank + Commentout
+	SpaceCommentout             = Commentout + OpArgCommentPrefixBlank
 	BackslashNewline            = "\\\n"
 	BackslashNewlineOpArgPrefix = OpArgCommentPrefixBlank + BackslashNewline +
 		OpArgCommentPrefixBlank
@@ -353,7 +353,7 @@ func makeEscapeComment(comment string) string {
 	return fmt.Sprintf(
 		"%s`%s%s`%s",
 		grayStart,
-		Commentout,
+		SpaceCommentout,
 		toLowerWithSpaces(comment),
 		colorEnd,
 	)
