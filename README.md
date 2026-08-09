@@ -8,6 +8,9 @@
 [![Go Reference](https://pkg.go.dev/badge/puutaro/yomel.svg)](https://pkg.go.dev/puutaro/yomel)
 [![codecov](https://codecov.io/gh/puutaro/yomel/branch/master/graph/badge.svg)](https://codecov.io/gh/puutaro/yomel)
 
+![Linux](https://img.shields.io/badge/Linux-supported-success?logo=linux&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-supported-success?logo=apple&logoColor=white)
+
 # yomel
 
 Super-readable and debuggable shell pipeline command tool, styled like `yaml`.  
