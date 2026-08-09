@@ -10,88 +10,119 @@
 
 # yomel
 
-`yomel` is a command-line utility designed to write multi-stage shell script pipelines using a structured, flat, and human-readable argument layout—inspired by the clear, nested visual style of `YAML` configuration files.
+## Innovative point about `yomel`
 
-By breaking down complex, nested one-liners or lengthy shell scripts into highly visible declarative steps (`stage`), `yomel` simplifies shell automation without abandoning native command-line paradigms.
+- Exsisting shellscript is not readable, but `yomel` give us super readable code like `yaml`!!
+- Exsisting shellscript is not debugable, but `yomel` give us super structure log!!
 
+### Existing cmd drawback example
 
-## Key Features
+Bellow existing cmd has two big hard point.  
 
-`yomel` gave us bellow merits
+#### It's super hard for us to read.    
+#### It's super hard for us to debug.  
 
-- Readable shellscript code
-- Structure log in shellscript pipeline
-
-
-### `yomel` cmd
-
-We can grasp what a command does just from its `title`, `stage` and `arg`  description, without reading the code.  
-Ordinary command is `ls "${HOME}" | tr '\n' '\t'`.  
-But normal command is no readable. Description is not exist.   
-So we take more time.   
-If it is `yomel`, we save reading time by description of `title` , `stage`, and `arg`.    
+- existing cmd
 
 ```sh.sh
-yomel \
-	title "list home dir con by smart"\
-	--no-live-stderr \
-	--no-live-stdout \
+step_num=$(\
+	find \
+	 "/home/xbabu/Desktop/share/temp/exp_py_for_yomel" \
+		 -name "*.py" \
+		 -type "f" \
+	| xargs wc -l \
+	| sort -nr \
+	| head -1 \
+	| sed 's/[^0-9]//g' \
+);\
+echo "${step_num}"
+```
+
+- existing log  
+
+what?
+
+- stdout 
+
+<img width="939" height="31" alt="image" src="https://github.com/user-attachments/assets/bcdde97a-4553-4624-a710-7205eadfde1b" />
+
+Generary, nobody wants to code in shell script if they can avoid it.  
+We only do it because there isn't a simpler way, but it will absolutely put you through hell—whether you're writing it, reading it back later, or trying to improve it.  
+Because the code is extremely difficult to read as prose/text, and  debug logs are not found.  
+
+
+
+### Super advantages example of `yomel`
+
+`yomel` give us two advantage like bellow.  
+
+
+#### **Readable shellscript code line `yaml`**
+#### **Structure log in shellscript pipeline**
+
+
+- cmd
+
+```sh.sh
+step_num=$(yomel \
+	title "agregate py step count" \
+	stage "find py file" \
+	-cmd find  \
+	--argFindDir "/home/xbabu/Desktop/share/temp/exp_py_for_yomel" \
+	--optFilterFileName name \
+	--valOnlyPyExtend "*.py" \
+	--optFilterType type \
+	--valFile f \
+	stage "count step num by each py file" \
+	-cmd xargs \
+	--argCountCmd  --n "wc -l" \
+	stage "sort numerically in descending order" \
 	--log \
-	stage "list bellow home directory" \
-	-cmd ls \
-	--argTargetDir "${HOME}" \
-	--log-filter "shuf | head -5 | sort" \
-	--err-log-filter "shuf | head -5 | sort" \
-	stage "newline to tab" \
-	-cmd tr \
-	--argRepSrc '\n' \
-	--argRepDst '\t'
+	-cmd sort \
+	--optNumrically n \
+	--optDescendingOrder r \
+	stage "get only first total line" \
+	--log \
+	-cmd head \
+	--optOnlyFirstLine 1 \
+	stage "get only step num" \
+	--log \
+	-cmd sed \
+	--argSubstitute --s 's/[^0-9]//g' \
+);\
+echo "total ${step_num}"
 
 ```
 
+The above code is very long.  
+But we can easily recognize the pipeline's purpose from the `title`, `stage`, and `--opt` , `--val`, `--arg` suffix description.  
 
-### log
+For a long time, I have been considering what's make a readable shell pipline.  
+Eventually, I realized that the key is being rich in notes. By heavily annotating it, we can reach a readable shellpipeline.  
+Altough this approach is very simple, I am sure of its strength.  
 
-We can grasp in progress in pipeline by modern structure log.  
-Ordinaly shellscript pipline don't disclose in progress log.  
-But `yomel` open in progress log.   
+Futhermore, look at the `yomel` log bellow.   
+`yomel` log is a messive advantage.  
+When I first saw this log, All the hassle associated with shell pipelines is disapeared.  
+
+- log
+
+<img width="942" height="872" alt="image" src="https://github.com/user-attachments/assets/fed95be1-97b0-4faf-8282-1e6ccfd1816b" />
+
+<img width="942" height="960" alt="image" src="https://github.com/user-attachments/assets/1786ad03-2664-4386-897c-c2ade3ef4652" />
+
+<img width="942" height="179" alt="image" src="https://github.com/user-attachments/assets/cc3bf3bf-7607-43b6-9ff4-8088587eb3a1" />
+
+- stdout 
+
+<img width="939" height="31" alt="image" src="https://github.com/user-attachments/assets/bcdde97a-4553-4624-a710-7205eadfde1b" />
 
 
-<img width="883" height="950" alt="image" src="https://github.com/user-attachments/assets/9bd8995a-e4e6-4508-9ae1-0d2ed81778dc" />
+I must point out that this log flows to `stderr`.  
+So, it has no effect on `stdout` at all.In other words, we are free to put debug commands like `echo` and `tee` in the middle of the shell pipeline.  
 
 
-Bellow, `yomel`'s err log.  
-By `yomel`'s log, we can find err factore more fastly.  
-
-
-<img width="661" height="686" alt="image" src="https://github.com/user-attachments/assets/75886821-9b1a-4631-b349-2eea6b3fe9ac" />
-
-
-### `yomel` sub shell
-
-`yomel`'s structure log is extremely powerful debugger when used in a `subshell`.  
-Of course, readable code is doing well.  
-
-```sh.sh
-destPath="$(\
-	yomel \
-		title "convert dest path from input mp4" \
-		--log \
-		stage "pass inputMp4 path" \
-		-cmd echo \
-		--argSrcMp4 "${inputMp4}"\
-		stage "convert dest path by replace" \
-		-cmd sed \
-		--optExtendRegex r \
-		--argSubstitute --s 's/(\.mp4)$/_fix_zure\1/'\
-)"
-```
-
-### log
-
-<img width="828" height="830" alt="image" src="https://github.com/user-attachments/assets/e0a12bff-8af2-4878-9440-357845618a76" />
-
-#### **`yomel` log flows to `stderr`. Therefore, `stdout` is successfully assigned to `destPath` variable.**  
+Thanks to `yomel`, we can create a super readable and debuggable environment in our shell scripts.
 
 
 ---
