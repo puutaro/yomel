@@ -7,7 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(t *testing.T) {
+// Test_checkDescriptionSuffixErr verifies that description suffixes correctly validate PascalCase rules and irregular repetitions.
+func Test_checkDescriptionSuffixErr(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     []argtables.ArgTable
@@ -56,7 +57,7 @@ func Test_checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(t *testing.T) {
 					Comment: "invalidPascal",
 				},
 			},
-			wantError: "Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 1",
+			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 1",
 		},
 		{
 			name: "should return error when comment suffix contains non-alphanumeric characters",
@@ -71,13 +72,28 @@ func Test_checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(t *testing.T) {
 					Comment: "Invalid-Name",
 				},
 			},
-			wantError: "Description suffix is must be alphanumeric pascalCase in '--opt' and '--lop' and '--arg' and '--val'\nstageNo: 2",
+			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 2",
+		},
+		{
+			name: "should return error when comment suffix consists of repeated single characters",
+			input: []argtables.ArgTable{
+				{
+					StageNo: 1,
+					IsStage: true,
+				},
+				{
+					StageNo: 1,
+					IsOpt:   true,
+					Comment: "aaa",
+				},
+			},
+			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 1",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(tt.input)
+			err := checkDescriptionSuffixErr(tt.input)
 			if tt.wantError == "" {
 				assert.NoError(t, err)
 			} else {

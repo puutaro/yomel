@@ -7,6 +7,7 @@ import (
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablecounter"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/descjudger"
 )
 
 func ArgTableValidate(argTables []argtables.ArgTable) error {
@@ -20,7 +21,7 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 		checkOnlyOneOptionErr,
 		checkCmdSvcActOrderErr,
 		checkQuoteOptionIrregularPositionErr,
-		checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr,
+		checkDescriptionSuffixErr,
 	}
 	for _, validate := range validators {
 		if err := validate(argTables); err != nil {
@@ -328,7 +329,7 @@ func checkQuoteOptionIrregularPositionErr(
 	return nil
 }
 
-func checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(argtables []argtables.ArgTable) error {
+func checkDescriptionSuffixErr(argtables []argtables.ArgTable) error {
 	for _, argTable := range argtables {
 		if !argTable.IsOpt &&
 			!argTable.IsLopt &&
@@ -336,18 +337,23 @@ func checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(argtables []argtables
 			!argTable.IsArg {
 			continue
 		}
-		err := execCheckDescriptionSuffixMustBealPhanumericPascalCaseErr(
+		if err := checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(
 			argTable.Comment,
 			argTable.StageNo,
-		)
-		if err != nil {
+		); err != nil {
+			return err
+		}
+		if err := checkDescriptionSuffixIrregularErrMsg(
+			argTable.Comment,
+			argTable.StageNo,
+		); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func execCheckDescriptionSuffixMustBealPhanumericPascalCaseErr(
+func checkDescriptionSuffixMustBeAlPhanumericPascalCaseErr(
 	str string,
 	stageNo int,
 ) error {
@@ -362,6 +368,18 @@ func execCheckDescriptionSuffixMustBealPhanumericPascalCaseErr(
 		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
 			return fmt.Errorf(descriptionSuffixMustBealPhanumericPascalCaseErrMsg, stageNo)
 		}
+	}
+	return nil
+}
+func checkDescriptionSuffixIrregularErrMsg(
+	str string,
+	stageNo int,
+) error {
+	if str == "" {
+		return nil
+	}
+	if descjudger.IsBellowSingleCharRepeated(str) {
+		return fmt.Errorf(descriptionSuffixIrregularErrMsg, stageNo, str)
 	}
 	return nil
 }

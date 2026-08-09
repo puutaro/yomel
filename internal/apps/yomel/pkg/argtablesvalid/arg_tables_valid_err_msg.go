@@ -35,8 +35,9 @@ const (
 	noQuoteOpSignalWithQuote = "'" + argtables.NoQuoteShortOpSignal + "/" + argtables.NoQuoteOpSignal + "'"
 	quoteSingnalWithAnd      = singleOpSignalWithQuote + " and " + noQuoteOpSignalWithQuote
 
-	stageNoSuffix   = "\nstageNo: %d"
-	ctrlFieldSuffix = " in stage 0 field"
+	stageNoSuffix    = "\nstageNo: %d"
+	descSuffixSuffix = "\ndescSuffix: %s"
+	ctrlFieldSuffix  = " in stage 0 field"
 
 	onlyOneStr            = " are only one"
 	onlyOneErrStageSuffix = onlyOneStr + " in each stage field" + stageNoSuffix
@@ -61,5 +62,7 @@ const (
 
 	quoteOptionIrregularPositionErrMsg = quoteSingnalWithAnd + " must be immediately after " + argValueWithAnd + stageNoSuffix
 
-	descriptionSuffixMustBealPhanumericPascalCaseErrMsg = "Description suffix is must be alphanumeric pascalCase in " + opLopArgValueWithAnd + stageNoSuffix
+	descriptionSuffixPrefix                             = "Description suffix of "
+	descriptionSuffixMustBealPhanumericPascalCaseErrMsg = descriptionSuffixPrefix + opLopArgValueWithAnd + " must be alphanumeric pascalCase in " + stageNoSuffix
+	descriptionSuffixIrregularErrMsg                    = descriptionSuffixPrefix + opLopArgValueWithAnd + " must be meaning alphanumeric pascal case" + stageNoSuffix + descSuffixSuffix
 )
