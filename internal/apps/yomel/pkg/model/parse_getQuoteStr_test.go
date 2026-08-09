@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_getQuoteStr verifies that getQuoteStr correctly extracts parameter strings and quote types based on quote signals in the argument table.
 func Test_getQuoteStr(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -19,14 +20,14 @@ func Test_getQuoteStr(t *testing.T) {
 		{
 			name: "should return double quoted string and next index when quote type signal is DoubleQuote",
 			input: []argtables.ArgTable{
-				{}, // index 0
-				{}, // index 1 (curIndex)
-				{QuoteTypeSignal: argtables.DoubleQuote, Str: testutil.Ptr("double-val")}, // index 2
+				{},                                // index 0
+				{},                                // index 1 (curIndex)
+				{Str: testutil.Ptr("double-val")}, // index 2
 			},
 			curIndex: 1,
 			want: ParamType{
 				Str:       testutil.Ptr("double-val"),
-				QuoteType: argtables.DoubleQuote, // note: getQuoteStr implementation doesn't explicitly set quoteType for DoubleQuote, it stays zero-value or whatever is in struct, let's verify exact fields
+				QuoteType: argtables.DoubleQuote,
 			},
 			wantIdx: 2,
 		},

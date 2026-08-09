@@ -157,6 +157,103 @@ func Test_parseStageModels(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "should handle service and action specific options, lopts, and arguments comprehensively",
+			input: []argtables.ArgTable{
+				{No: 1, StageNo: 1, IsStage: true},
+				{No: 2, StageNo: 1, Str: testutil.Ptr("service-action-thorough")},
+				{No: 3, StageNo: 1, IsCmd: true},
+				{No: 4, StageNo: 1, Str: testutil.Ptr("kubectl")},
+				{No: 5, StageNo: 1, IsSvc: true},
+				{No: 6, StageNo: 1, Str: testutil.Ptr("pods")},
+				{No: 7, StageNo: 1, IsSvc: false, IsOpt: true},
+				{No: 8, StageNo: 1, Str: testutil.Ptr("n")},
+				{No: 9, StageNo: 1, IsValue: true},
+				{No: 10, StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
+				{No: 11, StageNo: 1, Str: testutil.Ptr("default")},
+				{No: 12, StageNo: 1, IsAct: true},
+				{No: 13, StageNo: 1, Str: testutil.Ptr("get")},
+				{No: 14, StageNo: 1, IsLopt: true},
+				{No: 15, StageNo: 1, Str: testutil.Ptr("watch")},
+				{No: 16, StageNo: 1, IsArg: true},
+				{No: 17, StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
+				{No: 18, StageNo: 1, Str: testutil.Ptr("my-pod")},
+			},
+			wantCtrl: ControlModel{
+				IsLiveStdout: true,
+				IsLiveStderr: true,
+				IsVersion:    false,
+				IsHelp:       false,
+			},
+			wantStMod: []StageModel{
+				{
+					No:   1,
+					Desc: "service-action-thorough",
+					Cmd:  "kubectl",
+					Svc:  testutil.Ptr("pods"),
+					SvcOps: []OptParam{
+						{
+							Index:  7,
+							OptStr: "n",
+							Param: ParamType{
+								Str:       testutil.Ptr("default"),
+								QuoteType: argtables.NoQuote,
+							},
+						},
+					},
+					Act:     testutil.Ptr("get"),
+					ActLops: []OptParam{{Index: 14, OptStr: "watch", Param: ParamType{}}},
+					ActArgs: []ArgParam{
+						{
+							Index: 17,
+							Param: ParamType{
+								Str:       testutil.Ptr("my-pod"),
+								QuoteType: argtables.SingleQuote,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "should handle trailing empty IsValue and IsArg safely",
+			input: []argtables.ArgTable{
+				{No: 1, StageNo: 1, IsStage: true},
+				{No: 2, StageNo: 1, Str: testutil.Ptr("trailing-empty")},
+				{No: 3, StageNo: 1, IsCmd: true},
+				{No: 4, StageNo: 1, Str: testutil.Ptr("testcmd")},
+				{No: 5, StageNo: 1, IsOpt: true},
+				{No: 6, StageNo: 1, Str: testutil.Ptr("o")},
+				{No: 7, StageNo: 1, IsValue: true}, // Interpreted as an empty argument
+				{No: 8, StageNo: 1, IsArg: true},   // Interpreted as another empty argument
+			},
+			wantCtrl: ControlModel{
+				IsLiveStdout: true,
+				IsLiveStderr: true,
+				IsVersion:    false,
+				IsHelp:       false,
+			},
+			wantStMod: []StageModel{
+				{
+					No:   1,
+					Desc: "trailing-empty",
+					Cmd:  "testcmd",
+					CmdOps: []OptParam{
+						{
+							Index:  5,
+							OptStr: "o",
+							Param:  ParamType{},
+						},
+					},
+					CmdArgs: []ArgParam{
+						{
+							Index: 7,
+							Param: ParamType{},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {

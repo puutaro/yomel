@@ -464,12 +464,18 @@ func parseArg(
 func getQuoteStr(curStageArgTables []argtables.ArgTable, curIndex int) (ParamType, int) {
 	param := ParamType{}
 	afterFirstIndex := curIndex + 1
+	if afterFirstIndex >= len(curStageArgTables) {
+		return param, curIndex
+	}
 	afterFirstIndexStageArgTable := curStageArgTables[afterFirstIndex]
 	if afterFirstIndexStageArgTable.QuoteTypeSignal == argtables.DoubleQuote {
 		param.Str = afterFirstIndexStageArgTable.Str
 		return param, afterFirstIndex
 	}
 	afterNextIndex := curIndex + 2
+	if afterNextIndex >= len(curStageArgTables) {
+		return param, curIndex
+	}
 	afterNextIndexStageArgTable := curStageArgTables[afterNextIndex]
 	param.QuoteType = afterFirstIndexStageArgTable.QuoteTypeSignal
 	param.Str = afterNextIndexStageArgTable.Str

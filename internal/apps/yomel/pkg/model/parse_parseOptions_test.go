@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_parseOptions verifies that parseOptions correctly parses short/long options with various quote types, boundary conditions, and filters.
 func Test_parseOptions(t *testing.T) {
 	// Tiny helpers to minimize structural boilerplate
 	tStr := func(s string) argtables.ArgTable { return argtables.ArgTable{Str: &s} }
 	tCmd := func() argtables.ArgTable { return argtables.ArgTable{IsCmd: true} }
 	tSvc := func() argtables.ArgTable { return argtables.ArgTable{IsSvc: true} }
-	// tAct := func() args.ArgTable { return args.ArgTable{IsAct: true} }
+	// tAct := func() argtables.ArgTable { return argtables.ArgTable{IsAct: true} }
 	tOpt := func() argtables.ArgTable { return argtables.ArgTable{IsOpt: true} }
 	tLopt := func() argtables.ArgTable { return argtables.ArgTable{IsLopt: true} }
 	tVal := func() argtables.ArgTable { return argtables.ArgTable{IsValue: true} }
-	// tArg := func() args.ArgTable { return args.ArgTable{IsArg: true} }
 
 	tests := []struct {
 		name            string
@@ -65,6 +65,50 @@ func Test_parseOptions(t *testing.T) {
 					Index:  2,
 					OptStr: "verbose",
 					Param:  ParamType{},
+				},
+			},
+		},
+		{
+			name:           "should parse double quoted option value correctly",
+			nextStartIndex: 0,
+			input: []argtables.ArgTable{
+				tCmd(),
+				tOpt(), tStr("m"),
+				tVal(), tStr("double-val"), // DoubleQuote signal is implicit or handled by getQuoteStr
+			},
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
+			want: []OptParam{
+				{
+					Index:  2,
+					OptStr: "m",
+					Param: ParamType{
+						Str:       testutil.Ptr("double-val"),
+						QuoteType: argtables.DoubleQuote,
+					},
+				},
+			},
+		},
+		{
+			name:           "should parse no-quote option value correctly",
+			nextStartIndex: 0,
+			input: []argtables.ArgTable{
+				tCmd(),
+				tOpt(), tStr("c"),
+				tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("count"),
+			},
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
+			want: []OptParam{
+				{
+					Index:  2,
+					OptStr: "c",
+					Param: ParamType{
+						Str:       testutil.Ptr("count"),
+						QuoteType: argtables.NoQuote,
+					},
 				},
 			},
 		},
@@ -122,6 +166,25 @@ func Test_parseOptions(t *testing.T) {
 						Str:       testutil.Ptr("val-target"),
 						QuoteType: argtables.NoQuote,
 					},
+				},
+			},
+		},
+		{
+			name:           "should parse service options when target main arg is svc",
+			nextStartIndex: 0,
+			input: []argtables.ArgTable{
+				tCmd(), tStr("aws"),
+				tSvc(), tStr("s3"),
+				tOpt(), tStr("r"),
+			},
+			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsSvc },
+			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
+			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
+			want: []OptParam{
+				{
+					Index:  5,
+					OptStr: "r",
+					Param:  ParamType{},
 				},
 			},
 		},
