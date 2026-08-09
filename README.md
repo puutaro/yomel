@@ -10,8 +10,7 @@
 
 # yomel
 
-Readable and debugable shellscript code line tool.  
-
+Super-readable and debuggable shell pipeline command tool, styled like `yaml`.  
 
 ## Innovative point about `yomel`
 
