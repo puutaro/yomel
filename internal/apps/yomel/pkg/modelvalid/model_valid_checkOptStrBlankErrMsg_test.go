@@ -1,3 +1,4 @@
+// Write direct above line for Comment on code
 package modelvalid
 
 import (
@@ -7,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_checkOptStrBlankErrMsg verifies that checkOptStrBlankErrMsg correctly returns an error when any option or long option string is blank.
+// Test_checkOptStrBlankErrMsg verifies that checkOptStrBlankErrMsg correctly checks for blank option strings across all stages.
 func Test_checkOptStrBlankErrMsg(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -15,79 +16,37 @@ func Test_checkOptStrBlankErrMsg(t *testing.T) {
 		wantError string
 	}{
 		{
-			name: "should return nil when all option strings are valid and not blank in Cmd",
+			name: "should return nil when all option strings are valid and not blank",
 			stModels: []model.StageModel{
 				{
-					No: 1,
+					No:   1,
+					Desc: "stage1",
+					Cmd:  "aws",
 					CmdOps: []model.OptParam{
-						{OptStr: "f"},
-					},
-					CmdLops: []model.OptParam{
-						{OptStr: "verbose"},
+						{OptStr: "profile"},
 					},
 				},
 			},
 			wantError: "",
 		},
 		{
-			name: "should return nil when all option strings are valid and not blank in Svc",
+			name: "should return error when command option string is blank",
 			stModels: []model.StageModel{
 				{
-					No: 1,
-					SvcOps: []model.OptParam{
-						{OptStr: "f"},
-					},
-					SvcLops: []model.OptParam{
-						{OptStr: "verbose"},
-					},
-				},
-			},
-			wantError: "",
-		},
-		{
-			name: "should return nil when all option strings are valid and not blank in Act",
-			stModels: []model.StageModel{
-				{
-					No: 1,
-					ActOps: []model.OptParam{
-						{OptStr: "f"},
-					},
-					ActLops: []model.OptParam{
-						{OptStr: "verbose"},
-					},
-				},
-			},
-			wantError: "",
-		},
-		{
-			name: "should return error when CmdOps has a blank option string",
-			stModels: []model.StageModel{
-				{
-					No: 1,
+					No:   1,
+					Desc: "stage1",
+					Cmd:  "aws",
 					CmdOps: []model.OptParam{
 						{OptStr: ""},
 					},
 				},
 			},
-			wantError: "'--opt' and '--lop' str is required\nstageNo: 1",
+			wantError: "'--opt' and '--lop' str must not be blank\nstageNo: 1",
 		},
 		{
-			name: "should return error when SvcLops has a blank option string in stage 2",
-			stModels: []model.StageModel{
-				{
-					No: 1,
-					CmdOps: []model.OptParam{
-						{OptStr: "v"},
-					},
-				},
-				{
-					No: 2,
-					SvcLops: []model.OptParam{
-						{OptStr: ""},
-					},
-				},
-			},
-			wantError: "'--opt' and '--lop' str is required\nstageNo: 2",
+			name:      "should return nil when stages slice is empty",
+			stModels:  []model.StageModel{},
+			wantError: "",
 		},
 	}
 

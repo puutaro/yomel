@@ -17,7 +17,7 @@ const (
 	stageDescriptionDuplicate = stageSignalWithQuote + " description must be unique across stages" + stageNoSuffix + stageDesc
 
 	noBlankStrRequireErrMsg = "'%s' no blank str is required" + stageNoSuffix
-	optStrBlankErrMsg       = opLopWithAnd + " str is required" + stageNoSuffix
+	optStrBlankErrMsg       = opLopWithAnd + " str must not be blank" + stageNoSuffix
 	// cmdStrRequire        = "'" + argtables.CmdOpSignal + "'" + noBlankStrRequireErrMsg
 	// svcStrRequire        = "'" + argtables.SvcOpSignal + "'" + noBlankStrRequireErrMsg
 	// actStrRequire        = "'" + argtables.ActOpSignal + "'" + noBlankStrRequireErrMsg

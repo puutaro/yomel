@@ -116,7 +116,7 @@ func checkOptStrBlankErrMsg(stModels []model.StageModel) error {
 			stModel.ActLops,
 		}
 		for _, optParam := range optPrams {
-			err := execCheckOptStrBlankErrMsg(
+			err := execCheckOptStrBlankErr(
 				optParam,
 				stageNo,
 			)
@@ -129,7 +129,7 @@ func checkOptStrBlankErrMsg(stModels []model.StageModel) error {
 	return nil
 }
 
-func execCheckOptStrBlankErrMsg(
+func execCheckOptStrBlankErr(
 	opts []model.OptParam,
 	stageNo int,
 ) error {
@@ -140,7 +140,10 @@ func execCheckOptStrBlankErrMsg(
 		if opt.OptStr != "" {
 			continue
 		}
-		return fmt.Errorf(optStrBlankErrMsg, stageNo)
+		return fmt.Errorf(
+			optStrBlankErrMsg,
+			stageNo,
+		)
 	}
 	return nil
 }
