@@ -118,7 +118,6 @@ func Test_printDecoratedLog(t *testing.T) {
 				stderrBuffers:  []*bytes.Buffer{stderrBuffer},
 				cmdHasError:    tt.name == "should print decorated log with error label when cmdHasError is true",
 				startTime:      time.Now(),
-				stageEndTimes:  []time.Time{time.Now()},
 				stageDurations: []time.Duration{time.Second},
 			}
 

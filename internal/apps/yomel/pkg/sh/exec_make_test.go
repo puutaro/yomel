@@ -137,7 +137,6 @@ func Test_yomelLog_make(t *testing.T) {
 				stderrBuffers:  stderrBuffers,
 				cmdHasError:    tt.cmdHasError,
 				startTime:      time.Now(),
-				stageEndTimes:  []time.Time{time.Now(), time.Now()},
 				stageDurations: []time.Duration{time.Second, time.Second},
 			}
 

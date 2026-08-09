@@ -20,7 +20,6 @@ const (
 	redStart                              = "\x1b[31m"
 	colorEnd                              = "\x1b[39m"
 	blueGreenStart                        = "\x1b[30m"
-	ansiEnd                               = "\x1b[0m"
 	boldStart                             = "\x1b[1m"
 	boldEnd                               = "\x1b[22m"
 	underlineStart                        = "\x1b[4m"
@@ -36,7 +35,6 @@ type yomelLog struct {
 	stderrBuffers  []*bytes.Buffer
 	cmdHasError    bool
 	startTime      time.Time
-	stageEndTimes  []time.Time
 	stageDurations []time.Duration
 }
 
@@ -143,7 +141,6 @@ func Exec(yomelInfo YomelInfo) int {
 		stderrBuffers:  stderrBuffers,
 		cmdHasError:    cmdHasError,
 		startTime:      startTime,
-		stageEndTimes:  stageEndTimes,
 		stageDurations: stageDurations,
 	}
 	combinedLog := yl.make()
@@ -327,13 +324,11 @@ func (yl *yomelLog) printDecoratedLog(
 ) {
 	duration := yl.stageDurations[index]
 	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
-	endTime := yl.stageEndTimes[index]
 	newlineCompedForStage := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	stageHeader := fmt.Sprintf(
-		"%s[%d]_%s(%s)",
+		"%s[%d]_%s",
 		"Stage",
 		stageInfo.No,
-		convertTimeStampStr(endTime),
 		durationStr,
 	)
 	fmt.Fprintf(
