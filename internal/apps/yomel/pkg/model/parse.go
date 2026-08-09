@@ -403,10 +403,17 @@ func parseOptions(
 			continue
 		}
 		optStrIndex := j + 1
+		if optStrIndex >= curStageArgTablesLen {
+			continue
+		}
 		optStrIndexStageArgTable := curStageArgTables[optStrIndex]
+		var optStrIndexStageArgTableStr string
+		if strPtr := optStrIndexStageArgTable.Str; strPtr != nil {
+			optStrIndexStageArgTableStr = *strPtr
+		}
 		optParam := OptParam{
 			Index:   optStrIndex,
-			OptStr:  *optStrIndexStageArgTable.Str,
+			OptStr:  optStrIndexStageArgTableStr,
 			Comment: innerArgTable.Comment,
 		}
 		valueOpIndex := j + 2

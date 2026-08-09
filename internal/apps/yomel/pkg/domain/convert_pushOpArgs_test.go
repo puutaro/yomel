@@ -116,6 +116,26 @@ func Test_pushOpArgs(t *testing.T) {
 				"-v",
 			},
 		},
+		{
+			name: "should handle empty OptStr, and Param nil",
+			input: struct {
+				ops  []model.OptParam
+				lOps []model.OptParam
+				args []model.ArgParam
+			}{
+				ops: []model.OptParam{
+					{
+						Index:  1,
+						OptStr: "",
+					},
+				},
+				lOps: []model.OptParam{},
+				args: []model.ArgParam{},
+			},
+			want: []string{
+				"-",
+			},
+		},
 	}
 
 	for _, tt := range tests {
