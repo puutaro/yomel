@@ -25,7 +25,7 @@ const (
 	boldEnd                               = "\x1b[22m"
 	underlineStart                        = "\x1b[4m"
 	underlineEnd                          = "\x1b[24m"
-	sectionPrefixNewlineNum               = 2
+	sectionPrefixAndLastNewlineNum        = 2
 	miniSectionOrContentsPrefixNewlineNum = 1
 )
 
@@ -200,6 +200,7 @@ func (yl *yomelLog) make() bytes.Buffer {
 			shouldLog,
 		)
 	}
+	fmt.Fprint(&combinedLog, compNewLine(&combinedLog, sectionPrefixAndLastNewlineNum))
 	return combinedLog
 }
 
@@ -290,7 +291,7 @@ func (yl *yomelLog) printTotalCmd(
 	w io.Writer,
 	totalPipeCmdStr string,
 ) {
-	newlineStr := compNewLine(w, sectionPrefixNewlineNum)
+	newlineStr := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	fmt.Fprintf(
 		w,
 		"%s%s\n%s",
@@ -327,7 +328,7 @@ func (yl *yomelLog) printDecoratedLog(
 	duration := yl.stageDurations[index]
 	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
 	endTime := yl.stageEndTimes[index]
-	newlineCompedForStage := compNewLine(w, sectionPrefixNewlineNum)
+	newlineCompedForStage := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	stageHeader := fmt.Sprintf(
 		"%s[%d]_%s(%s)",
 		"Stage",
@@ -344,7 +345,7 @@ func (yl *yomelLog) printDecoratedLog(
 		),
 		capitalizeFirst(stageInfo.Desc),
 	)
-	newlineCompedForCmd := compNewLine(w, sectionPrefixNewlineNum)
+	newlineCompedForCmd := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	fmt.Fprintf(
 		w,
 		"%s%s \n%s",
@@ -361,7 +362,7 @@ func (yl *yomelLog) printDecoratedLog(
 			stageInfo.ErrLogFilter,
 		)
 	}
-	newlineCompedForStdout := compNewLine(w, sectionPrefixNewlineNum)
+	newlineCompedForStdout := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	yl.write2Std(
 		w,
 		fmt.Sprintf(
@@ -372,7 +373,6 @@ func (yl *yomelLog) printDecoratedLog(
 		stdoutBuf,
 		stageInfo.LogFilter,
 	)
-	fmt.Fprintln(w)
 }
 
 func makeNormalOrRedStdErrLabel(hasErr bool) string {
