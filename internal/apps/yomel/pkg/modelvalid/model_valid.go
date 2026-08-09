@@ -24,6 +24,7 @@ func ModelValidate(stModels []model.StageModel) error {
 	}
 	wholeValidators := []func([]model.StageModel) error{
 		checkStageDescriptionDuplicate,
+		checkOptStrBlankErrMsg,
 	}
 	for _, validate := range wholeValidators {
 		if err := validate(stModels); err != nil {
@@ -113,6 +114,47 @@ func execCheckNoBlankStrRequireErr(str *string, mainArg string, stageNo int) err
 	trimmed := strings.Trim(*str, " 　")
 	if trimmed == "" {
 		return fmt.Errorf(noBlankStrRequireErrMsg, mainArg, stageNo)
+	}
+	return nil
+}
+
+func checkOptStrBlankErrMsg(stModels []model.StageModel) error {
+	for _, stModel := range stModels {
+		stageNo := stModel.No
+		optPrams := [][]model.OptParam{
+			stModel.CmdOps,
+			stModel.CmdLops,
+			stModel.SvcOps,
+			stModel.SvcLops,
+			stModel.ActOps,
+			stModel.ActLops,
+		}
+		for _, optParam := range optPrams {
+			err := execCheckOptStrBlankErrMsg(
+				optParam,
+				stageNo,
+			)
+			if err == nil {
+				continue
+			}
+			return err
+		}
+	}
+	return nil
+}
+
+func execCheckOptStrBlankErrMsg(
+	opts []model.OptParam,
+	stageNo int,
+) error {
+	if len(opts) == 0 {
+		return nil
+	}
+	for _, opt := range opts {
+		if opt.OptStr != "" {
+			continue
+		}
+		return fmt.Errorf(optStrBlankErrMsg, stageNo)
 	}
 	return nil
 }
