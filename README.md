@@ -10,6 +10,9 @@
 
 # yomel
 
+Readable and debugable shellscript code line tool.  
+
+
 ## Innovative point about `yomel`
 
 - Exsisting shellscript is not readable, but `yomel` give us super readable code like `yaml`!!
@@ -125,7 +128,12 @@ So, it has no effect on `stdout` at all.In other words, we are free to put debug
 Thanks to `yomel`, we can create a super readable and debuggable environment in our shell scripts.
 
 
----
+
+## Demo
+
+![yomel_demo2](https://github.com/user-attachments/assets/b8b5d0c6-ad0b-44bb-b64d-fe3cfcd3b20a)
+
+
 
 ## Installation (Linux/Mac)
 
@@ -140,8 +148,6 @@ curl https://raw.githubusercontent.com/puutaro/yomel/refs/heads/master/install.s
 ```sh.sh
 go install github.com/puutaro/yomel/cmd/yomel@latest
 ```
-
----
 
 
 ## Complete Option Reference & Deep Dive
@@ -233,6 +239,6 @@ Modifiers specify how parameters, options, and trailing arguments are constructe
     * `--arg[PascalCase] --n "<string>"`: Appends an unquoted positional argument.
   * **Usage:** `--argPattern --s "/pattern/d"` appends `'/pattern/d'`.
 
----
+
 
 
