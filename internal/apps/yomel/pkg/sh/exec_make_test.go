@@ -52,7 +52,7 @@ func Test_yomelLog_make(t *testing.T) {
 			stderrStrs:  []string{""},
 			cmdHasError: false,
 			wantOutputSubstr: []string{
-				"Yomel-log_",
+				"Yomel-log ",
 				"Single-desc",
 				"Cmd",
 				"echo 'hello'",
@@ -83,14 +83,14 @@ func Test_yomelLog_make(t *testing.T) {
 			stderrStrs:  []string{"", ""},
 			cmdHasError: false,
 			wantOutputSubstr: []string{
-				"Yomel-log_",
+				"Yomel-log ",
 				"Title",
 				"Multi-title",
 				"Total-cmd",
 				"echo 'line1'",
 				"grep 'line1'",
-				"Stage[1]_",
-				"Stage[2]_",
+				"Stage[1] ",
+				"Stage[2] ",
 			},
 		},
 		{
@@ -110,7 +110,7 @@ func Test_yomelLog_make(t *testing.T) {
 			stderrStrs:  []string{"some error occurred\n"},
 			cmdHasError: true,
 			wantOutputSubstr: []string{
-				"Yomel-log_",
+				"Yomel-log ",
 				"Error-stage",
 				"Error",
 				"some error occurred",

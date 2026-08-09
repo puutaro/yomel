@@ -41,7 +41,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			stdoutBuf: "hello\n",
 			shouldLog: true,
 			wantOutputSubstr: []string{
-				"Stage[1]_",
+				"Stage[1] ",
 				"Test-stage",
 				"Cmd",
 				"echo 'hello'",
@@ -72,7 +72,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			stdoutBuf: "",
 			shouldLog: true,
 			wantOutputSubstr: []string{
-				"Stage[1]_",
+				"Stage[1] ",
 				"Error-stage",
 				"Cmd",
 				"exit 1",
@@ -94,7 +94,7 @@ func Test_printDecoratedLog(t *testing.T) {
 			stdoutBuf: "file1\nfile2\n",
 			shouldLog: true,
 			wantOutputSubstr: []string{
-				"Stage[3]_",
+				"Stage[3] ",
 				"Stdout-only-stage",
 				"Cmd",
 				"ls",

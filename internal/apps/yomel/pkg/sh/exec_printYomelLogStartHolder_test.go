@@ -18,12 +18,12 @@ func Test_printYomelLogStartHolder(t *testing.T) {
 		{
 			name:      "should print yomel log start holder with formatted timestamp",
 			startTime: time.Date(2026, 6, 15, 12, 30, 45, 123456000, time.UTC),
-			want:      "\n\x1b[4m\x1b[1mYomel-log_2026/06/15-12:30:45.123456\x1b[22m\x1b[24m",
+			want:      "\n\x1b[4m\x1b[1mYomel-log 2026/06/15-12:30:45.123456\x1b[22m\x1b[24m",
 		},
 		{
 			name:      "should handle zero time correctly",
 			startTime: time.Time{},
-			want:      "\n\x1b[4m\x1b[1mYomel-log_0001/01/01-00:00:00.000000\x1b[22m\x1b[24m",
+			want:      "\n\x1b[4m\x1b[1mYomel-log 0001/01/01-00:00:00.000000\x1b[22m\x1b[24m",
 		},
 	}
 

@@ -26,6 +26,7 @@ const (
 	underlineEnd                          = "\x1b[24m"
 	sectionPrefixAndLastNewlineNum        = 2
 	miniSectionOrContentsPrefixNewlineNum = 1
+	sectionSentenceSeparator              = " "
 )
 
 type yomelLog struct {
@@ -253,10 +254,11 @@ func (yl *yomelLog) printYomelLogStartHolder(
 	yomelLogStartHolderBuffer.WriteString("\n")
 	yomelLogStartHolderBuffer.WriteString(
 		fmt.Sprintf(
-			"%s%s%s_%s%s%s",
+			"%s%s%s%s%s%s%s",
 			underlineStart,
 			boldStart,
 			"Yomel-log",
+			sectionSentenceSeparator,
 			convertTimeStampStr(yl.startTime),
 			boldEnd,
 			underlineEnd,
@@ -326,9 +328,10 @@ func (yl *yomelLog) printDecoratedLog(
 	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
 	newlineCompedForStage := compNewLine(w, sectionPrefixAndLastNewlineNum)
 	stageHeader := fmt.Sprintf(
-		"%s[%d]_%s",
+		"%s[%d]%s%s",
 		"Stage",
 		stageInfo.No,
+		sectionSentenceSeparator,
 		durationStr,
 	)
 	fmt.Fprintf(
