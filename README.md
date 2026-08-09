@@ -10,13 +10,12 @@
 
 # yomel
 
-Readable and debugable shellscript code line tool.  
-
+Super-readable and debuggable shell pipeline command tool, styled like `yaml`.  
 
 ## Innovative point about `yomel`
 
-- Exsisting shellscript is not readable, but `yomel` give us super readable code like `yaml`!!
-- Exsisting shellscript is not debugable, but `yomel` give us super structure log!!
+- Existing shellscript is not readable, but `yomel` give us super readable code like `yaml`!!
+- Existing shellscript is not debugable, but `yomel` give us super structured logs!!
 
 ### Existing cmd drawback example
 
@@ -49,7 +48,7 @@ what?
 
 <img width="939" height="31" alt="image" src="https://github.com/user-attachments/assets/bcdde97a-4553-4624-a710-7205eadfde1b" />
 
-Generary, nobody wants to code in shell script if they can avoid it.  
+Generally, nobody wants to code in shell script if they can avoid it.  
 We only do it because there isn't a simpler way, but it will absolutely put you through hell—whether you're writing it, reading it back later, or trying to improve it.  
 Because the code is extremely difficult to read as prose/text, and  debug logs are not found.  
 
@@ -102,7 +101,7 @@ But we can easily recognize the pipeline's purpose from the `title`, `stage`, an
 
 For a long time, I have been considering what's make a readable shell pipline.  
 Eventually, I realized that the key is being rich in notes. By heavily annotating it, we can reach a readable shellpipeline.  
-Altough this approach is very simple, I am sure of its strength.  
+Although this approach is very simple, I am sure of its strength.  
 
 Futhermore, look at the `yomel` log bellow.   
 `yomel` log is a messive advantage.  
