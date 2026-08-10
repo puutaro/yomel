@@ -135,8 +135,7 @@ Thanks to `yomel`, we can create a super readable and debuggable environment in 
 
 ## Demo
 
-![yomel_demo2](https://github.com/user-attachments/assets/b8b5d0c6-ad0b-44bb-b64d-fe3cfcd3b20a)
-
+![yomel_demo4](https://github.com/user-attachments/assets/0790af4a-b567-4be0-9061-9afabbb4da4f)
 
 
 ## Installation (Linux/Mac)
