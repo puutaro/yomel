@@ -111,7 +111,7 @@ jobs:
             echo "exists=false" >> $GITHUB_ENV
           fi
 
-      - name: Download all artifacts
+- name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: downloaded-binaries
@@ -121,15 +121,27 @@ jobs:
           mkdir -p final_build
           find downloaded-binaries -type f -exec mv {} final_build/ \;
 
-      - name: Create Release and Upload Binaries / Notes
+      - name: Create Release and Upload Binaries
         uses: softprops/action-gh-release@v2
         with:
           files: final_build/*
           tag_name: ${{ env.TAG_VERSION }}
           name: Release yomel-${{ env.TAG_VERSION }}
-          body_path: ${{ steps.check_release_note.outputs.exists == 'true' && env.NOTE_PATH || '' }}
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Force update release note body with markdown file
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NOTE_PATH="releasenote/${{ env.RAW_VERSION }}.md"
+          if [ -f "$NOTE_PATH" ]; then
+            echo "Overwriting release note body using $NOTE_PATH"
+            gh release edit "${{ env.TAG_VERSION }}" --notes-file "$NOTE_PATH"
+          else
+            echo "Release note file ($NOTE_PATH) not found."
+            exit 1
+          fi
