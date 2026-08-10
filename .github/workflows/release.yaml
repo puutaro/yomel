@@ -57,6 +57,17 @@ jobs:
           TAG_VERSION="v${RAW_VERSION}"
           echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
+      - name: Check release note existence
+        id: check_release_note
+        run: |
+          NOTE_PATH="releasenote/${{ env.RAW_VERSION }}.md"
+          if [ -f "$NOTE_PATH" ]; then
+            echo "NOTE_PATH=$NOTE_PATH" >> $GITHUB_ENV
+            echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "exists=false" >> $GITHUB_ENV
+          fi      
+
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
@@ -74,6 +85,7 @@ jobs:
           files: ${{ env.BUILD_DIR }}/*
           tag_name: ${{ env.TAG_VERSION }}
           name: Release yomel-${{ env.TAG_VERSION }}
+          body_path: ${{ steps.check_release_note.outputs.exists == 'true' && env.NOTE_PATH || '' }}
           fail_on_unmatched_files: true
           draft: false
           prerelease: false
