@@ -111,7 +111,7 @@ jobs:
             echo "exists=false" >> $GITHUB_ENV
           fi
 
-- name: Download all artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: downloaded-binaries
