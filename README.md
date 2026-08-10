@@ -112,7 +112,7 @@ Futhermore, look at the `yomel` log bellow.
 `yomel` log is a messive advantage.  
 When I first saw this log, All the hassle associated with shell pipelines is disapeared.  
 
-- log
+- log (stderr)
 
 <img width="942" height="872" alt="image" src="https://github.com/user-attachments/assets/fed95be1-97b0-4faf-8282-1e6ccfd1816b" />
 
