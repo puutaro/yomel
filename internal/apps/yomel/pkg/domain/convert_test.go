@@ -122,7 +122,7 @@ func Test_Convert(t *testing.T) {
 					SvcOpArgsWithComment: []string{"-rSIED_COmMetN_BAlNk"},
 					Act:                  "cp",
 					ActOpArgs:            []string{"s3://my-bucket/path"},
-					ActOpArgsWithComment: []string(nil),
+					ActOpArgsWithComment: []string{"s3://my-bucket/path"},
 				},
 			},
 		},

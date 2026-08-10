@@ -135,7 +135,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 			stModel.ActLops,
 			stModel.ActArgs,
 			func(opArgList []string) {
-				stage.ActOpArgs = opArgList
+				stage.ActOpArgsWithComment = opArgList
 			},
 		)
 		stages[i] = stage

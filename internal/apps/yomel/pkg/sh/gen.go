@@ -45,25 +45,28 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 	globalLogFilter := yomel.Ctrl.LogFilter
 	globalErrLogFilter := yomel.Ctrl.ErrLogFilter
 	// default stdout log don't display
-	isLog := false
+	isLogInCtrl := false
 	if ctrlIsLog := yomel.Ctrl.IsLog; ctrlIsLog != nil {
-		isLog = *ctrlIsLog
+		isLogInCtrl = *ctrlIsLog
 	}
 	for i, stage := range stages {
-		isLogForStage := isLog
+		isLogInStage := isLogInCtrl
 		if stageIsLog := stage.IsLog; stageIsLog != nil {
-			isLogForStage = *stageIsLog
+			isLogInStage = *stageIsLog
 		}
 		yomelInfo := StageInfo{
 			No:           stage.No,
 			Desc:         stage.Desc,
-			IsLog:        isLogForStage,
+			IsLog:        isLogInStage,
 			LogFilter:    insertFilterShellStr(globalLogFilter, stage.LogFilter),
 			ErrLogFilter: insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
 		}
 		var stageCmd stageCommand
+		cmdStrList := makeStrListFromStr(stage.Cmd)
+		svcStrList := makeStrListFromStr(stage.Svc)
+		actStrList := makeStrListFromStr(stage.Act)
 		stageCmd.insertStageEl(
-			[]string{stage.Cmd},
+			cmdStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
@@ -71,7 +74,7 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
-			[]string{stage.Svc},
+			svcStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
@@ -79,7 +82,7 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
-			[]string{stage.Act},
+			actStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
@@ -92,7 +95,7 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 
 		var stageCmdWithComment stageCommand
 		stageCmdWithComment.insertStageEl(
-			[]string{stage.Cmd},
+			cmdStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmdWithComment.insertStageEl(
@@ -100,7 +103,7 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmdWithComment.insertStageEl(
-			[]string{stage.Svc},
+			svcStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmdWithComment.insertStageEl(
@@ -108,7 +111,7 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmdWithComment.insertStageEl(
-			[]string{stage.Act},
+			actStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmdWithComment.insertStageEl(
@@ -141,4 +144,11 @@ func insertFilterShellStr(globalFilter string, logFilter string) string {
 		return globalFilter
 	}
 	return logFilter
+}
+
+func makeStrListFromStr(str string) []string {
+	if str == "" {
+		return nil
+	}
+	return []string{str}
 }
