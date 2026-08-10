@@ -69,7 +69,8 @@ Because the code is extremely difficult to read as prose/text, and  debug logs a
 - cmd
 
 ```sh.sh
-step_num=$(yomel \
+step_num=$(\
+yomel \
 	title "agregate py step count" \
 	stage "find py file" \
 	-cmd find  \
