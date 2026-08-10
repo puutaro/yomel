@@ -27,7 +27,7 @@ type YomelInfo struct {
 }
 
 func Gen(yomel domain.Yomel) YomelInfo {
-	stageInfos := GenStageInfo(yomel)
+	stageInfos := genStageInfo(yomel)
 	ctrl := yomel.Ctrl
 	return YomelInfo{
 		IsLiveStdout: ctrl.IsLiveStdout,
@@ -39,7 +39,7 @@ func Gen(yomel domain.Yomel) YomelInfo {
 	}
 }
 
-func GenStageInfo(yomel domain.Yomel) []StageInfo {
+func genStageInfo(yomel domain.Yomel) []StageInfo {
 	stages := yomel.Stages
 	yomelInfos := make([]StageInfo, len(stages))
 	globalLogFilter := yomel.Ctrl.LogFilter
@@ -50,13 +50,14 @@ func GenStageInfo(yomel domain.Yomel) []StageInfo {
 		isLog = *ctrlIsLog
 	}
 	for i, stage := range stages {
+		isLogForStage := isLog
 		if stageIsLog := stage.IsLog; stageIsLog != nil {
-			isLog = *stageIsLog
+			isLogForStage = *stageIsLog
 		}
 		yomelInfo := StageInfo{
 			No:           stage.No,
 			Desc:         stage.Desc,
-			IsLog:        isLog,
+			IsLog:        isLogForStage,
 			LogFilter:    insertFilterShellStr(globalLogFilter, stage.LogFilter),
 			ErrLogFilter: insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
 		}
