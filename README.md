@@ -151,3 +151,8 @@ curl https://raw.githubusercontent.com/puutaro/yomel/refs/heads/master/install.s
 go install github.com/puutaro/yomel/cmd/yomel@latest
 ```
 
+## Deep dive
+
+-> [DEEPDIVE.md](https://github.com/puutaro/yomel/blob/master/DEEPDIBE.md)
+
+
