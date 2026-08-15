@@ -14,7 +14,12 @@ const (
 	genWithQuote     = "'" + argtables.GenModeFlagSignal + "'"
 	directWithQuote  = "'" + argtables.DirectModeFlagSignal + "'"
 
-	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote + " and " + genWithQuote + " and " + directWithQuote
+	titleColorStrWithQuote        = "'" + argtables.TitleColorOpSignal + "'"
+	titleBgColorStrWithQuote      = "'" + argtables.TitleBgColorOpSignal + "'"
+	titleCommentColorStrWithQuote = "'" + argtables.TitleCommentColorOpSignal + "'"
+	titleColorBgColorWithAnd      = titleColorStrWithQuote + " and " + titleBgColorStrWithQuote + " and " + titleCommentColorStrWithQuote
+
+	ctrlParameterWithAnd = versionWithQuote + " and " + helpWithQuote + " and " + genWithQuote + " and " + directWithQuote + titleColorBgColorWithAnd
 
 	logFilterWithQuote    = "'" + argtables.LogFilterOpSignal + "'"
 	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"

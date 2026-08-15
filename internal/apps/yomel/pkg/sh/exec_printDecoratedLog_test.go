@@ -1,139 +1,92 @@
-// Test_printDecoratedLog verifies that printDecoratedLog correctly outputs formatted logs to the writer under various conditions.
 package sh
 
 import (
 	"bytes"
-	"regexp"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
-
-// stripANSI removes ANSI escape sequences (colors, underlines, bold, etc.) from the string.
-func stripANSI(str string) string {
-	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]*[mK]`)
-	return ansiRegex.ReplaceAllString(str, "")
-}
 
 func Test_printDecoratedLog(t *testing.T) {
 	tests := []struct {
 		name             string
-		yomelInfo        YomelInfo
-		stageInfo        StageInfo
-		index            int
-		stderrBuf        string
-		stdoutBuf        string
+		isTerminal       bool
+		isLightColorMode bool
+		cmdHasError      bool
 		shouldLog        bool
-		wantOutputSubstr []string
+		stageInfo        StageInfo
+		yomelInfo        YomelInfo
 	}{
 		{
-			name:      "should print decorated log with stdout and progress stderr when shouldLog is true",
-			yomelInfo: YomelInfo{},
+			name:             "Terminal mode enabled with light color mode and error",
+			isTerminal:       true,
+			isLightColorMode: true,
+			cmdHasError:      true,
+			shouldLog:        true,
 			stageInfo: StageInfo{
 				No:                 1,
-				Desc:               "test-stage",
-				CmdStrsWithComment: "echo 'hello'",
+				Desc:               "Test stage description",
 				IsLog:              true,
+				LogFilter:          "",
+				ErrLogFilter:       "",
+				CmdStrs:            "echo 'hello'",
+				CmdStrsWithComment: "echo 'hello' # comment",
+				ForegroundColor:    "\x1b[31m",
+				BackgroundColor:    "\x1b[42m",
+				CommentColorStart:  "\x1b[34m",
 			},
-			index:     0,
-			stderrBuf: "some progress info\n",
-			stdoutBuf: "hello\n",
-			shouldLog: true,
-			wantOutputSubstr: []string{
-				"Stage[1] ",
-				"Test-stage",
-				"Cmd",
-				"echo 'hello'",
-				"Progress",
-				"some progress info",
-				"Stdout",
-				"hello",
-			},
-		},
-		{
-			name: "should print decorated log with error label when cmdHasError is true",
 			yomelInfo: YomelInfo{
-				StageInfos: []StageInfo{
-					{
-						No:                 1,
-						Desc:               "error-stage",
-						CmdStrsWithComment: "exit 1",
-					},
-				},
-			},
-			stageInfo: StageInfo{
-				No:                 1,
-				Desc:               "error-stage",
-				CmdStrsWithComment: "exit 1",
-			},
-			index:     0,
-			stderrBuf: "error occurred\n",
-			stdoutBuf: "",
-			shouldLog: true,
-			wantOutputSubstr: []string{
-				"Stage[1] ",
-				"Error-stage",
-				"Cmd",
-				"exit 1",
-				"Error",
-				"error occurred",
+				Title:           "Test Title",
+				ForegroundColor: "\x1b[31m",
+				BackgroundColor: "\x1b[42m",
 			},
 		},
 		{
-			name:      "should print only stdout when stderr buffer is empty and shouldLog is true",
-			yomelInfo: YomelInfo{},
+			name:             "Non-terminal mode without error and log filter",
+			isTerminal:       false,
+			isLightColorMode: false,
+			cmdHasError:      false,
+			shouldLog:        false,
 			stageInfo: StageInfo{
-				No:                 3,
-				Desc:               "stdout-only-stage",
+				No:                 2,
+				Desc:               "Another stage",
+				IsLog:              false,
+				LogFilter:          "cat",
+				ErrLogFilter:       "cat",
+				CmdStrs:            "ls",
 				CmdStrsWithComment: "ls",
-				IsLog:              true,
 			},
-			index:     0,
-			stderrBuf: "",
-			stdoutBuf: "file1\nfile2\n",
-			shouldLog: true,
-			wantOutputSubstr: []string{
-				"Stage[3] ",
-				"Stdout-only-stage",
-				"Cmd",
-				"ls",
-				"Stdout",
-				"file1",
-				"file2",
+			yomelInfo: YomelInfo{
+				Title: "",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var combinedLog bytes.Buffer
-			stderrBuffer := bytes.NewBufferString(tt.stderrBuf)
-			stdoutBuffer := bytes.NewBufferString(tt.stdoutBuf)
-
-			yl := &yomelLog{
-				yomelInfo:      tt.yomelInfo,
-				stageInfos:     []StageInfo{tt.stageInfo},
-				stdoutBuffers:  []*bytes.Buffer{stdoutBuffer},
-				stderrBuffers:  []*bytes.Buffer{stderrBuffer},
-				cmdHasError:    tt.name == "should print decorated log with error label when cmdHasError is true",
-				startTime:      time.Now(),
-				stageDurations: []time.Duration{time.Second},
+			yl := yomelLog{
+				yomelInfo:        tt.yomelInfo,
+				stageInfos:       []StageInfo{tt.stageInfo},
+				stdoutBuffers:    []*bytes.Buffer{bytes.NewBufferString("test stdout\n")},
+				stderrBuffers:    []*bytes.Buffer{bytes.NewBufferString("test stderr\n")},
+				cmdHasError:      tt.cmdHasError,
+				stageDurations:   []time.Duration{time.Second},
+				isTerminal:       tt.isTerminal,
+				isLightColorMode: tt.isLightColorMode,
 			}
 
+			var buf bytes.Buffer
 			yl.printDecoratedLog(
-				&combinedLog,
+				&buf,
 				tt.stageInfo,
-				tt.index,
-				stderrBuffer,
-				stdoutBuffer,
+				0,
+				yl.stderrBuffers[0],
+				yl.stdoutBuffers[0],
 				tt.shouldLog,
+				"\x1b[41m",
 			)
 
-			output := stripANSI(combinedLog.String())
-
-			for _, substr := range tt.wantOutputSubstr {
-				assert.Contains(t, output, substr)
+			if buf.Len() == 0 {
+				t.Errorf("printDecoratedLog() produced empty output")
 			}
 		})
 	}

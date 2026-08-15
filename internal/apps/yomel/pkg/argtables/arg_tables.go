@@ -6,54 +6,66 @@ import (
 )
 
 const (
-	Version              = "version"
-	Help                 = "help"
-	DirectMode           = "direct"
-	GenMode              = "gen"
-	Title                = "title"
-	StageArgName         = "stage"
-	NoLiveStdoutFlagName = "no-live-stdout"
-	NoLiveStderrFlagName = "no-live-stderr"
-	LogOpName            = "log"
-	NoLogOpName          = "no-log"
-	LogFilter            = "log-filter"
-	ErrLogFilter         = "err-log-filter"
-	CmdOpName            = "cmd"
-	SvcOpName            = "svc"
-	ActOpName            = "act"
-	OptOpName            = "opt"
-	LoptOpName           = "lop"
-	ArgOpName            = "arg"
-	ValueOpName          = "val"
-	SingleOpName         = "single"
-	SingleShortOpName    = "s"
-	NoQuoteOpName        = "no-quote"
-	NoQuoteShortOpName   = "n"
+	Version                 = "version"
+	Help                    = "help"
+	DirectMode              = "direct"
+	GenMode                 = "gen"
+	Title                   = "title"
+	StageArgName            = "stage"
+	NoLiveStdoutFlagName    = "no-live-stdout"
+	NoLiveStderrFlagName    = "no-live-stderr"
+	LogOpName               = "log"
+	NoLogOpName             = "no-log"
+	LogFilter               = "log-filter"
+	ErrLogFilter            = "err-log-filter"
+	CmdOpName               = "cmd"
+	SvcOpName               = "svc"
+	ActOpName               = "act"
+	OptOpName               = "opt"
+	LoptOpName              = "lop"
+	ArgOpName               = "arg"
+	ValueOpName             = "val"
+	ColorOpName             = "color"
+	BgColorOpName           = "bg-color"
+	ComemntColorOpName      = "comment-color"
+	TitleComemntColorOpName = "title-comment-color"
+	TitleColorOpName        = "title-color"
+	TitleBgColorOpName      = "title-bg-color"
+	SingleOpName            = "single"
+	SingleShortOpName       = "s"
+	NoQuoteOpName           = "no-quote"
+	NoQuoteShortOpName      = "n"
 )
 const (
-	VersionOpSignal        = "--" + Version
-	HelpOpSignal           = "--" + Help
-	DirectModeFlagSignal   = "--" + DirectMode
-	GenModeFlagSignal      = "--" + GenMode
-	TitleSignal            = Title
-	StageSignal            = StageArgName
-	CmdOpSignal            = "-" + CmdOpName
-	NoLiveStdoutFlagSignal = "--" + NoLiveStdoutFlagName
-	NoLiveStderrFlagSignal = "--" + NoLiveStderrFlagName
-	LogFlagSignal          = "--" + LogOpName
-	NoLogFlagSignal        = "--" + NoLogOpName
-	LogFilterOpSignal      = "--" + LogFilter
-	ErrLogFilterOpSignal   = "--" + ErrLogFilter
-	SvcOpSignal            = "-" + SvcOpName
-	ActOpSignal            = "-" + ActOpName
-	OptOpSignal            = "--" + OptOpName
-	LoptOpSignal           = "--" + LoptOpName
-	ArgOpSignal            = "--" + ArgOpName
-	ValueOptSignal         = "--" + ValueOpName
-	SingleOpSignal         = "--" + SingleOpName
-	SingleShortOpSignal    = "--" + SingleShortOpName
-	NoQuoteOpSignal        = "--" + NoQuoteOpName
-	NoQuoteShortOpSignal   = "--" + NoQuoteShortOpName
+	VersionOpSignal           = "--" + Version
+	HelpOpSignal              = "--" + Help
+	DirectModeFlagSignal      = "--" + DirectMode
+	GenModeFlagSignal         = "--" + GenMode
+	TitleSignal               = Title
+	StageSignal               = StageArgName
+	CmdOpSignal               = "-" + CmdOpName
+	NoLiveStdoutFlagSignal    = "--" + NoLiveStdoutFlagName
+	NoLiveStderrFlagSignal    = "--" + NoLiveStderrFlagName
+	LogFlagSignal             = "--" + LogOpName
+	NoLogFlagSignal           = "--" + NoLogOpName
+	LogFilterOpSignal         = "--" + LogFilter
+	ErrLogFilterOpSignal      = "--" + ErrLogFilter
+	SvcOpSignal               = "-" + SvcOpName
+	ActOpSignal               = "-" + ActOpName
+	OptOpSignal               = "--" + OptOpName
+	LoptOpSignal              = "--" + LoptOpName
+	ArgOpSignal               = "--" + ArgOpName
+	ValueOptSignal            = "--" + ValueOpName
+	ColorOpSignal             = "--" + ColorOpName
+	BgColorOpSignal           = "--" + BgColorOpName
+	CommentColorOpSignal      = "--" + ComemntColorOpName
+	TitleColorOpSignal        = "--" + TitleColorOpName
+	TitleBgColorOpSignal      = "--" + TitleBgColorOpName
+	TitleCommentColorOpSignal = "--" + TitleComemntColorOpName
+	SingleOpSignal            = "--" + SingleOpName
+	SingleShortOpSignal       = "--" + SingleShortOpName
+	NoQuoteOpSignal           = "--" + NoQuoteOpName
+	NoQuoteShortOpSignal      = "--" + NoQuoteShortOpName
 )
 
 type QuoteType int
@@ -65,31 +77,37 @@ const (
 )
 
 type ArgTable struct {
-	No              int
-	IsVersion       bool
-	IsHelp          bool
-	IsGen           bool
-	IsNoLiveStdout  bool
-	IsNoLiveStderr  bool
-	IsTitle         bool
-	IsDirect        bool
-	IsLogFilter     bool
-	IsErrLogFilter  bool
-	StageNo         int
-	IsStage         bool
-	IsLog           bool
-	IsNoLog         bool
-	IsCmd           bool
-	IsSvc           bool
-	IsAct           bool
-	IsOpt           bool
-	IsLopt          bool
-	IsValue         bool
-	IsArg           bool
-	Comment         string
-	QuoteTypeSignal QuoteType
-	UnknownOption   string
-	Str             *string
+	No                  int
+	IsVersion           bool
+	IsHelp              bool
+	IsGen               bool
+	IsNoLiveStdout      bool
+	IsNoLiveStderr      bool
+	IsTitle             bool
+	IsDirect            bool
+	IsLogFilter         bool
+	IsErrLogFilter      bool
+	StageNo             int
+	IsStage             bool
+	IsLog               bool
+	IsNoLog             bool
+	IsCmd               bool
+	IsSvc               bool
+	IsAct               bool
+	IsOpt               bool
+	IsLopt              bool
+	IsValue             bool
+	IsArg               bool
+	Comment             string
+	IsColor             bool
+	IsBgColor           bool
+	IsCommentColor      bool
+	IsTitleColor        bool
+	IsTitleBgColor      bool
+	IsTitleCommentColor bool
+	QuoteTypeSignal     QuoteType
+	UnknownOption       string
+	Str                 *string
 }
 type ExpectedNext int
 
@@ -203,6 +221,18 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			argTable.IsArg = true
 			argTable.Comment = removePrefix(inputArg, ArgOpSignal)
 			expectedNext = ExpectUp2HyphenStr
+		case inputArg == ColorOpSignal:
+			argTable.IsColor = true
+		case inputArg == BgColorOpSignal:
+			argTable.IsBgColor = true
+		case inputArg == TitleColorOpSignal:
+			argTable.IsTitleColor = true
+		case inputArg == TitleBgColorOpSignal:
+			argTable.IsTitleBgColor = true
+		case inputArg == CommentColorOpSignal:
+			argTable.IsCommentColor = true
+		case inputArg == TitleCommentColorOpSignal:
+			argTable.IsTitleCommentColor = true
 		case
 			inputArg == SingleOpSignal,
 			inputArg == SingleShortOpSignal:

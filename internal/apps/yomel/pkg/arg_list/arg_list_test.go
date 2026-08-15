@@ -1,4 +1,4 @@
-package arglist
+package arg_list
 
 import (
 	"os"

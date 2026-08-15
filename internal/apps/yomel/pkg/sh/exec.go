@@ -13,33 +13,43 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/charmbracelet/x/term"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/env"
 )
 
 const (
-	redStart                              = "\x1b[31m"
-	colorEnd                              = "\x1b[39m"
-	blueGreenStart                        = "\x1b[30m"
-	boldStart                             = "\x1b[1m"
-	boldEnd                               = "\x1b[22m"
-	underlineStart                        = "\x1b[4m"
-	underlineEnd                          = "\x1b[24m"
+	redStart       = "\x1b[31m"
+	colorEnd       = domain.ColorEnd
+	blueGreenStart = "\x1b[30m"
+	boldStart      = "\x1b[1m"
+	boldEnd        = "\x1b[22m"
+	underlineStart = "\x1b[4m"
+	underlineEnd   = "\x1b[24m"
+)
+
+const (
 	sectionPrefixAndLastNewlineNum        = 2
 	miniSectionOrContentsPrefixNewlineNum = 1
 	sectionSentenceSeparator              = " "
 )
 
 type yomelLog struct {
-	yomelInfo      YomelInfo
-	stageInfos     []StageInfo
-	stdoutBuffers  []*bytes.Buffer
-	stderrBuffers  []*bytes.Buffer
-	cmdHasError    bool
-	startTime      time.Time
-	stageDurations []time.Duration
+	yomelInfo        YomelInfo
+	stageInfos       []StageInfo
+	stdoutBuffers    []*bytes.Buffer
+	stderrBuffers    []*bytes.Buffer
+	cmdHasError      bool
+	startTime        time.Time
+	stageDurations   []time.Duration
+	isTerminal       bool
+	isLightColorMode bool
 }
 
-func Exec(yomelInfo YomelInfo) int {
+func Exec(
+	yomelInfo YomelInfo,
+	yomelEnv env.YomelEnv,
+) int {
 	stageInfos := yomelInfo.StageInfos
 	numCmds := len(stageInfos)
 	if numCmds == 0 {
@@ -136,13 +146,15 @@ func Exec(yomelInfo YomelInfo) int {
 
 	// 6. Finally, output decorated logs to os.Stderr based on flag conditions
 	yl := yomelLog{
-		yomelInfo:      yomelInfo,
-		stageInfos:     stageInfos,
-		stdoutBuffers:  stdoutBuffers,
-		stderrBuffers:  stderrBuffers,
-		cmdHasError:    cmdHasError,
-		startTime:      startTime,
-		stageDurations: stageDurations,
+		yomelInfo:        yomelInfo,
+		stageInfos:       stageInfos,
+		stdoutBuffers:    stdoutBuffers,
+		stderrBuffers:    stderrBuffers,
+		cmdHasError:      cmdHasError,
+		startTime:        startTime,
+		stageDurations:   stageDurations,
+		isTerminal:       yomelEnv.IsTerminal,
+		isLightColorMode: yomelEnv.IsLightColorMode,
 	}
 	combinedLog := yl.make()
 
@@ -178,17 +190,41 @@ func (yl *yomelLog) make() bytes.Buffer {
 	if firstLogIdx == -1 {
 		return combinedLog
 	}
-
-	yl.printYomelLogStartHolder(&combinedLog)
+	isLightColorMode := yl.isLightColorMode
+	titleStartBackgroundColor := outputTitleStartColor(
+		yl.yomelInfo.BackgroundColor,
+		yl.isTerminal,
+		isLightColorMode,
+	)
+	yl.printYomelLogStartHolder(
+		&combinedLog,
+		titleStartBackgroundColor,
+	)
 	if stageLen > 1 {
-		yl.printTitleLog(&combinedLog, yomelTitle)
-		yl.printTotalCmd(&combinedLog, totalPipeCmdStr)
+		yl.printTitleLog(
+			&combinedLog,
+			yomelTitle,
+			titleStartBackgroundColor,
+		)
+		yl.printTotalCmd(
+			&combinedLog,
+			totalPipeCmdStr,
+			titleStartBackgroundColor,
+		)
 	}
+	var curSectionColor string
 	for i, stageInfo := range yl.stageInfos {
 		shouldLog := stageInfo.IsLog || yl.cmdHasError
 		if !yl.cmdHasError && !shouldLog {
 			continue
 		}
+		backgroundColor := stageInfo.BackgroundColor
+		curSectionColor = outputSectionColorStart(
+			backgroundColor,
+			yl.isTerminal,
+			isLightColorMode,
+			curSectionColor,
+		)
 		yl.printDecoratedLog(
 			&combinedLog,
 			stageInfo,
@@ -196,6 +232,7 @@ func (yl *yomelLog) make() bytes.Buffer {
 			yl.stderrBuffers[i],
 			yl.stdoutBuffers[i],
 			shouldLog,
+			curSectionColor,
 		)
 	}
 	fmt.Fprint(&combinedLog, compNewLine(&combinedLog, sectionPrefixAndLastNewlineNum))
@@ -247,22 +284,66 @@ func makeTotalPipeCmd(
 	return cmdPipeline
 }
 
+func colorizePipelineCmd(
+	line string,
+	fgColor string,
+	isTerminal bool,
+) string {
+	// すでに空行の場合や、カラーコードが不要な場合はそのまま返す
+	if line == "" || fgColor == "" || !isTerminal {
+		return line
+	}
+	lineWithColorEndTrim := strings.ReplaceAll(line, colorEnd, "")
+	lines := strings.Split(lineWithColorEndTrim, "\n")
+	for i, line := range lines {
+		if !strings.HasSuffix(line, "\\") {
+			lines[i] = fgColor + line + colorEnd
+			continue
+		}
+		base := line[:len(line)-1]
+		lines[i] = fgColor + base + fgColor + "\\" + colorEnd
+	}
+	return strings.Join(lines, "\n")
+}
+
 func (yl *yomelLog) printYomelLogStartHolder(
 	w io.Writer,
+	titleStartBackgroundColor string,
 ) {
 	var yomelLogStartHolderBuffer bytes.Buffer
 	yomelLogStartHolderBuffer.WriteString("\n")
+	logStartRaw := fmt.Sprintf(
+		"%s%s%s",
+		"Yomel-log",
+		sectionSentenceSeparator,
+		convertTimeStampStr(yl.startTime),
+	)
+	isTerminal := yl.isTerminal
+	logStartWithColor := makeForegroundColor(
+		logStartRaw,
+		yl.yomelInfo.ForegroundColor,
+		isTerminal,
+	)
+	logStartHolderWithDeco := ""
+	switch isTerminal {
+	case true:
+		logStartHolderWithDeco = makeFullWidthBgColorLine(
+			fmt.Sprintf(
+				"%s%s%s%s%s",
+				underlineStart,
+				boldStart,
+				logStartWithColor,
+				boldEnd,
+				underlineEnd,
+			),
+			titleStartBackgroundColor,
+			isTerminal,
+		)
+	default:
+		logStartHolderWithDeco = logStartWithColor
+	}
 	yomelLogStartHolderBuffer.WriteString(
-		fmt.Sprintf(
-			"%s%s%s%s%s%s%s",
-			underlineStart,
-			boldStart,
-			"Yomel-log",
-			sectionSentenceSeparator,
-			convertTimeStampStr(yl.startTime),
-			boldEnd,
-			underlineEnd,
-		),
+		logStartHolderWithDeco,
 	)
 	w.Write(
 		yomelLogStartHolderBuffer.Bytes(),
@@ -272,32 +353,94 @@ func (yl *yomelLog) printYomelLogStartHolder(
 func (yl *yomelLog) printTitleLog(
 	w io.Writer,
 	title string,
+	titleStartColor string,
 ) {
 	if title == "" {
 		return
 	}
 	newLIneStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
+	foregroundColor := yl.yomelInfo.ForegroundColor
+	isTerminal := yl.isTerminal
+	titleHOlderWithFgColorUnder := makeForegroundColor(
+		convertUnderAndFirstBold(
+			"Title",
+			isTerminal,
+		),
+		foregroundColor,
+		isTerminal,
+	)
+	titleHolderWithDeco := makeFullWidthBgColorLine(
+		titleHOlderWithFgColorUnder,
+		titleStartColor,
+		isTerminal,
+	)
+	titleCon := makeForegroundColor(
+		capitalizeFirst(title),
+		foregroundColor,
+		isTerminal,
+	)
+	titleHolderAndCon := fmt.Sprintf(
+		"%s\n%s",
+		titleHolderWithDeco,
+		titleCon,
+	)
 	fmt.Fprintf(
 		w,
-		"%s%s\n%s",
+		"%s%s",
 		newLIneStr,
-		convertUnderAndFirstBold("Title"),
-		capitalizeFirst(title),
+		titleHolderAndCon,
 	)
 }
 
 func (yl *yomelLog) printTotalCmd(
 	w io.Writer,
 	totalPipeCmdStr string,
+	titleStartColor string,
 ) {
 	newlineStr := compNewLine(w, sectionPrefixAndLastNewlineNum)
+	isTerminal := yl.isTerminal
+	yomelInfo := yl.yomelInfo
+	foregroundColor := yomelInfo.ForegroundColor
+	totalCmdSectionWithFgColorUnsder := makeForegroundColor(
+		convertUnderAndFirstBold(
+			"Total-cmd",
+			isTerminal,
+		),
+		foregroundColor,
+		isTerminal,
+	)
+	totalCmdSectionWithDeco := makeFullWidthBgColorLine(
+		totalCmdSectionWithFgColorUnsder,
+		titleStartColor,
+		isTerminal,
+	)
+	titleCommentColorStart := yomelInfo.TitleCommentForegroundColor
 	fmt.Fprintf(
 		w,
 		"%s%s\n%s",
 		newlineStr,
-		convertUnderAndFirstBold("Total-cmd"),
-		formatSideComment(totalPipeCmdStr),
+		totalCmdSectionWithDeco,
+		colorizePipelineCmd(
+			formatSideComment(
+				decideCommentColor(
+					totalPipeCmdStr,
+					titleCommentColorStart,
+					isTerminal,
+				),
+			),
+			foregroundColor,
+			isTerminal,
+		),
 	)
+}
+
+func decideCommentColor(cmdWithCome, commentRepColor string, isTerminal bool) string {
+	if !isTerminal ||
+		cmdWithCome == "" ||
+		commentRepColor == "" {
+		return cmdWithCome
+	}
+	return strings.ReplaceAll(cmdWithCome, domain.GrayStart, commentRepColor)
 }
 
 func capitalizeFirst(s string) string {
@@ -308,9 +451,12 @@ func capitalizeFirst(s string) string {
 	return string(unicode.ToUpper(r)) + s[size:]
 }
 
-func convertUnderAndFirstBold(s string) string {
+func convertUnderAndFirstBold(s string, isTerminal bool) string {
 	if s == "" {
 		return ""
+	}
+	if !isTerminal {
+		return s
 	}
 	r, size := utf8.DecodeRuneInString(s)
 	return underlineStart + boldStart + string(r) + boldEnd + s[size:] + underlineEnd
@@ -323,7 +469,9 @@ func (yl *yomelLog) printDecoratedLog(
 	stderrBuf,
 	stdoutBuf *bytes.Buffer,
 	shouldLog bool,
+	curSectionColor string,
 ) {
+	foreroundColor := stageInfo.ForegroundColor
 	duration := yl.stageDurations[index]
 	durationStr := fmt.Sprintf("+%.6fs", duration.Seconds())
 	newlineCompedForStage := compNewLine(w, sectionPrefixAndLastNewlineNum)
@@ -334,63 +482,157 @@ func (yl *yomelLog) printDecoratedLog(
 		sectionSentenceSeparator,
 		durationStr,
 	)
-	fmt.Fprintf(
-		w,
-		"%s%s\n%s",
-		newlineCompedForStage,
+	isTerminal := yl.isTerminal
+	stageHeaderWithUnerFirstBold := makeForegroundColor(
 		convertUnderAndFirstBold(
 			stageHeader,
+			isTerminal,
 		),
+		foreroundColor,
+		isTerminal,
+	)
+	stageHeaderWithDeco := makeFullWidthBgColorLine(
+		stageHeaderWithUnerFirstBold,
+		curSectionColor,
+		isTerminal,
+	)
+	descWithFgColorCapitalizeFirst := makeForegroundColor(
 		capitalizeFirst(stageInfo.Desc),
+		foreroundColor,
+		isTerminal,
+	)
+	stageCon := fmt.Sprintf(
+		"%s\n%s",
+		stageHeaderWithDeco,
+		descWithFgColorCapitalizeFirst,
+	)
+	fmt.Fprintf(
+		w,
+		"%s%s",
+		newlineCompedForStage,
+		stageCon,
 	)
 	newlineCompedForCmd := compNewLine(w, sectionPrefixAndLastNewlineNum)
+	cmdSectionWithFgColorUnder := makeForegroundColor(
+		convertUnderAndFirstBold(
+			"Cmd",
+			isTerminal,
+		),
+		foreroundColor,
+		isTerminal,
+	)
+	cmdSectionWithDeco := makeBackgoundColor(
+		cmdSectionWithFgColorUnder,
+		curSectionColor,
+		isTerminal,
+	)
+	curCommentColorStart := outputCommentColorStart(
+		stageInfo.CommentColorStart,
+		yl.yomelInfo.CommentColor,
+		isTerminal,
+	)
+	cmdBodyWithDeco := colorizePipelineCmd(
+		formatSideComment(
+			decideCommentColor(
+				stageInfo.CmdStrsWithComment,
+				curCommentColorStart,
+				isTerminal,
+			),
+		),
+		foreroundColor,
+		isTerminal,
+	)
 	fmt.Fprintf(
 		w,
 		"%s%s \n%s",
 		newlineCompedForCmd,
-		convertUnderAndFirstBold("Cmd"),
-		formatSideComment(stageInfo.CmdStrsWithComment),
+		cmdSectionWithDeco,
+		cmdBodyWithDeco,
+	)
+	stdErrSectionWithFgColorUnserBold := makeForegroundColor(
+		makeNormalOrRedStdErrLabel(
+			yl.cmdHasError,
+			isTerminal,
+		),
+		foreroundColor,
+		isTerminal,
+	)
+	stdErrSectionWithDeco := makeBackgoundColor(
+		stdErrSectionWithFgColorUnserBold,
+		curSectionColor,
+		isTerminal,
 	)
 	if shouldLog {
 		newlineForStdErr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 		yl.write2Std(
 			w,
-			newlineForStdErr+makeNormalOrRedStdErrLabel(yl.cmdHasError),
+			newlineForStdErr+
+				stdErrSectionWithDeco,
 			stderrBuf,
 			stageInfo.ErrLogFilter,
+			foreroundColor,
+			isTerminal,
 		)
 	}
 	newlineCompedForStdout := compNewLine(w, sectionPrefixAndLastNewlineNum)
+	stdoutHolderWithFgColorBoldUnder := makeForegroundColor(
+		convertUnderAndFirstBold(
+			"Stdout",
+			isTerminal,
+		),
+		foreroundColor,
+		isTerminal,
+	)
+	stdoutHolderWithDeco := makeBackgoundColor(
+		stdoutHolderWithFgColorBoldUnder,
+		curSectionColor,
+		isTerminal,
+	)
 	yl.write2Std(
 		w,
 		fmt.Sprintf(
 			"%s%s",
 			newlineCompedForStdout,
-			convertUnderAndFirstBold("Stdout"),
+			stdoutHolderWithDeco,
 		),
 		stdoutBuf,
 		stageInfo.LogFilter,
+		foreroundColor,
+		isTerminal,
 	)
 }
 
-func makeNormalOrRedStdErrLabel(hasErr bool) string {
+func makeNormalOrRedStdErrLabel(hasErr bool, isTerminal bool) string {
 	logGenre := "Progress"
 	if hasErr {
 		logGenre = "Error"
 		return fmt.Sprintf(
 			"%s%s%s",
 			redStart,
-			convertUnderAndFirstBold(logGenre),
+			convertUnderAndFirstBold(
+				logGenre,
+				isTerminal,
+			),
 			colorEnd,
 		)
 	}
 	return fmt.Sprintf(
 		"%s",
-		convertUnderAndFirstBold(logGenre),
+		convertUnderAndFirstBold(
+			logGenre,
+			isTerminal,
+		),
 	)
 }
 
-func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filterShell string) {
+func (yl *yomelLog) write2Std(
+	w io.Writer,
+	label string,
+	buf *bytes.Buffer,
+	filterShell string,
+	foregroundColor string,
+	isTerminal bool,
+) {
 	if buf.Len() <= 0 {
 		return
 	}
@@ -398,7 +640,13 @@ func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filt
 	if filterShell == "" {
 		newLineStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 		w.Write([]byte(newLineStr))
-		w.Write(buf.Bytes())
+		w.Write(
+			bufStrToByteWithFgColor(
+				buf.String(),
+				foregroundColor,
+				isTerminal,
+			),
+		)
 		return
 	}
 	filterShellCmd := exec.Command("bash", "-c", filterShell)
@@ -410,40 +658,68 @@ func (yl *yomelLog) write2Std(w io.Writer, label string, buf *bytes.Buffer, filt
 	if err := filterShellCmd.Run(); err == nil || filterShellCmdStderrBuf.Len() <= 0 {
 		newLineStr := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 		w.Write([]byte(newLineStr))
-		w.Write(filterShellCmdStdoutBuf.Bytes())
+		w.Write(
+			bufStrToByteWithFgColor(
+				filterShellCmdStdoutBuf.String(),
+				foregroundColor,
+				isTerminal,
+			),
+		)
 		return
 	}
 	newlineForFilterShell := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
+	filterShellErrStrWithDeco := fmt.Sprintf(
+		"%s%s%s",
+		redStart,
+		convertUnderAndFirstBold(
+			"filter shell err",
+			yl.isTerminal,
+		),
+		colorEnd,
+	)
 	fmt.Fprintf(
 		w,
 		"%s%s",
 		newlineForFilterShell,
-		fmt.Sprintf(
-			"%s%s%s",
-			redStart,
-			convertUnderAndFirstBold("filter shell err"),
-			colorEnd,
-		),
+		filterShellErrStrWithDeco,
 	)
 	newLineStrForFiltershellErrCon := compNewLine(w, miniSectionOrContentsPrefixNewlineNum)
 	w.Write([]byte(newLineStrForFiltershellErrCon))
-	w.Write(filterShellCmdStderrBuf.Bytes())
+	w.Write(
+		bufStrToByteWithFgColor(
+			filterShellCmdStderrBuf.String(),
+			foregroundColor,
+			isTerminal,
+		),
+	)
+}
+
+func bufStrToByteWithFgColor(
+	bufStr string,
+	foregroundColor string,
+	isTerminal bool,
+) []byte {
+	bufStrWithFgColor := makeForegroundColor(
+		bufStr,
+		foregroundColor,
+		isTerminal,
+	)
+	return []byte(bufStrWithFgColor)
 }
 
 func formatSideComment(cmdStr string) string {
 	sideCommentBlank := domain.SideCommentBlank
-
 	lines := strings.Split(cmdStr, "\n")
 	var maxBaseRune int
 	baseRunes := make([]int, len(lines))
 	idxs := make([]int, len(lines))
-	for i, line := range lines {
-		idx := strings.Index(line, sideCommentBlank)
+	for i, lineSrc := range lines {
+		idx := strings.Index(lineSrc, sideCommentBlank)
 		idxs[i] = idx
 		if idx == -1 {
 			continue
 		}
-		baseLine := line[:idx]
+		baseLine := lineSrc[:idx]
 		rNum := utf8.RuneCountInString(baseLine)
 		baseRunes[i] = rNum
 		if rNum > maxBaseRune {
@@ -462,11 +738,9 @@ func formatSideComment(cmdStr string) string {
 			}
 			continue
 		}
-
 		baseLine := line[:idx]
 		commentLine := line[idx:]
 		diff := maxBaseRune - baseRunes[i]
-
 		sb.WriteString(baseLine)
 		if diff > 0 {
 			for d := 0; d < diff; d++ {
@@ -474,7 +748,6 @@ func formatSideComment(cmdStr string) string {
 			}
 		}
 		sb.WriteString(concatBlank)
-
 		commentBody := commentLine[len(sideCommentBlank):]
 		sb.WriteString(commentBody)
 
@@ -507,4 +780,163 @@ func compNewLine(w io.Writer, newLIneNum int) string {
 		return strings.Repeat("\n", addCount)
 	}
 	return ""
+}
+
+func outputTitleStartColor(
+	backGroundColor string,
+	isTerm bool,
+	isLightColorMode bool,
+) string {
+	if !isTerm {
+		return ""
+	}
+	if backGroundColor != "" {
+		return backGroundColor
+	}
+	ligthTarcoizBakcgroundStart := "\x1b[48;5;193m"
+	if isLightColorMode {
+		return ligthTarcoizBakcgroundStart
+	}
+	deepbrownBackgroundStart := "\x1b[48;5;52m"
+	return deepbrownBackgroundStart
+}
+func outputSectionColorStart(
+	backgroudColorStartStr string,
+	isTerm bool,
+	isLightColorMode bool,
+	beforeColor string,
+) string {
+	if !isTerm {
+		return ""
+	}
+	if backgroudColorStartStr != "" {
+		return backgroudColorStartStr
+	}
+	switch isLightColorMode {
+	case true:
+		lightBlueBakcgroundStart := "\x1b[48;5;159m"
+		// lightGreenBackgroundStart := "\x1b[48;5;121m"
+		lightGreenBackgroundStart := "\x1b[48;5;157m"
+		if beforeColor == lightBlueBakcgroundStart {
+			return lightGreenBackgroundStart
+		} else {
+			return lightBlueBakcgroundStart
+		}
+	default:
+		darkGreenBackgroundStart := "\x1b[48;5;22m"
+		darkBlueBakcgroundStart := "\x1b[48;5;18m"
+		if beforeColor == darkGreenBackgroundStart {
+			return darkBlueBakcgroundStart
+		} else {
+			return darkGreenBackgroundStart
+		}
+	}
+}
+func outputCommentColorStart(
+	stageCommentColorStart string,
+	ctrlCommentColorStart string,
+	isTerm bool,
+) string {
+	if !isTerm {
+		return ""
+	}
+	if stageCommentColorStart != "" {
+		return stageCommentColorStart
+	}
+	return ctrlCommentColorStart
+}
+
+func makeFullWidthBgColorLine(
+	text string,
+	colorStart string,
+	isTerminal bool,
+) string {
+	if !isTerminal {
+		return text
+	}
+	widthPtr := getTerminalWidth(os.Stderr)
+	if widthPtr == nil {
+		return makeBackgoundColor(
+			text,
+			colorStart,
+			isTerminal,
+		)
+	}
+	backgroundColorEnd := "\x1b[49m"
+	plainText := stripAnsi(text)
+	visLen := utf8.RuneCountInString(plainText)
+	// ターミナルの幅に満たない分の空白をパディング
+	paddingLen := *widthPtr - visLen
+	if paddingLen < 0 {
+		paddingLen = 0
+	}
+	// 元のテキスト（装飾付き）の末尾に、足りない分のスペースを追加
+	paddedText := text + fmt.Sprintf("%*s", paddingLen, "")
+	if colorStart == "" {
+		return paddedText
+	}
+	return fmt.Sprintf("%s%s%s", colorStart, paddedText, backgroundColorEnd)
+}
+func makeBackgoundColor(
+	str string,
+	colorStart string,
+	isTerminal bool,
+) string {
+	if colorStart == "" || !isTerminal {
+		return str
+	}
+	backgroundColorEnd := "\x1b[49m"
+	return fmt.Sprintf(
+		"%s%s%s",
+		colorStart,
+		str,
+		backgroundColorEnd,
+	)
+}
+func makeForegroundColor(
+	str string,
+	colorStart string,
+	isTerminal bool,
+) string {
+	if colorStart == "" || !isTerminal {
+		return str
+	}
+	return fmt.Sprintf(
+		"%s%s%s",
+		colorStart,
+		str,
+		colorEnd,
+	)
+}
+
+func getTerminalWidth(f *os.File) *int {
+	// f.Fd() を使ってターミナルのファイル記述子を渡す
+	width, _, err := term.GetSize(f.Fd())
+	if err != nil {
+		return nil // 取得失敗時は一般的な80文字幅をデフォルトにする
+	}
+	return &width
+}
+
+func stripAnsi(s string) string {
+	var buf strings.Builder
+	inEscape := false
+	for i := 0; i < len(s); {
+		if i+1 < len(s) && s[i] == 0x1b && s[i+1] == '[' {
+			inEscape = true
+			i += 2
+			continue
+		}
+		if inEscape {
+			c := s[i]
+			if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') {
+				inEscape = false
+			}
+			i++
+			continue
+		}
+		buf.WriteByte(s[i])
+		i++
+	}
+	return buf.String()
 }

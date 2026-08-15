@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/color"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/descjudger"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 )
@@ -15,6 +16,7 @@ func ModelValidate(stModels []model.StageModel) error {
 		checkIrregularStageDesc,
 		checkNoBlankStrRequireErrForCmd,
 		checkNoBlankStrRequireErr,
+		checkColorCodeStrIrregularErr,
 	}
 	for _, stModel := range stModels {
 		for _, validate := range validators {
@@ -104,6 +106,24 @@ func execCheckNoBlankStrRequireErr(str *string, mainArg string, stageNo int) err
 	return nil
 }
 
+func checkColorCodeStrIrregularErr(stModel model.StageModel) error {
+	stageNo := stModel.No
+	for _, colorStr := range []string{
+		stModel.ColorStr,
+		stModel.BgColorStr,
+		stModel.CommentColorStr,
+	} {
+		err := color.DetectColorCodeStrIrregularErr(colorStr)
+		if err != nil {
+			return fmt.Errorf(
+				colorStrIrregularErrMsg,
+				stageNo,
+				err,
+			)
+		}
+	}
+	return nil
+}
 func checkOptStrBlankErrMsg(stModels []model.StageModel) error {
 	for _, stModel := range stModels {
 		stageNo := stModel.No

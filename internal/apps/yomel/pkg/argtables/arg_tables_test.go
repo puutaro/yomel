@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arglist"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arg_list"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
 	"github.com/stretchr/testify/assert"
@@ -32,6 +32,12 @@ func Test_GenArgTable(t *testing.T) {
 				"--gen",
 				"--log-filter", "grep log",
 				"--err-log-filter", "grep err_log",
+				"--color", "green",
+				"--bg-color", "darkGreen",
+				"--comment-color", "gray",
+				"--title-color", "green",
+				"--title-bg-color", "darkGreen",
+				"--title-comment-color", "gray",
 				"stage", "test1",
 				"--log-filter", "grep \"log aws1\"",
 				"-cmd", "aws",
@@ -85,6 +91,18 @@ func Test_GenArgTable(t *testing.T) {
 				// parse --err-log-filter option with pattern
 				{StageNo: 0, IsErrLogFilter: true},
 				{StageNo: 0, Str: testutil.Ptr("grep err_log")},
+				{StageNo: 0, IsColor: true},
+				{StageNo: 0, Str: testutil.Ptr("green")},
+				{StageNo: 0, IsBgColor: true},
+				{StageNo: 0, Str: testutil.Ptr("darkGreen")},
+				{StageNo: 0, IsCommentColor: true},
+				{StageNo: 0, Str: testutil.Ptr("gray")},
+				{StageNo: 0, IsTitleColor: true},
+				{StageNo: 0, Str: testutil.Ptr("green")},
+				{StageNo: 0, IsTitleBgColor: true},
+				{StageNo: 0, Str: testutil.Ptr("darkGreen")},
+				{StageNo: 0, IsTitleCommentColor: true},
+				{StageNo: 0, Str: testutil.Ptr("gray")},
 
 				// parse stage definition for test1
 				{StageNo: 1, IsStage: true},
@@ -212,7 +230,7 @@ func Test_GenArgTable(t *testing.T) {
 			defer func() { os.Args = oldArgs }()
 			os.Args = tt.input
 
-			inputArgs := arglist.Gen()
+			inputArgs := arg_list.Gen()
 			got := argtables.GenArgTable(inputArgs)
 			for i := range tt.want {
 				tt.want[i].No = i + 1

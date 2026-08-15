@@ -21,38 +21,47 @@ type ArgParam struct {
 	Param ParamType
 }
 type StageModel struct {
-	No           int
-	Desc         string
-	Cmd          string
-	CmdOps       []OptParam
-	CmdLops      []OptParam
-	CmdArgs      []ArgParam
-	Svc          *string
-	SvcOps       []OptParam
-	SvcLops      []OptParam
-	SvcArgs      []ArgParam
-	Act          *string
-	ActOps       []OptParam
-	ActLops      []OptParam
-	ActArgs      []ArgParam
-	IsLog        *bool
-	LogFilter    string
-	ErrLogFilter string
+	No              int
+	Desc            string
+	Cmd             string
+	CmdOps          []OptParam
+	CmdLops         []OptParam
+	CmdArgs         []ArgParam
+	Svc             *string
+	SvcOps          []OptParam
+	SvcLops         []OptParam
+	SvcArgs         []ArgParam
+	Act             *string
+	ActOps          []OptParam
+	ActLops         []OptParam
+	ActArgs         []ArgParam
+	IsLog           *bool
+	LogFilter       string
+	ErrLogFilter    string
+	ColorStr        string
+	BgColorStr      string
+	CommentColorStr string
 	// Arg    []Param
 	// Opt    []Param
 }
 
 type ControlModel struct {
-	IsLog        *bool
-	LogFilter    string
-	ErrLogFilter string
-	IsVersion    bool
-	IsHelp       bool
-	IsGen        bool
-	IsDirect     bool
-	IsLiveStdout bool
-	IsLiveStderr bool
-	Title        string
+	IsLog                *bool
+	LogFilter            string
+	ErrLogFilter         string
+	IsVersion            bool
+	IsHelp               bool
+	IsGen                bool
+	IsDirect             bool
+	IsLiveStdout         bool
+	IsLiveStderr         bool
+	Title                string
+	ColorStr             string
+	BgColorStr           string
+	CommentColorStr      string
+	TitleColorStr        string
+	TitleBgColorStr      string
+	TitleCommentColorStr string
 }
 
 func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
@@ -144,6 +153,48 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 	); strPtr != nil {
 		ctrl.ErrLogFilter = *strPtr
 	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsColor },
+	); strPtr != nil {
+		ctrl.ColorStr = *strPtr
+	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsBgColor },
+	); strPtr != nil {
+		ctrl.BgColorStr = *strPtr
+	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsCommentColor },
+	); strPtr != nil {
+		ctrl.CommentColorStr = *strPtr
+	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsTitleColor },
+	); strPtr != nil {
+		ctrl.TitleColorStr = *strPtr
+	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsTitleBgColor },
+	); strPtr != nil {
+		ctrl.TitleBgColorStr = *strPtr
+	}
+	if strPtr := getOneStr(
+		0,
+		curCtrlArgTables,
+		func(t argtables.ArgTable) bool { return t.IsTitleCommentColor },
+	); strPtr != nil {
+		ctrl.TitleCommentColorStr = *strPtr
+	}
 
 	argTablesLen := len(argTables)
 	totalStageLen := argTables[argTablesLen-1].StageNo
@@ -210,6 +261,27 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 			func(t argtables.ArgTable) bool { return t.IsErrLogFilter },
 		); strPtr != nil {
 			stModel.ErrLogFilter = *strPtr
+		}
+		if strPtr := getOneStr(
+			0,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsColor },
+		); strPtr != nil {
+			stModel.ColorStr = *strPtr
+		}
+		if strPtr := getOneStr(
+			0,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsBgColor },
+		); strPtr != nil {
+			stModel.BgColorStr = *strPtr
+		}
+		if strPtr := getOneStr(
+			0,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsCommentColor },
+		); strPtr != nil {
+			stModel.CommentColorStr = *strPtr
 		}
 		parseOptions(
 			nextStartIndex,

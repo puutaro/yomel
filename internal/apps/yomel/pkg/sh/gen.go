@@ -16,26 +16,38 @@ type StageInfo struct {
 	ErrLogFilter       string
 	CmdStrs            string
 	CmdStrsWithComment string
+	ForegroundColor    string
+	BackgroundColor    string
+	CommentColorStart  string
 }
 type YomelInfo struct {
-	IsDirect     bool
-	IsGen        bool
-	IsLiveStdout bool
-	IsLiveStdErr bool
-	Title        string
-	StageInfos   []StageInfo
+	IsDirect                    bool
+	IsGen                       bool
+	IsLiveStdout                bool
+	IsLiveStdErr                bool
+	Title                       string
+	StageInfos                  []StageInfo
+	ForegroundColor             string
+	BackgroundColor             string
+	CommentColor                string
+	TitleCommentForegroundColor string
+	TitleCommentBackgroundColor string
 }
 
 func Gen(yomel domain.Yomel) YomelInfo {
 	stageInfos := genStageInfo(yomel)
 	ctrl := yomel.Ctrl
 	return YomelInfo{
-		IsLiveStdout: ctrl.IsLiveStdout,
-		IsLiveStdErr: ctrl.IsLiveStderr,
-		IsDirect:     ctrl.IsDirect,
-		IsGen:        ctrl.IsGen,
-		Title:        ctrl.Title,
-		StageInfos:   stageInfos,
+		IsLiveStdout:                ctrl.IsLiveStdout,
+		IsLiveStdErr:                ctrl.IsLiveStderr,
+		IsDirect:                    ctrl.IsDirect,
+		IsGen:                       ctrl.IsGen,
+		Title:                       ctrl.Title,
+		ForegroundColor:             ctrl.TitleColorStartStr,
+		BackgroundColor:             ctrl.TitleBgColorStartStr,
+		TitleCommentForegroundColor: ctrl.TitleCommentColorStartStr,
+		CommentColor:                ctrl.CommentColorStartStr,
+		StageInfos:                  stageInfos,
 	}
 }
 
@@ -46,20 +58,36 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 	globalErrLogFilter := yomel.Ctrl.ErrLogFilter
 	// default stdout log don't display
 	isLogInCtrl := false
-	if ctrlIsLog := yomel.Ctrl.IsLog; ctrlIsLog != nil {
+	yomelCtrl := yomel.Ctrl
+	if ctrlIsLog := yomelCtrl.IsLog; ctrlIsLog != nil {
 		isLogInCtrl = *ctrlIsLog
 	}
+	foregroundStartColor := yomelCtrl.TitleColorStartStr
+	backgroundStartColor := yomelCtrl.TitleBgColorStartStr
+	commentColorStartStr := yomelCtrl.CommentColorStartStr
 	for i, stage := range stages {
 		isLogInStage := isLogInCtrl
 		if stageIsLog := stage.IsLog; stageIsLog != nil {
 			isLogInStage = *stageIsLog
 		}
+		if colorForegroundStartStr := stage.ColorStartStr; colorForegroundStartStr != "" {
+			foregroundStartColor = colorForegroundStartStr
+		}
+		if colorBackgroundStartStr := stage.BgColorStartStr; colorBackgroundStartStr != "" {
+			backgroundStartColor = colorBackgroundStartStr
+		}
+		if commentTmpColorStartStr := stage.CommentColorStartStr; commentTmpColorStartStr != "" {
+			commentColorStartStr = commentTmpColorStartStr
+		}
 		yomelInfo := StageInfo{
-			No:           stage.No,
-			Desc:         stage.Desc,
-			IsLog:        isLogInStage,
-			LogFilter:    insertFilterShellStr(globalLogFilter, stage.LogFilter),
-			ErrLogFilter: insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
+			No:                stage.No,
+			Desc:              stage.Desc,
+			IsLog:             isLogInStage,
+			LogFilter:         insertFilterShellStr(globalLogFilter, stage.LogFilter),
+			ErrLogFilter:      insertFilterShellStr(globalErrLogFilter, stage.ErrLogFilter),
+			ForegroundColor:   foregroundStartColor,
+			BackgroundColor:   backgroundStartColor,
+			CommentColorStart: commentColorStartStr,
 		}
 		var stageCmd stageCommand
 		cmdStrList := makeStrListFromStr(stage.Cmd)

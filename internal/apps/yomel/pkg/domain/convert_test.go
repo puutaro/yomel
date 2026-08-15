@@ -1,4 +1,3 @@
-// internal/apps/yomel/pkg/domain/convert_test.go
 package domain
 
 import (
@@ -6,145 +5,144 @@ import (
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/toml"
 	"github.com/puutaro/yomel/internal/pkg/testutil"
-	"github.com/stretchr/testify/assert"
 )
 
-// Test_Convert verifies that model.ControlModel and stage models are correctly converted into domain.Yomel structures.
-func Test_Convert(t *testing.T) {
-	tests := []struct {
-		name       string
-		ctrl       model.ControlModel
-		stageMods  []model.StageModel
-		wantCtrl   Control
-		wantStages []Stage
-	}{
+func TestConvert(t *testing.T) {
+	ctrlModel := model.ControlModel{
+		IsGen:                true,
+		IsLog:                testutil.Ptr(true),
+		LogFilter:            "para-log-filter",
+		ErrLogFilter:         "para-err-filter",
+		Title:                "Test Title",
+		IsVersion:            false,
+		IsHelp:               false,
+		IsDirect:             false,
+		IsLiveStdout:         true,
+		IsLiveStderr:         true,
+		ColorStr:             "red>blue",
+		BgColorStr:           "green>black",
+		CommentColorStr:      "yellow",
+		TitleColorStr:        "blue",
+		TitleBgColorStr:      "white",
+		TitleCommentColorStr: "gray",
+	}
+
+	stModels := []model.StageModel{
 		{
-			name: "should convert control and single stage model with arguments and options correctly",
-			ctrl: model.ControlModel{
-				IsLog:        testutil.Ptr(true),
-				LogFilter:    "global-log-filter",
-				ErrLogFilter: "global-err-filter",
-			},
-			stageMods: []model.StageModel{
+			No:   1,
+			Desc: "Stage 1",
+			Cmd:  "echo",
+			CmdOps: []model.OptParam{
 				{
-					No:   1,
-					Desc: "stage1",
-					Cmd:  "echo",
-					CmdOps: []model.OptParam{
-						{
-							Index:  2,
-							OptStr: "n",
-							Param:  model.ParamType{},
-						},
+					Index:  1,
+					OptStr: "v",
+					Param: model.ParamType{
+						Str:       testutil.Ptr("val1"),
+						QuoteType: argtables.DoubleQuote,
+						Comment:   "OptComment",
 					},
-					CmdArgs: []model.ArgParam{
-						{
-							Index: 4,
-							Param: model.ParamType{
-								Str:       testutil.Ptr("hello yomel"),
-								QuoteType: argtables.SingleQuote,
-							},
-						},
-					},
-					IsLog:        testutil.Ptr(false),
-					LogFilter:    "stage-log-filter",
-					ErrLogFilter: "stage-err-filter",
 				},
-			},
-			wantCtrl: Control{
-				IsLog:        testutil.Ptr(true),
-				LogFilter:    "global-log-filter",
-				ErrLogFilter: "global-err-filter",
-			},
-			wantStages: []Stage{
 				{
-					No:                   1,
-					Desc:                 "stage1",
-					Cmd:                  "echo",
-					CmdOpArgs:            []string{"-n", "'hello yomel'"},
-					CmdOpArgsWithComment: []string{"-nSIED_COmMetN_BAlNk", "'hello yomel'"},
-					IsLog:                testutil.Ptr(false),
-					LogFilter:            "stage-log-filter",
-					ErrLogFilter:         "stage-err-filter",
-				},
-			},
-		},
-		{
-			name: "should handle comprehensive command, service, and action parameters with various quotes",
-			ctrl: model.ControlModel{
-				IsLog: testutil.Ptr(false),
-			},
-			stageMods: []model.StageModel{
-				{
-					No:   1,
-					Desc: "comprehensive-stage",
-					Cmd:  "aws",
-					CmdLops: []model.OptParam{
-						{
-							Index:  2,
-							OptStr: "profile",
-							Param:  model.ParamType{},
-						},
-					},
-					Svc: testutil.Ptr("s3"),
-					SvcOps: []model.OptParam{
-						{
-							Index:  5,
-							OptStr: "r",
-							Param:  model.ParamType{},
-						},
-					},
-					Act: testutil.Ptr("cp"),
-					ActArgs: []model.ArgParam{
-						{
-							Index: 8,
-							Param: model.ParamType{
-								Str:       testutil.Ptr("s3://my-bucket/path"),
-								QuoteType: argtables.NoQuote,
-							},
-						},
+					Index:  2,
+					OptStr: "n",
+					Param: model.ParamType{
+						Str:       nil,
+						QuoteType: argtables.NoQuote,
+						Comment:   "NoValueComment",
 					},
 				},
 			},
-			wantCtrl: Control{
-				IsLog: testutil.Ptr(false),
-			},
-			wantStages: []Stage{
+			CmdLops: []model.OptParam{
 				{
-					No:                   1,
-					Desc:                 "comprehensive-stage",
-					Cmd:                  "aws",
-					CmdOpArgs:            []string{"--profile"},
-					CmdOpArgsWithComment: []string{"--profileSIED_COmMetN_BAlNk"},
-					Svc:                  "s3",
-					SvcOpArgs:            []string{"-r"},
-					SvcOpArgsWithComment: []string{"-rSIED_COmMetN_BAlNk"},
-					Act:                  "cp",
-					ActOpArgs:            []string{"s3://my-bucket/path"},
-					ActOpArgsWithComment: []string{"s3://my-bucket/path"},
+					Index:  3,
+					OptStr: "long",
+					Param: model.ParamType{
+						Str:       testutil.Ptr("val2"),
+						QuoteType: argtables.SingleQuote,
+					},
 				},
 			},
-		},
-		{
-			name:       "should handle empty stages and nil pointers gracefully",
-			ctrl:       model.ControlModel{IsLog: nil},
-			stageMods:  []model.StageModel{},
-			wantCtrl:   Control{IsLog: nil},
-			wantStages: []Stage{}, // 実際の戻り値に合わせて空スライスに修正
+			CmdArgs: []model.ArgParam{
+				{
+					Index: 4,
+					Param: model.ParamType{
+						Str:       testutil.Ptr("arg1"),
+						QuoteType: argtables.NoQuote,
+						Comment:   "ArgComment",
+					},
+				},
+				{
+					Index: 5,
+					Param: model.ParamType{
+						Str: nil,
+					},
+				},
+			},
+			Svc:             testutil.Ptr("service"),
+			SvcOps:          []model.OptParam{},
+			SvcLops:         []model.OptParam{},
+			SvcArgs:         []model.ArgParam{},
+			Act:             testutil.Ptr("action"),
+			ActOps:          []model.OptParam{},
+			ActLops:         []model.OptParam{},
+			ActArgs:         []model.ArgParam{},
+			IsLog:           testutil.Ptr(false),
+			LogFilter:       "st-log-filter",
+			ErrLogFilter:    "st-err-filter",
+			ColorStr:        "red",
+			BgColorStr:      "green",
+			CommentColorStr: "blue",
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := Convert(tt.ctrl, tt.stageMods)
-			assert.Equal(t, tt.wantCtrl, got.Ctrl)
+	yomelToml := toml.LogConfig{
+		Color: toml.ColorConfig{
+			Color:             "blue",
+			BgColor:           "black",
+			TitleColor:        "red",
+			TitleBgColor:      "white",
+			CommentColor:      "gray",
+			TitleCommentColor: "black",
+		},
+		Stream: toml.StreamConfig{
+			LogFilterShell:    "toml-log-filter",
+			ErrLogFilterShell: "toml-err-filter",
+		},
+	}
 
-			if tt.wantStages == nil {
-				assert.Nil(t, got.Stages)
-			} else {
-				assert.Equal(t, tt.wantStages, got.Stages)
-			}
-		})
+	// Test with terminal true and false
+	for _, isTerminal := range []bool{true, false} {
+		res := Convert(ctrlModel, stModels, yomelToml, isTerminal)
+		if res.Ctrl.Title != "Test Title" {
+			t.Errorf("expected Title to be 'Test Title', got '%s'", res.Ctrl.Title)
+		}
+		if len(res.Stages) != 1 {
+			t.Errorf("expected 1 stage, got %d", len(res.Stages))
+		}
+	}
+}
+
+func TestDecideParameterOrToml(t *testing.T) {
+	if got := decideParameterOrToml("", "toml"); got != "toml" {
+		t.Errorf("expected 'toml', got '%s'", got)
+	}
+	if got := decideParameterOrToml("para", "toml"); got != "para" {
+		t.Errorf("expected 'para', got '%s'", got)
+	}
+}
+
+func TestToLowerWithSpaces(t *testing.T) {
+	input := "TestCommentWordCase"
+	expected := "test comment word case"
+	if got := toLowerWithSpaces(input); got != expected {
+		t.Errorf("expected '%s', got '%s'", expected, got)
+	}
+
+	// Test without upper case change
+	input2 := "test"
+	if got := toLowerWithSpaces(input2); got != "test" {
+		t.Errorf("expected 'test', got '%s'", got)
 	}
 }

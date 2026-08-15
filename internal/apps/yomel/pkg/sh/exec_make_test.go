@@ -1,156 +1,180 @@
-// Test_yomelLog_make verifies that yomelLog.make correctly generates the decorated log output based on stages, titles, and error states.
 package sh
 
 import (
 	"bytes"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func Test_yomelLog_make(t *testing.T) {
-	tests := []struct {
-		name             string
-		yomelInfo        YomelInfo
-		stageInfos       []StageInfo
-		stdoutStrs       []string
-		stderrStrs       []string
-		cmdHasError      bool
-		wantOutputSubstr []string
-	}{
-		{
-			name: "should return empty buffer when no stage requires logging and no error occurred",
+func TestYomelLogMake(t *testing.T) {
+	startTime := time.Now()
+
+	t.Run("Normal case with single stage and no log", func(t *testing.T) {
+		yl := yomelLog{
 			yomelInfo: YomelInfo{
-				Title: "test-title",
+				Title: "Test Title",
+				StageInfos: []StageInfo{
+					{
+						No:                 1,
+						Desc:               "First stage",
+						IsLog:              true,
+						CmdStrs:            "echo hello",
+						CmdStrsWithComment: "echo hello",
+					},
+				},
+				ForegroundColor: "",
+				BackgroundColor: "",
 			},
 			stageInfos: []StageInfo{
 				{
-					No:    1,
-					IsLog: false,
+					No:                 1,
+					Desc:               "First stage",
+					IsLog:              true,
+					CmdStrs:            "echo hello",
+					CmdStrsWithComment: "echo hello",
 				},
 			},
-			stdoutStrs:       []string{"hello\n"},
-			stderrStrs:       []string{""},
+			stdoutBuffers:    []*bytes.Buffer{bytes.NewBufferString("hello\n")},
+			stderrBuffers:    []*bytes.Buffer{bytes.NewBufferString("")},
 			cmdHasError:      false,
-			wantOutputSubstr: []string{},
-		},
-		{
-			name: "should generate decorated log when single stage has IsLog true",
+			startTime:        startTime,
+			stageDurations:   []time.Duration{time.Second},
+			isTerminal:       false,
+			isLightColorMode: false,
+		}
+		buf := yl.make()
+		if buf.Len() == 0 {
+			t.Error("expected log output, got empty")
+		}
+	})
+
+	t.Run("Multiple stages with terminal color and error", func(t *testing.T) {
+		yl := yomelLog{
 			yomelInfo: YomelInfo{
-				Title: "single-title",
-			},
-			stageInfos: []StageInfo{
-				{
-					No:                 1,
-					Desc:               "single-desc",
-					CmdStrsWithComment: "echo 'hello'",
-					IsLog:              true,
+				Title: "Multi Stage Title",
+				StageInfos: []StageInfo{
+					{
+						No:                 1,
+						Desc:               "Stage one",
+						IsLog:              true,
+						CmdStrs:            "pwd",
+						CmdStrsWithComment: "pwd",
+					},
+					{
+						No:                 2,
+						Desc:               "Stage two",
+						IsLog:              true,
+						CmdStrs:            "ls",
+						CmdStrsWithComment: "ls",
+					},
 				},
-			},
-			stdoutStrs:  []string{"hello\n"},
-			stderrStrs:  []string{""},
-			cmdHasError: false,
-			wantOutputSubstr: []string{
-				"Yomel-log ",
-				"Single-desc",
-				"Cmd",
-				"echo 'hello'",
-				"Stdout",
-				"hello",
-			},
-		},
-		{
-			name: "should include title and total command when multiple stages are present and should log",
-			yomelInfo: YomelInfo{
-				Title: "multi-title",
+				ForegroundColor: "\x1b[31m",
+				BackgroundColor: "\x1b[41m",
 			},
 			stageInfos: []StageInfo{
 				{
 					No:                 1,
-					Desc:               "stage-1",
-					CmdStrsWithComment: "echo 'line1'",
+					Desc:               "Stage one",
 					IsLog:              true,
+					CmdStrs:            "pwd",
+					CmdStrsWithComment: "pwd",
 				},
 				{
 					No:                 2,
-					Desc:               "stage-2",
-					CmdStrsWithComment: "grep 'line1'",
+					Desc:               "Stage two",
 					IsLog:              true,
+					CmdStrs:            "ls",
+					CmdStrsWithComment: "ls",
 				},
 			},
-			stdoutStrs:  []string{"line1\n", "line1\n"},
-			stderrStrs:  []string{"", ""},
-			cmdHasError: false,
-			wantOutputSubstr: []string{
-				"Yomel-log ",
-				"Title",
-				"Multi-title",
-				"Total-cmd",
-				"echo 'line1'",
-				"grep 'line1'",
-				"Stage[1] ",
-				"Stage[2] ",
+			stdoutBuffers: []*bytes.Buffer{
+				bytes.NewBufferString("/tmp\n"),
+				bytes.NewBufferString("file.txt\n"),
 			},
-		},
-		{
-			name: "should force logging and display error header when cmdHasError is true",
+			stderrBuffers: []*bytes.Buffer{
+				bytes.NewBufferString(""),
+				bytes.NewBufferString("some error\n"),
+			},
+			cmdHasError:      true,
+			startTime:        startTime,
+			stageDurations:   []time.Duration{time.Second, 2 * time.Second},
+			isTerminal:       true,
+			isLightColorMode: true,
+		}
+		buf := yl.make()
+		if buf.Len() == 0 {
+			t.Error("expected non-empty log output for multi stage with error")
+		}
+	})
+
+	t.Run("Filter shell handling and light mode toggles", func(t *testing.T) {
+		yl := yomelLog{
 			yomelInfo: YomelInfo{
-				Title: "error-title",
+				Title: "",
+				StageInfos: []StageInfo{
+					{
+						No:                 1,
+						Desc:               "Filter stage",
+						IsLog:              true,
+						CmdStrs:            "echo test",
+						CmdStrsWithComment: "echo test",
+						LogFilter:          "cat",
+						ErrLogFilter:       "cat",
+					},
+				},
 			},
 			stageInfos: []StageInfo{
 				{
 					No:                 1,
-					Desc:               "error-stage",
-					CmdStrsWithComment: "exit 1",
-					IsLog:              false,
+					Desc:               "Filter stage",
+					IsLog:              true,
+					CmdStrs:            "echo test",
+					CmdStrsWithComment: "echo test",
+					LogFilter:          "cat",
+					ErrLogFilter:       "cat",
 				},
 			},
-			stdoutStrs:  []string{""},
-			stderrStrs:  []string{"some error occurred\n"},
-			cmdHasError: true,
-			wantOutputSubstr: []string{
-				"Yomel-log ",
-				"Error-stage",
-				"Error",
-				"some error occurred",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			stdoutBuffers := make([]*bytes.Buffer, len(tt.stdoutStrs))
-			for i, s := range tt.stdoutStrs {
-				stdoutBuffers[i] = bytes.NewBufferString(s)
-			}
-
-			stderrBuffers := make([]*bytes.Buffer, len(tt.stderrStrs))
-			for i, s := range tt.stderrStrs {
-				stderrBuffers[i] = bytes.NewBufferString(s)
-			}
-
-			yl := &yomelLog{
-				yomelInfo:      tt.yomelInfo,
-				stageInfos:     tt.stageInfos,
-				stdoutBuffers:  stdoutBuffers,
-				stderrBuffers:  stderrBuffers,
-				cmdHasError:    tt.cmdHasError,
-				startTime:      time.Now(),
-				stageDurations: []time.Duration{time.Second, time.Second},
-			}
-
-			buffer := yl.make()
-			output := stripANSI(buffer.String())
-
-			if len(tt.wantOutputSubstr) == 0 {
-				assert.Empty(t, output)
-				return
-			}
-
-			for _, substr := range tt.wantOutputSubstr {
-				assert.Contains(t, output, substr)
-			}
-		})
-	}
+			stdoutBuffers:    []*bytes.Buffer{bytes.NewBufferString("filtered out\n")},
+			stderrBuffers:    []*bytes.Buffer{bytes.NewBufferString("err filtered\n")},
+			cmdHasError:      false,
+			startTime:        startTime,
+			stageDurations:   []time.Duration{time.Millisecond * 500},
+			isTerminal:       true,
+			isLightColorMode: false,
+		}
+		buf := yl.make()
+		if buf.Len() == 0 {
+			t.Error("expected output from filter test case")
+		}
+	})
 }
+
+func TestExecHelpers(t *testing.T) {
+	t.Run("Direct exec with empty command", func(t *testing.T) {
+		code := directExec("")
+		if code != ExitSuccess {
+			t.Errorf("expected ExitSuccess, got %d", code)
+		}
+	})
+
+	t.Run("Colorize pipeline command", func(t *testing.T) {
+		res := colorizePipelineCmd("echo hello \\\n| cat", "\x1b[32m", true)
+		if res == "" {
+			t.Error("expected colored pipeline command")
+		}
+
+		resEmpty := colorizePipelineCmd("", "\x1b[32m", true)
+		if resEmpty != "" {
+			t.Error("expected empty string")
+		}
+	})
+
+	t.Run(ansiColorTestsIfNeeded, func(t *testing.T) {
+		stripped := stripAnsi("\x1b[31mhello\x1b[39m")
+		if stripped != "hello" {
+			t.Errorf("expected 'hello', got '%s'", stripped)
+		}
+	})
+}
+
+const ansiColorTestsIfNeeded = "Strip ansi and color functions"

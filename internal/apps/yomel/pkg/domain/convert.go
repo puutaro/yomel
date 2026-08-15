@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-	"unicode"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/color"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/toml"
 )
 
 const (
@@ -19,22 +20,39 @@ const (
 	BackslashNewlineOpArgPrefix = OpArgCommentPrefixBlank + BackslashNewline +
 		OpArgCommentPrefixBlank
 )
+const (
+	GrayStart               = "\x1b[38;5;244m"
+	ColorEnd                = "\x1b[39m"
+	ForegroundColorAnsiCode = 38
+	BackgroundColorAnsiCode = 48
+)
+
+type ForeOrBack int
+
+const (
+	ForegroundAnsi ForeOrBack = iota
+	BackgroundAnsi
+)
 
 type opArgType struct {
 	Index int
 	Str   string
 }
 type Control struct {
-	IsGen        bool
-	IsLog        *bool
-	LogFilter    string
-	ErrLogFilter string
-	Title        string
-	IsVersion    bool
-	IsHelp       bool
-	IsDirect     bool
-	IsLiveStdout bool
-	IsLiveStderr bool
+	IsGen                     bool
+	IsLog                     *bool
+	LogFilter                 string
+	ErrLogFilter              string
+	Title                     string
+	IsVersion                 bool
+	IsHelp                    bool
+	IsDirect                  bool
+	IsLiveStdout              bool
+	IsLiveStderr              bool
+	TitleColorStartStr        string
+	TitleBgColorStartStr      string
+	TitleCommentColorStartStr string
+	CommentColorStartStr      string
 }
 type Stage struct {
 	No                   int
@@ -51,34 +69,92 @@ type Stage struct {
 	IsLog                *bool
 	LogFilter            string
 	ErrLogFilter         string
+	ColorStartStr        string
+	BgColorStartStr      string
+	CommentColorStartStr string
 }
 type Yomel struct {
 	Ctrl   Control
 	Stages []Stage
 }
 
-func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
+func Convert(
+	ctrlModel model.ControlModel,
+	stModels []model.StageModel,
+	yomelToml toml.LogConfig,
+	isTerminal bool,
+) Yomel {
 	stringValue := func(s *string) string {
 		if s == nil || *s == "" {
 			return ""
 		}
 		return *s
 	}
+	tomlColor := yomelToml.Color
+	tomlStream := yomelToml.Stream
 	ctrl := Control{
-		IsGen:        ctrlModel.IsGen,
-		IsLog:        ctrlModel.IsLog,
-		Title:        ctrlModel.Title,
-		LogFilter:    ctrlModel.LogFilter,
-		ErrLogFilter: ctrlModel.ErrLogFilter,
+		IsGen: ctrlModel.IsGen,
+		IsLog: ctrlModel.IsLog,
+		Title: ctrlModel.Title,
+		LogFilter: decideParameterOrToml(
+			ctrlModel.LogFilter,
+			tomlStream.LogFilterShell,
+		),
+		ErrLogFilter: decideParameterOrToml(
+			ctrlModel.ErrLogFilter,
+			tomlStream.ErrLogFilterShell,
+		),
 		IsVersion:    ctrlModel.IsVersion,
 		IsHelp:       ctrlModel.IsHelp,
 		IsDirect:     ctrlModel.IsDirect,
 		IsLiveStdout: ctrlModel.IsLiveStdout,
 		IsLiveStderr: ctrlModel.IsLiveStderr,
+		TitleColorStartStr: hexToAnsiFg(
+			decideParameterOrToml(
+				ctrlModel.TitleColorStr,
+				tomlColor.TitleColor,
+			),
+		),
+		TitleBgColorStartStr: hexToAnsiBg(
+			decideParameterOrToml(
+				ctrlModel.TitleBgColorStr,
+				tomlColor.TitleBgColor,
+			),
+		),
+		TitleCommentColorStartStr: hexToAnsiFg(
+			decideParameterOrToml(
+				ctrlModel.TitleCommentColorStr,
+				tomlColor.TitleCommentColor,
+			),
+		),
 	}
 	yomel := Yomel{Ctrl: ctrl}
 	stages := make([]Stage, len(stModels))
+	ctrlColorStartStrList := makeColorStrStartListByOrderOperator(
+		decideParameterOrToml(
+			ctrlModel.ColorStr,
+			tomlColor.Color,
+		),
+	)
+	ctrlColorStartStrListLen := len(ctrlColorStartStrList)
+	ctrlBgColorStartStrList := makeColorStrStartListByOrderOperator(
+		decideParameterOrToml(
+			ctrlModel.BgColorStr,
+			tomlColor.BgColor,
+		),
+	)
+	ctrlBgColorStartStrListLen := len(ctrlBgColorStartStrList)
+	ctrlCommentColorStartStrList := makeColorStrStartListByOrderOperator(
+		decideParameterOrToml(
+			ctrlModel.CommentColorStr,
+			tomlColor.CommentColor,
+		),
+	)
+	ctrlCommentColorStartStrListLen := len(ctrlCommentColorStartStrList)
 	for i, stModel := range stModels {
+		curCtrlColorIndex := i % ctrlColorStartStrListLen
+		curCtrlBgColorIndex := i % ctrlBgColorStartStrListLen
+		curCtrlCommentColorIndex := i % ctrlCommentColorStartStrListLen
 		var stage = Stage{
 			No:   stModel.No,
 			Desc: stModel.Desc,
@@ -89,6 +165,18 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 			IsLog:        stModel.IsLog,
 			LogFilter:    stModel.LogFilter,
 			ErrLogFilter: stModel.ErrLogFilter,
+			ColorStartStr: hexToAnsiFgForStage(
+				stModel.ColorStr,
+				ctrlColorStartStrList[curCtrlColorIndex],
+			),
+			BgColorStartStr: hexToAnsiBgForStage(
+				stModel.BgColorStr,
+				ctrlBgColorStartStrList[curCtrlBgColorIndex],
+			),
+			CommentColorStartStr: hexToAnsiFgForStage(
+				stModel.CommentColorStr,
+				ctrlCommentColorStartStrList[curCtrlCommentColorIndex],
+			),
 		}
 		pushOpArgs(
 			stModel.CmdOps,
@@ -105,6 +193,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 			func(opArgList []string) {
 				stage.CmdOpArgsWithComment = opArgList
 			},
+			isTerminal,
 		)
 		pushOpArgs(
 			stModel.SvcOps,
@@ -121,6 +210,7 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 			func(opArgList []string) {
 				stage.SvcOpArgsWithComment = opArgList
 			},
+			isTerminal,
 		)
 		pushOpArgs(
 			stModel.ActOps,
@@ -137,11 +227,26 @@ func Convert(ctrlModel model.ControlModel, stModels []model.StageModel) Yomel {
 			func(opArgList []string) {
 				stage.ActOpArgsWithComment = opArgList
 			},
+			isTerminal,
 		)
 		stages[i] = stage
 	}
 	yomel.Stages = stages
 	return yomel
+}
+
+func decideParameterOrToml(paraStr, tomlStr string) string {
+	if paraStr == "" {
+		return tomlStr
+	}
+	return paraStr
+}
+
+func makeColorStrStartListByOrderOperator(colorStr string) []string {
+	return strings.Split(
+		colorStr,
+		color.OrderOperator,
+	)
 }
 
 func pushOpArgs(
@@ -177,13 +282,25 @@ func pushOpArgsWithComment(
 	lOps []model.OptParam,
 	args []model.ArgParam,
 	insertFn func([]string),
+	isTerminal bool,
 ) {
 	shortOpPrefix := "-"
 	longOpPrefix := "--"
 	var opArgStrs []string
-	opTypes := makeOptListWithComment(ops, shortOpPrefix)
-	lOpTypes := makeOptListWithComment(lOps, longOpPrefix)
-	argTypes := makeArgListWithComment(args)
+	opTypes := makeOptListWithComment(
+		ops,
+		shortOpPrefix,
+		isTerminal,
+	)
+	lOpTypes := makeOptListWithComment(
+		lOps,
+		longOpPrefix,
+		isTerminal,
+	)
+	argTypes := makeArgListWithComment(
+		args,
+		isTerminal,
+	)
 	totalArgOpLen := len(opTypes) +
 		len(lOpTypes) +
 		len(argTypes)
@@ -234,6 +351,7 @@ func makeOptList(
 func makeOptListWithComment(
 	optPs []model.OptParam,
 	opPrefix string,
+	isTerminal bool,
 ) []opArgType {
 	var cmdLOpTypes []opArgType
 	for _, op := range optPs {
@@ -243,7 +361,10 @@ func makeOptListWithComment(
 			Index: op.Index,
 		}
 		strP := p.Str
-		escapeOpComment := makeEscapeComment(op.Comment)
+		escapeOpComment := makeEscapeComment(
+			op.Comment,
+			isTerminal,
+		)
 		if strP == nil {
 			oat.Str = fmt.Sprintf(`%s%s`, opPrefix, optStr) +
 				SideCommentBlank + escapeOpComment
@@ -267,7 +388,10 @@ func makeOptListWithComment(
 		case argtables.NoQuote:
 			oatStr += fmt.Sprintf(`%s%s %s`, opPrefix, optStr, str)
 		}
-		escapeValComemnt := makeEscapeComment(p.Comment)
+		escapeValComemnt := makeEscapeComment(
+			p.Comment,
+			isTerminal,
+		)
 		if escapeValComemnt == "" {
 			oat.Str = oatStr
 		} else {
@@ -307,8 +431,10 @@ func makeArgList(
 	}
 	return cmdArgTypes
 }
+
 func makeArgListWithComment(
 	argPs []model.ArgParam,
+	isTerminal bool,
 ) []opArgType {
 	var cmdArgTypes []opArgType
 	for _, arg := range argPs {
@@ -332,7 +458,10 @@ func makeArgListWithComment(
 		case argtables.NoQuote:
 			oatStr = fmt.Sprintf(`%s`, str)
 		}
-		escapeArgComemnt := makeEscapeComment(p.Comment)
+		escapeArgComemnt := makeEscapeComment(
+			p.Comment,
+			isTerminal,
+		)
 		if escapeArgComemnt == "" {
 			oat.Str = oatStr
 		} else {
@@ -342,40 +471,4 @@ func makeArgListWithComment(
 		cmdArgTypes = append(cmdArgTypes, oat)
 	}
 	return cmdArgTypes
-}
-
-func makeEscapeComment(comment string) string {
-	if comment == "" {
-		return ""
-	}
-	grayStart := "\x1b[38;5;244m"
-	colorEnd := "\x1b[39m"
-	return fmt.Sprintf(
-		"%s`%s%s`%s",
-		grayStart,
-		SpaceCommentout,
-		toLowerWithSpaces(comment),
-		colorEnd,
-	)
-}
-
-func toLowerWithSpaces(s string) string {
-	var sb strings.Builder
-	runes := []rune(s)
-	runesLen := len(runes)
-	for i := 0; i < runesLen; i++ {
-		r := runes[i]
-		nextRuneIndex := i + 1
-		if !unicode.IsUpper(r) ||
-			(nextRuneIndex < runesLen &&
-				unicode.IsUpper(runes[nextRuneIndex])) {
-			sb.WriteRune(r)
-			continue
-		}
-		if i > 0 {
-			sb.WriteRune(' ')
-		}
-		sb.WriteRune(unicode.ToLower(r))
-	}
-	return sb.String()
 }

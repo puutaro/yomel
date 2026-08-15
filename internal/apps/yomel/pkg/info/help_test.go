@@ -106,3 +106,69 @@ func Test_GetHelpByOption(t *testing.T) {
 		})
 	}
 }
+
+// Write direct above line for Comment on code
+func Test_GetHelpByDefault_Additional(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     []string
+		wantHelp  *string
+		wantError error
+	}{
+		{
+			name:      "should handle other control flags or invalid inputs appropriately",
+			input:     []string{"--unknown"},
+			wantHelp:  nil,
+			wantError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotHelp, gotErr := GetHelpByDefault(tt.input)
+			if tt.wantError != nil {
+				assert.EqualError(t, gotErr, tt.wantError.Error())
+			} else {
+				assert.NoError(t, gotErr)
+			}
+			if tt.wantHelp != nil {
+				assert.Equal(t, *tt.wantHelp, *gotHelp)
+			} else {
+				assert.Equal(t, tt.wantHelp, gotHelp)
+			}
+		})
+	}
+}
+
+// Write direct above line for Comment on code
+func Test_GetHelpByOption_Additional(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     []argtables.ArgTable
+		wantHelp  *string
+		wantError error
+	}{
+		{
+			name:      "should handle empty argtables for GetHelpByOption",
+			input:     []argtables.ArgTable{},
+			wantHelp:  nil,
+			wantError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotHelp, gotErr := GetHelpByOption(tt.input)
+			if tt.wantError != nil {
+				assert.EqualError(t, gotErr, tt.wantError.Error())
+			} else {
+				assert.NoError(t, gotErr)
+			}
+			if tt.wantHelp != nil {
+				assert.Equal(t, *tt.wantHelp, *gotHelp)
+			} else {
+				assert.Equal(t, tt.wantHelp, gotHelp)
+			}
+		})
+	}
+}

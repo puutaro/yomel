@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arglist"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/arg_list"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtablesvalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/domain"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/env"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/info"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/model"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/modelvalid"
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/sh"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/toml"
+	"github.com/puutaro/yomel/internal/apps/yomel/pkg/tomlvalid"
 )
 
 const (
@@ -22,7 +25,7 @@ const (
 
 func main() {
 
-	inputArgs := arglist.Gen()
+	inputArgs := arg_list.Gen()
 	helpConByDefault, helpErrByDefault := info.GetHelpByDefault(inputArgs)
 	if helpErrByDefault != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", helpErrByDefault)
@@ -66,9 +69,30 @@ func main() {
 		os.Exit(errorExitSignal)
 		return
 	}
-	yomel := domain.Convert(ctrl, stageModels)
+	yomelEnv := env.ReadEnd(ctrl.IsDirect, ctrl.IsGen)
+	yomelToml := toml.ReadToml(yomelEnv.YomelTomlPath)
+	if yomelToml.Color.EnableLightMode == int(env.Light) {
+		yomelEnv.IsLightColorMode = true
+	}
+	if yomelToml.Stream.EnableTee == int(env.TeeOn) {
+		yomelEnv.IsTerminal = true
+	}
+	if tomlErr := tomlvalid.TomlValidate(
+		yomelToml,
+		yomelEnv.YomelTomlPath,
+	); tomlErr != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", tomlErr)
+		os.Exit(errorExitSignal)
+		return
+	}
+	yomel := domain.Convert(
+		ctrl,
+		stageModels,
+		yomelToml,
+		yomelEnv.IsTerminal,
+	)
 	yomelInfo := sh.Gen(yomel)
-	finishStatus := sh.Exec(yomelInfo)
+	finishStatus := sh.Exec(yomelInfo, yomelEnv)
 	os.Exit(finishStatus)
 
 }

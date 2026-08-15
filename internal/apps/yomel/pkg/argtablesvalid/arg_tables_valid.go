@@ -88,7 +88,13 @@ func checkCtrlParameterSpecifyInStageErr(argTables []argtables.ArgTable) error {
 		if stageNo == 0 {
 			continue
 		}
-		if argTable.IsVersion || argTable.IsHelp || argTable.IsDirect || argTable.IsGen {
+		if argTable.IsVersion ||
+			argTable.IsHelp ||
+			argTable.IsDirect ||
+			argTable.IsGen ||
+			argTable.IsTitleColor ||
+			argTable.IsTitleBgColor ||
+			argTable.IsTitleCommentColor {
 			return fmt.Errorf(ctrlParameterSpecifyInStageErrMsg, stageNo)
 		}
 	}

@@ -1,4 +1,3 @@
-// Write direct above line for Comment on code
 package info
 
 import (
@@ -17,33 +16,50 @@ func Test_GetVersion(t *testing.T) {
 		name      string
 		argTables []argtables.ArgTable
 		want      *string
+		wantErr   bool
 	}{
 		{
 			name: "should return version string when IsVersion is true",
 			argTables: []argtables.ArgTable{
 				{StageNo: 0, IsVersion: true},
 			},
-			want: &version,
+			want:    &version,
+			wantErr: false,
 		},
 		{
 			name: "should return nil when IsVersion is false",
 			argTables: []argtables.ArgTable{
 				{StageNo: 0, IsVersion: false},
 			},
-			want: nil,
+			want:    nil,
+			wantErr: false,
 		},
 		{
 			name:      "should return nil when argTables is empty",
 			argTables: []argtables.ArgTable{},
 			want:      nil,
+			wantErr:   false,
+		},
+		{
+			name: "should handle multiple argTables where IsVersion is true",
+			argTables: []argtables.ArgTable{
+				{StageNo: 0, IsVersion: false},
+				{StageNo: 0, IsVersion: true},
+			},
+			want:    &version,
+			wantErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetVersion(tt.argTables)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
 		})
 	}
 }

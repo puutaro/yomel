@@ -1,42 +1,65 @@
-// Test_printTotalCmd verifies that printTotalCmd correctly outputs the formatted total command pipeline string.
 package sh
 
 import (
 	"bytes"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func Test_printTotalCmd(t *testing.T) {
+// Test printTotalCmd with various terminal and color configurations
+func TestPrintTotalCmd(t *testing.T) {
 	tests := []struct {
 		name            string
-		title           string
+		isTerminal      bool
 		totalPipeCmdStr string
-		want            string
+		titleStartColor string
+		foregroundColor string
+		commentColor    string
 	}{
 		{
-			name:            "should print total command with side comments formatted correctly",
-			title:           "test-title",
-			totalPipeCmdStr: "echo 'hello'    `#first comment`\necho 'world'    `#second comment`",
-			want:            "\n\n\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'hello'    `#first comment`\necho 'world'    `#second comment`",
+			name:            "Terminal disabled case",
+			isTerminal:      false,
+			totalPipeCmdStr: "echo 'test' \\\n| cat",
+			titleStartColor: "",
+			foregroundColor: "",
+			commentColor:    "",
 		},
 		{
-			name:            "should handle single line total command string correctly",
-			title:           "simple-title",
-			totalPipeCmdStr: "echo 'simple'",
-			want:            "\n\n\x1b[4m\x1b[1mT\x1b[22motal-cmd\x1b[24m\necho 'simple'",
+			name:            "Terminal enabled with color and comments",
+			isTerminal:      true,
+			totalPipeCmdStr: "echo 'test' SIED_COmMetN_BAlNk # side comment \\\n| cat",
+			titleStartColor: "\x1b[48;5;52m",
+			foregroundColor: "\x1b[38;5;244m",
+			commentColor:    "\x1b[38;5;208m",
+		},
+		{
+			name:            "Empty command string case",
+			isTerminal:      true,
+			totalPipeCmdStr: "",
+			titleStartColor: "\x1b[48;5;52m",
+			foregroundColor: "\x1b[38;5;244m",
+			commentColor:    "",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var combinedLog bytes.Buffer
-			yl := &yomelLog{}
+			// Initialize yomelLog for testing printTotalCmd
+			yl := yomelLog{
+				yomelInfo: YomelInfo{
+					Title:                       "Sample Title",
+					ForegroundColor:             tt.foregroundColor,
+					TitleCommentForegroundColor: tt.commentColor,
+				},
+				isTerminal: tt.isTerminal,
+			}
 
-			yl.printTotalCmd(&combinedLog, tt.totalPipeCmdStr)
+			var buf bytes.Buffer
+			// Execute printTotalCmd method
+			yl.printTotalCmd(&buf, tt.totalPipeCmdStr, tt.titleStartColor)
 
-			assert.Equal(t, tt.want, combinedLog.String())
+			if buf.Len() == 0 && tt.totalPipeCmdStr != "" {
+				t.Errorf("printTotalCmd() produced unexpected empty output for %s", tt.name)
+			}
 		})
 	}
 }

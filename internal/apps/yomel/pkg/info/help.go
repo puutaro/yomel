@@ -91,14 +91,14 @@ func GetHelpByDefault(argList []string) (*string, error) {
 	}
 	return execGetHelp()
 }
-func GetHelpByOption(argTablesDto []argtables.ArgTable) (*string, error) {
+func GetHelpByOption(argTables []argtables.ArgTable) (*string, error) {
 	stageNo := 0
-	for _, argTableDto := range argTablesDto {
-		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)
+	for _, argTable := range argTables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if stageNo > 0 {
 			return nil, nil
 		}
-		if argTableDto.IsHelp {
+		if argTable.IsHelp {
 			return execGetHelp()
 		}
 	}

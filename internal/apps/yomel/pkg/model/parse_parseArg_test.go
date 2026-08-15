@@ -96,6 +96,39 @@ func Test_parseArg(t *testing.T) {
 			wantIndices:        []int{7},
 			wantNextStartIndex: 7,
 		},
+		{
+			name:           "should skip inner arg table when IsArg is false",
+			nextStartIndex: 0,
+			input: []argtables.ArgTable{
+				tAct(),
+				{IsArg: false}, // Should be skipped
+				tArg(), {QuoteTypeSignal: argtables.NoQuote}, tStr("valid-arg"),
+			},
+			isNextMainArg:   func(t argtables.ArgTable) bool { return false },
+			isTargetMainArg: func(t argtables.ArgTable) bool { return t.IsAct },
+			wantParam: []ParamType{
+				{Str: testutil.Ptr("valid-arg"), QuoteType: argtables.NoQuote},
+			},
+			wantIndices:        []int{4},
+			wantNextStartIndex: 4,
+		},
+		{
+			name:           "should break inner loop when next main arg is encountered inside stage",
+			nextStartIndex: 0,
+			input: []argtables.ArgTable{
+				tAct(),
+				tArg(), {QuoteTypeSignal: argtables.NoQuote}, tStr("arg1"),
+				tSvc(), // Inner next main arg boundary
+				tArg(), {QuoteTypeSignal: argtables.NoQuote}, tStr("skipped-inner-arg"),
+			},
+			isNextMainArg:   func(t argtables.ArgTable) bool { return t.IsSvc },
+			isTargetMainArg: func(t argtables.ArgTable) bool { return t.IsAct },
+			wantParam: []ParamType{
+				{Str: testutil.Ptr("arg1"), QuoteType: argtables.NoQuote},
+			},
+			wantIndices:        []int{3},
+			wantNextStartIndex: 3,
+		},
 	}
 
 	for _, tt := range tests {

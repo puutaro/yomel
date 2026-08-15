@@ -11,12 +11,12 @@ import (
 
 func GetVersion(argtables []argtables.ArgTable) (*string, error) {
 	stageNo := 0
-	for _, argTableDto := range argtables {
-		stageNo += argtablecounter.IncrementStageNo(argTableDto.IsStage)
+	for _, argTable := range argtables {
+		stageNo += argtablecounter.IncrementStageNo(argTable.IsStage)
 		if stageNo > 0 {
 			return nil, nil
 		}
-		if argTableDto.IsVersion {
+		if argTable.IsVersion {
 			return execGetVersion()
 		}
 	}
