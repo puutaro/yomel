@@ -40,7 +40,7 @@ step_num=$(\
 	| head -1 \
 	| sed 's/[^0-9]//g' \
 );\
-echo "${step_num}"
+echo "total ${step_num}"
 ```
 
 - existing log  
@@ -49,7 +49,8 @@ what?
 
 - stdout 
 
-<img width="939" height="31" alt="image" src="https://github.com/user-attachments/assets/bcdde97a-4553-4624-a710-7205eadfde1b" />
+<img width="141" height="28" alt="image" src="https://github.com/user-attachments/assets/8a217de6-2a7c-472d-b447-3c3dfb2e91d6" />
+
 
 Generally, nobody wants to code in shell script if they can avoid it.  
 We only do it because there isn't a simpler way, but it will absolutely put you through hell—whether you're writing it, reading it back later, or trying to improve it.  
@@ -114,15 +115,16 @@ When I first saw this log, All the hassle associated with shell pipelines is dis
 
 - log (stderr)
 
-<img width="942" height="872" alt="image" src="https://github.com/user-attachments/assets/fed95be1-97b0-4faf-8282-1e6ccfd1816b" />
+<img width="1051" height="898" alt="image" src="https://github.com/user-attachments/assets/98d0842d-30bf-4e26-9f3f-da340b14c217" />
 
-<img width="942" height="960" alt="image" src="https://github.com/user-attachments/assets/1786ad03-2664-4386-897c-c2ade3ef4652" />
+<img width="1052" height="815" alt="image" src="https://github.com/user-attachments/assets/199e896a-2ec0-42b6-a07c-1b0c950d4a82" />
 
-<img width="942" height="179" alt="image" src="https://github.com/user-attachments/assets/cc3bf3bf-7607-43b6-9ff4-8088587eb3a1" />
+
 
 - stdout 
 
-<img width="939" height="31" alt="image" src="https://github.com/user-attachments/assets/bcdde97a-4553-4624-a710-7205eadfde1b" />
+<img width="141" height="28" alt="image" src="https://github.com/user-attachments/assets/b17ad885-f5d5-42a1-a8ca-43eaa7f1895f" />
+
 
 
 I must point out that this log flows to `stderr`.  
