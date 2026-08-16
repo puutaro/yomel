@@ -13,77 +13,42 @@ import (
 const detail = `Usage:
   yomel [flags] stage [desc] [cmd options/arguments...] [service options/arguments...] [action options/arguments...]
 
-Meta Flags:
-  --version          Print version information
-  --help             Print help information
-  title               Specify a title for the output report or the generated job.
-  --no-live-stdout      Disable live output of stdout.
-  --no-live-stderr      Disable live output of stderr.
-  --gen              Output total pipeline command
-  --direct           Exec shell directly (simple exec pipe shell without log)
+Telemetry and Filter Options:
+  title "<pipeline_title>"    Specify a title for the overall pipeline
+  --no-live-stdout            Suppress real-time streaming of standard output (stdout)
+  --no-live-stderr            Suppress real-time streaming of standard error (stderr)
+  --log                       Activate the internal logging system
+  --gen                       Outputs the total pipeline command (dry-run)
+  --direct                    Executes the shell pipeline directly without internal logging decoration
+  --log-filter "<shell_command>"    Attaches an asynchronous log interceptor for standard output (stdout)
+  --err-log-filter "<shell_command>" Attaches an asynchronous log interceptor for standard error (stderr)
 
-General Flags:
-  --log              Enable stdout logging for pipeline execution
-  --no-log           Disable stdout logging for pipeline execution
-  --log-filter       Filter stdout logs using shell commands
-  --err-log-filter   Filter stderr logs using shell commands
+Structural Stage Elements:
+  stage "<stage_name>"        Initializes a new execution boundary (pipeline stage)
+  -cmd "<binary>"             Specifies the main executable or binary command
+  -svc "<service_name>"       Declares a sub-service or second-level command hierarchy
+  -act "<action_name>"        Declares the operation, verb, or action to be performed
 
-Stage Parameters:
-  stage              Define a new pipeline stage with a description
-  -cmd               Specify the command to execute
-  -svc               Specify the service name
-  -act               Specify the action name
-  --opt[PascalCase]  Specify a short option key with an optional Alphanumeric PascalCase description suffix
-  --lop[PascalCase]  Specify a long option key with an optional Alphanumeric PascalCase description suffix
-  --val[PascalCase]  Specify an option value with an optional Alphanumeric PascalCase description suffix
-  --arg[PascalCase]  Specify a positional argument with an optional Alphanumeric PascalCase description suffix
-  --single, -s       Indicate single-quoted value or argument
-  --no-quote, -n     Indicate unquoted value or argument
+Color Control Options:
+  --color "<color_code>"          Specifies the foreground text color for the command body and logs
+  --bg-color "<color_code>"       Specifies the background color for the section header/panels
+  --comment-color "<color_code>"  Customizes the color used for comments inside the pipeline commands
+  --title-color "<color_code>"    Sets the global title and header text color (Global control option only)
+  --title-bg-color "<color_code>" Sets the background color for the global title and overall pipeline log headers
+  --title-comment-color "<color_code>" Sets the comment color specifically for the total pipeline command section
 
-Examples:
-  1. Retrieve logs from S3, extract them, and grep for errors:
-     yomel \
-       stage "download" \
-       -cmd "aws" \
-       -svc "s3" \
-       -act "cp" \
-       --argS3Path --s "s3://my-bucket/logs.tar.gz" \
-       --argDest --n "-" \
-       stage "extract" \
-       -cmd "tar" \
-       --optX \
-       --valCompressType --n "z" \
-       --optO \
-       --valDest --n "-" \
-       stage "search" \
-       -cmd "grep" \
-       --argPattern --s "ERROR"
+Option and Argument Value Modifiers:
+  --opt[PascalCase] "<flag>"  Generates a short-style option flag with an optional PascalCase description suffix
+  --lop[PascalCase] "<flag>"  Generates a long-style option flag with an optional PascalCase description suffix
+  --val[PascalCase]           Declares a value associated with the preceding option (must be followed by --s or --n)
+  --arg[PascalCase]           Appends a standalone, positional argument to the tail end (must be followed by --s or --n)
+  --single, -s                Indicate single-quoted value or argument
+  --no-quote, -n              Indicate unquoted value or argument
 
-  2. Run with global logging enabled:
-     yomel \
-        --log \
-        --log-filter "head -10" \
-        stage "list" \
-        -cmd "ls" \
-        --optL \
-        --valTargetDir --n "/var/log"
-
-  3. Run with logging disabled partly:
-     yomel \
-        --log \
-        stage "list" \
-        -cmd "ls" \
-        --optL \
-        --valTargetDir --n "/var/log" \
-        --no-log \
-        stage "replace newline to space" \
-        -cmd "tr" \
-        --argFrom --s '\n' \
-        --argTo --s ' ' \
-        --log-filter "head -1" \
-        stage "add prefix" \
-        -cmd sed \
-        --argPattern --s 's/^/$HOME/'`
+Environment Variables and TOML Configuration:
+  YOMEL_LIGHT_COLOR_MODE      Controls whether to enable the light color theme mode
+  YOMEL_ENABLE_TEE            Controls whether terminal tee streaming characteristics are enabled
+  YOMEL_TOML_PATH             Specifies the custom file path to the external yomel.toml configuration file`
 
 func GetHelpByDefault(argList []string) (*string, error) {
 	if len(argList) > 0 {
