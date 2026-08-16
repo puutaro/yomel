@@ -137,7 +137,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NOTE_PATH="releasenote/${{ env.RAW_VERSION }}.md"
+          NOTE_PATH="release_note/${{ env.RAW_VERSION }}.md"
           if [ -f "$NOTE_PATH" ]; then
             echo "Overwriting release note body using $NOTE_PATH"
             gh release edit "${{ env.TAG_VERSION }}" --notes-file "$NOTE_PATH"
