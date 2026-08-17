@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-// TestMakeNormalOrRedStdErrLabel tests makeNormalOrRedStdErrLabel with various conditions.
+// TestMakeNormalOrRedStdErrLabel tests makeNormalOrRedStdErrLabel with various combinations of hasErr and isTerminal.
 func TestMakeNormalOrRedStdErrLabel(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -13,28 +13,28 @@ func TestMakeNormalOrRedStdErrLabel(t *testing.T) {
 		want       string
 	}{
 		{
-			name:       "Progress without terminal",
+			name:       "Progress label when no error and terminal is false",
 			hasErr:     false,
 			isTerminal: false,
 			want:       "Progress",
 		},
 		{
-			name:       "Progress with terminal",
+			name:       "Error label when error exists and terminal is false",
+			hasErr:     true,
+			isTerminal: false,
+			want:       "Error",
+		},
+		{
+			name:       "Progress label when no error and terminal is true",
 			hasErr:     false,
 			isTerminal: true,
 			want:       "\x1b[4m\x1b[1mP\x1b[22mrogress\x1b[24m",
 		},
 		{
-			name:       "Error without terminal",
-			hasErr:     true,
-			isTerminal: false,
-			want:       "\x1b[31mError\x1b[39m",
-		},
-		{
-			name:       "Error with terminal",
+			name:       "Error label when error exists and terminal is true",
 			hasErr:     true,
 			isTerminal: true,
-			want:       "\x1b[31m\x1b[4m\x1b[1mE\x1b[22mrror\x1b[24m\x1b[39m",
+			want:       "\x1b[4m\x1b[1mE\x1b[22mrror\x1b[24m",
 		},
 	}
 

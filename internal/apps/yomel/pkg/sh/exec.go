@@ -549,12 +549,16 @@ func (yl *yomelLog) printDecoratedLog(
 		cmdSectionWithDeco,
 		cmdBodyWithDeco,
 	)
+	stdoutHolderColor := foreroundColor
+	if yl.cmdHasError {
+		stdoutHolderColor = redStart
+	}
 	stdErrSectionWithFgColorUnserBold := makeForegroundColor(
 		makeNormalOrRedStdErrLabel(
 			yl.cmdHasError,
 			isTerminal,
 		),
-		foreroundColor,
+		stdoutHolderColor,
 		isTerminal,
 	)
 	stdErrSectionWithDeco := makeBackgoundColor(
@@ -606,15 +610,6 @@ func makeNormalOrRedStdErrLabel(hasErr bool, isTerminal bool) string {
 	logGenre := "Progress"
 	if hasErr {
 		logGenre = "Error"
-		return fmt.Sprintf(
-			"%s%s%s",
-			redStart,
-			convertUnderAndFirstBold(
-				logGenre,
-				isTerminal,
-			),
-			colorEnd,
-		)
 	}
 	return fmt.Sprintf(
 		"%s",
