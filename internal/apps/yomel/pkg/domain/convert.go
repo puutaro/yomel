@@ -60,12 +60,6 @@ type Stage struct {
 	Cmd                  string
 	CmdOpArgs            []string
 	CmdOpArgsWithComment []string
-	Svc                  string
-	SvcOpArgs            []string
-	SvcOpArgsWithComment []string
-	Act                  string
-	ActOpArgs            []string
-	ActOpArgsWithComment []string
 	IsLog                *bool
 	LogFilter            string
 	ErrLogFilter         string
@@ -84,12 +78,6 @@ func Convert(
 	yomelToml toml.LogConfig,
 	isTerminal bool,
 ) Yomel {
-	stringValue := func(s *string) string {
-		if s == nil || *s == "" {
-			return ""
-		}
-		return *s
-	}
 	tomlColor := yomelToml.Color
 	tomlStream := yomelToml.Stream
 	ctrl := Control{
@@ -156,12 +144,9 @@ func Convert(
 		curCtrlBgColorIndex := i % ctrlBgColorStartStrListLen
 		curCtrlCommentColorIndex := i % ctrlCommentColorStartStrListLen
 		var stage = Stage{
-			No:   stModel.No,
-			Desc: stModel.Desc,
-			Cmd:  stModel.Cmd,
-			// svc and act *string is no need, because finish validation and keep culc speed
-			Svc:          stringValue(stModel.Svc),
-			Act:          stringValue(stModel.Act),
+			No:           stModel.No,
+			Desc:         stModel.Desc,
+			Cmd:          stModel.Cmd,
 			IsLog:        stModel.IsLog,
 			LogFilter:    stModel.LogFilter,
 			ErrLogFilter: stModel.ErrLogFilter,
@@ -192,40 +177,6 @@ func Convert(
 			stModel.CmdArgs,
 			func(opArgList []string) {
 				stage.CmdOpArgsWithComment = opArgList
-			},
-			isTerminal,
-		)
-		pushOpArgs(
-			stModel.SvcOps,
-			stModel.SvcLops,
-			stModel.SvcArgs,
-			func(opArgList []string) {
-				stage.SvcOpArgs = opArgList
-			},
-		)
-		pushOpArgsWithComment(
-			stModel.SvcOps,
-			stModel.SvcLops,
-			stModel.SvcArgs,
-			func(opArgList []string) {
-				stage.SvcOpArgsWithComment = opArgList
-			},
-			isTerminal,
-		)
-		pushOpArgs(
-			stModel.ActOps,
-			stModel.ActLops,
-			stModel.ActArgs,
-			func(opArgList []string) {
-				stage.ActOpArgs = opArgList
-			},
-		)
-		pushOpArgsWithComment(
-			stModel.ActOps,
-			stModel.ActLops,
-			stModel.ActArgs,
-			func(opArgList []string) {
-				stage.ActOpArgsWithComment = opArgList
 			},
 			isTerminal,
 		)

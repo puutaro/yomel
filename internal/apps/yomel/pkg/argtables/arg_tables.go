@@ -19,8 +19,6 @@ const (
 	LogFilter               = "log-filter"
 	ErrLogFilter            = "err-log-filter"
 	CmdOpName               = "cmd"
-	SvcOpName               = "svc"
-	ActOpName               = "act"
 	OptOpName               = "opt"
 	LoptOpName              = "lop"
 	ArgOpName               = "arg"
@@ -50,8 +48,6 @@ const (
 	NoLogFlagSignal           = "--" + NoLogOpName
 	LogFilterOpSignal         = "--" + LogFilter
 	ErrLogFilterOpSignal      = "--" + ErrLogFilter
-	SvcOpSignal               = "-" + SvcOpName
-	ActOpSignal               = "-" + ActOpName
 	OptOpSignal               = "--" + OptOpName
 	LoptOpSignal              = "--" + LoptOpName
 	ArgOpSignal               = "--" + ArgOpName
@@ -92,8 +88,6 @@ type ArgTable struct {
 	IsLog               bool
 	IsNoLog             bool
 	IsCmd               bool
-	IsSvc               bool
-	IsAct               bool
 	IsOpt               bool
 	IsLopt              bool
 	IsValue             bool
@@ -200,12 +194,6 @@ func GenArgTable(inputArgs []string) []ArgTable {
 			expectedNext = ExpectUp2PureParameterStr
 		case inputArg == CmdOpSignal:
 			argTable.IsCmd = true
-			expectedNext = ExpectUp2PureParameterStr
-		case inputArg == SvcOpSignal:
-			argTable.IsSvc = true
-			expectedNext = ExpectUp2PureParameterStr
-		case inputArg == ActOpSignal:
-			argTable.IsAct = true
 			expectedNext = ExpectUp2PureParameterStr
 		case strings.HasPrefix(inputArg, OptOpSignal):
 			argTable.IsOpt = true

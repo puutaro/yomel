@@ -27,14 +27,6 @@ type StageModel struct {
 	CmdOps          []OptParam
 	CmdLops         []OptParam
 	CmdArgs         []ArgParam
-	Svc             *string
-	SvcOps          []OptParam
-	SvcLops         []OptParam
-	SvcArgs         []ArgParam
-	Act             *string
-	ActOps          []OptParam
-	ActLops         []OptParam
-	ActArgs         []ArgParam
 	IsLog           *bool
 	LogFilter       string
 	ErrLogFilter    string
@@ -65,6 +57,9 @@ type ControlModel struct {
 }
 
 func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
+	if len(argTables) == 0 {
+		return ControlModel{}, []StageModel{}
+	}
 	var curCtrlArgTables []argtables.ArgTable
 	for _, argTable := range argTables {
 		if argTable.StageNo > 0 {
@@ -283,109 +278,6 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 		); strPtr != nil {
 			stModel.CommentColorStr = *strPtr
 		}
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsCmd },
-			func(t argtables.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsOpt },
-			func(p OptParam) { stModel.CmdOps = append(stModel.CmdOps, p) },
-		)
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsCmd },
-			func(t argtables.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsLopt },
-			func(p OptParam) { stModel.CmdLops = append(stModel.CmdLops, p) },
-		)
-		nextStartIndex = parseArg(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsSvc || t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsCmd },
-			func(ind int, p ParamType) {
-				stModel.CmdArgs = append(
-					stModel.CmdArgs,
-					ArgParam{
-						Index: ind,
-						Param: p,
-					},
-				)
-			},
-		)
-		stModel.Svc = getOneStr(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsSvc },
-		)
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsSvc },
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsOpt },
-			func(p OptParam) { stModel.SvcOps = append(stModel.SvcOps, p) },
-		)
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsSvc },
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsLopt },
-			func(p OptParam) { stModel.SvcLops = append(stModel.SvcLops, p) },
-		)
-		nextStartIndex = parseArg(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsSvc },
-			func(ind int, p ParamType) {
-				stModel.SvcArgs = append(
-					stModel.SvcArgs,
-					ArgParam{
-						Index: ind,
-						Param: p,
-					},
-				)
-			},
-		)
-		stModel.Act = getOneStr(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsAct },
-		)
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsArg },
-			func(t argtables.ArgTable) bool { return t.IsOpt },
-			func(p OptParam) { stModel.ActOps = append(stModel.ActOps, p) },
-		)
-		parseOptions(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(t argtables.ArgTable) bool { return t.IsArg },
-			func(t argtables.ArgTable) bool { return t.IsLopt },
-			func(p OptParam) { stModel.ActLops = append(stModel.ActLops, p) },
-		)
-		nextStartIndex = parseArg(
-			nextStartIndex,
-			curStageArgTables,
-			func(t argtables.ArgTable) bool { return false },
-			func(t argtables.ArgTable) bool { return t.IsAct },
-			func(ind int, p ParamType) {
-				stModel.ActArgs = append(
-					stModel.ActArgs,
-					ArgParam{
-						Index: ind,
-						Param: p,
-					},
-				)
-			},
-		)
 		stModels[stageNo-1] = stModel
 	}
 	return ctrl, stModels

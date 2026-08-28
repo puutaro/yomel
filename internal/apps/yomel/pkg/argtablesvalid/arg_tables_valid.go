@@ -19,7 +19,6 @@ func ArgTableValidate(argTables []argtables.ArgTable) error {
 		checkIsCmd,
 		checkCtrlParameterSpecifyInStageErr,
 		checkOnlyOneOptionErr,
-		checkCmdSvcActOrderErr,
 		checkQuoteOptionIrregularPositionErr,
 		checkDescriptionSuffixErr,
 	}
@@ -131,14 +130,6 @@ func checkStageParameterSpecifyInCtrlErr(
 			targetParameterSignal:  argtables.CmdOpSignal,
 		},
 		{
-			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsSvc },
-			targetParameterSignal:  argtables.SvcOpSignal,
-		},
-		{
-			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsAct },
-			targetParameterSignal:  argtables.ActOpSignal,
-		},
-		{
 			targetParameterCheckFn: func(a argtables.ArgTable) bool { return a.IsArg },
 			targetParameterSignal:  argtables.ArgOpSignal,
 		},
@@ -222,22 +213,6 @@ func checkOnlyOneOptionErr(
 			},
 			targetParameters: cmdOpNameWithQuote,
 		},
-		{
-			targetParameterCheckFn: func(
-				a argtables.ArgTable,
-			) bool {
-				return a.IsSvc
-			},
-			targetParameters: svcOpNameWithQuote,
-		},
-		{
-			targetParameterCheckFn: func(
-				a argtables.ArgTable,
-			) bool {
-				return a.IsAct
-			},
-			targetParameters: actOpNameWithQuote,
-		},
 	}
 
 	for _, c := range checkers {
@@ -278,38 +253,6 @@ func execCheckOnlyOneOptionErr(
 	return nil
 }
 
-func checkCmdSvcActOrderErr(argTables []argtables.ArgTable) error {
-	stageNo := 0
-	curMainArgNum := 0
-	cmdOrder := 1
-	svcOrder := 2
-	actOrder := 3
-	for _, argTable := range argTables {
-		incStageNo := argtablecounter.IncrementStageNo(argTable.IsStage)
-		if incStageNo > 0 {
-			curMainArgNum = 0
-		}
-		switch true {
-		case argTable.IsCmd:
-			if curMainArgNum > cmdOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
-			}
-			curMainArgNum = cmdOrder
-		case argTable.IsSvc:
-			if curMainArgNum > svcOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
-			}
-			curMainArgNum = svcOrder
-		case argTable.IsAct:
-			if curMainArgNum > actOrder {
-				return fmt.Errorf(cmdSvcActOrdrerIrregularErrMsg, stageNo)
-			}
-			curMainArgNum = actOrder
-		}
-		stageNo += incStageNo
-	}
-	return nil
-}
 func checkQuoteOptionIrregularPositionErr(
 	argTables []argtables.ArgTable,
 ) error {

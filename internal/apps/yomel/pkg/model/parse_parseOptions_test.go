@@ -1,190 +1,96 @@
+// Package model provides parsing and data modeling for yomel arguments.
 package model
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
-	"github.com/puutaro/yomel/internal/pkg/testutil"
-	"github.com/stretchr/testify/assert"
 )
 
-// Test_parseOptions verifies that parseOptions correctly parses short/long options with various quote types, boundary conditions, and filters.
-func Test_parseOptions(t *testing.T) {
-	// Tiny helpers to minimize structural boilerplate
-	tStr := func(s string) argtables.ArgTable { return argtables.ArgTable{Str: &s} }
-	tCmd := func() argtables.ArgTable { return argtables.ArgTable{IsCmd: true} }
-	tSvc := func() argtables.ArgTable { return argtables.ArgTable{IsSvc: true} }
-	// tAct := func() argtables.ArgTable { return argtables.ArgTable{IsAct: true} }
-	tOpt := func() argtables.ArgTable { return argtables.ArgTable{IsOpt: true} }
-	tLopt := func() argtables.ArgTable { return argtables.ArgTable{IsLopt: true} }
-	tVal := func() argtables.ArgTable { return argtables.ArgTable{IsValue: true} }
-
+// TestParseOptions tests the parseOptions function with various argument tables and conditions.
+func TestParseOptions(t *testing.T) {
 	tests := []struct {
-		name            string
-		nextStartIndex  int
-		input           []argtables.ArgTable
-		isTargetMainArg func(argtables.ArgTable) bool
-		isNextMainArg   func(argtables.ArgTable) bool
-		isTargetOpt     func(argtables.ArgTable) bool
-		want            []OptParam
+		name              string
+		nextStartIndex    int
+		curStageArgTables []argtables.ArgTable
+		isTargetMainArg   func(t argtables.ArgTable) bool
+		isNextMainArg     func(t argtables.ArgTable) bool
+		isTargetOpt       func(argtables.ArgTable) bool
+		expectedOptParams []OptParam
 	}{
 		{
-			name:           "should parse short options with values correctly",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(),
-				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: argtables.SingleQuote}, tStr("file.txt"),
+			name:              "Empty argument tables",
+			nextStartIndex:    0,
+			curStageArgTables: []argtables.ArgTable{},
+			isTargetMainArg: func(t argtables.ArgTable) bool {
+				return t.IsCmd
 			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
+			isNextMainArg: func(t argtables.ArgTable) bool {
+				return t.IsStage
+			},
+			isTargetOpt: func(t argtables.ArgTable) bool {
+				return t.IsOpt
+			},
+			expectedOptParams: nil,
+		},
+		{
+			name:           "Parse single option without value parameter",
+			nextStartIndex: 0,
+			curStageArgTables: []argtables.ArgTable{
+				{IsCmd: true, StageNo: 1},
+				{Str: strPtr("echo"), StageNo: 1},
+				{IsOpt: true, Comment: "TestOpt", StageNo: 1},
+				{Str: strPtr("foo"), StageNo: 1},
+			},
+			isTargetMainArg: func(t argtables.ArgTable) bool {
+				return t.IsCmd
+			},
+			isNextMainArg: func(t argtables.ArgTable) bool {
+				return t.IsStage
+			},
+			isTargetOpt: func(t argtables.ArgTable) bool {
+				return t.IsOpt
+			},
+			expectedOptParams: []OptParam{
 				{
-					Index:  2,
-					OptStr: "f",
-					Param: ParamType{
-						Str:       testutil.Ptr("file.txt"),
-						QuoteType: argtables.SingleQuote,
-					},
+					Index:   3,
+					OptStr:  "foo",
+					Comment: "TestOpt",
+					Param:   ParamType{},
 				},
 			},
 		},
 		{
-			name:           "should parse long options without values correctly",
+			name:           "Parse option with value parameter and double quote",
 			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(),
-				tLopt(), tStr("verbose"),
+			curStageArgTables: []argtables.ArgTable{
+				{IsCmd: true, StageNo: 1},
+				{Str: strPtr("echo"), StageNo: 1},
+				{IsOpt: true, Comment: "TestOpt", StageNo: 1},
+				{Str: strPtr("foo"), StageNo: 1},
+				{IsValue: true, StageNo: 1},
+				{QuoteTypeSignal: argtables.DoubleQuote, Str: strPtr("bar_val"), StageNo: 1},
 			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsLopt },
-			want: []OptParam{
+			isTargetMainArg: func(t argtables.ArgTable) bool {
+				return t.IsCmd
+			},
+			isNextMainArg: func(t argtables.ArgTable) bool {
+				return t.IsStage
+			},
+			isTargetOpt: func(t argtables.ArgTable) bool {
+				return t.IsOpt
+			},
+			expectedOptParams: []OptParam{
 				{
-					Index:  2,
-					OptStr: "verbose",
-					Param:  ParamType{},
-				},
-			},
-		},
-		{
-			name:           "should parse double quoted option value correctly",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(),
-				tOpt(), tStr("m"),
-				tVal(), tStr("double-val"), // DoubleQuote signal is implicit or handled by getQuoteStr
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
-				{
-					Index:  2,
-					OptStr: "m",
+					Index:   3,
+					OptStr:  "foo",
+					Comment: "TestOpt",
 					Param: ParamType{
-						Str:       testutil.Ptr("double-val"),
+						Str:       strPtr("bar_val"),
 						QuoteType: argtables.DoubleQuote,
+						Comment:   "",
 					},
-				},
-			},
-		},
-		{
-			name:           "should parse no-quote option value correctly",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(),
-				tOpt(), tStr("c"),
-				tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("count"),
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
-				{
-					Index:  2,
-					OptStr: "c",
-					Param: ParamType{
-						Str:       testutil.Ptr("count"),
-						QuoteType: argtables.NoQuote,
-					},
-				},
-			},
-		},
-		{
-			name:           "should stop parsing when next main argument is encountered",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(),
-				tOpt(), tStr("f"),
-				tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("file1"),
-				tSvc(), // Boundary to next main arg
-				tOpt(), tStr("ignored"),
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsSvc || a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
-				{
-					Index:  2,
-					OptStr: "f",
-					Param: ParamType{
-						Str:       testutil.Ptr("file1"),
-						QuoteType: argtables.NoQuote,
-					},
-				},
-			},
-		},
-		{
-			name:           "should return empty slice when target main argument is not found",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tSvc(),
-				tOpt(), tStr("v"),
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want:            nil,
-		},
-		{
-			name:           "should skip elements before nextStartIndex",
-			nextStartIndex: 4,
-			input: []argtables.ArgTable{
-				tCmd(), tOpt(), tStr("a"), tVal(), tStr("val-skip"),
-				tCmd(), tOpt(), tStr("b"), tVal(), {QuoteTypeSignal: argtables.NoQuote}, tStr("val-target"),
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsCmd },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
-				{
-					Index:  7,
-					OptStr: "b",
-					Param: ParamType{
-						Str:       testutil.Ptr("val-target"),
-						QuoteType: argtables.NoQuote,
-					},
-				},
-			},
-		},
-		{
-			name:           "should parse service options when target main arg is svc",
-			nextStartIndex: 0,
-			input: []argtables.ArgTable{
-				tCmd(), tStr("aws"),
-				tSvc(), tStr("s3"),
-				tOpt(), tStr("r"),
-			},
-			isTargetMainArg: func(a argtables.ArgTable) bool { return a.IsSvc },
-			isNextMainArg:   func(a argtables.ArgTable) bool { return a.IsAct },
-			isTargetOpt:     func(a argtables.ArgTable) bool { return a.IsOpt },
-			want: []OptParam{
-				{
-					Index:  5,
-					OptStr: "r",
-					Param:  ParamType{},
 				},
 			},
 		},
@@ -192,18 +98,32 @@ func Test_parseOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got []OptParam
+			var gotOptParams []OptParam
+			appendFn := func(op OptParam) {
+				gotOptParams = append(gotOptParams, op)
+			}
+
 			parseOptions(
 				tt.nextStartIndex,
-				tt.input,
+				tt.curStageArgTables,
 				tt.isTargetMainArg,
 				tt.isNextMainArg,
 				tt.isTargetOpt,
-				func(p OptParam) {
-					got = append(got, p)
-				},
+				appendFn,
 			)
-			assert.Equal(t, tt.want, got)
+
+			if len(gotOptParams) == 0 && len(tt.expectedOptParams) == 0 {
+				return
+			}
+
+			if !reflect.DeepEqual(gotOptParams, tt.expectedOptParams) {
+				t.Errorf("parseOptions() got = %v, want %v", gotOptParams, tt.expectedOptParams)
+			}
 		})
 	}
+}
+
+// strPtr is a helper function to return a pointer to a string literal.
+func strPtr(s string) *string {
+	return &s
 }

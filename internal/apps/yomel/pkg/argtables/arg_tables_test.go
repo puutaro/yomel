@@ -50,18 +50,6 @@ func Test_GenArgTable(t *testing.T) {
 				"--arg", "--n", "awsawsaws2",
 				"--single",
 				"--no-quote",
-				"-svc", "a3api",
-				"--opt", "e",
-				"--val", "--s", "eeee",
-				"--opt", "f",
-				"--val", "--s", "ffff",
-				"--arg", "--s", "svcsvcsvc1",
-				"--arg", "--s", "svcsvcsvc2",
-				"-act", "list-objects",
-				"--lop", "s",
-				"--val", "--s", "sss",
-				"--lop", "t",
-				"--val", "--n", "ttt",
 				"--arg", "agagagaga1",
 				"--arg", "agagagaga2",
 
@@ -142,48 +130,6 @@ func Test_GenArgTable(t *testing.T) {
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 				// parse no-quote modifier
 				{StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
-				// parse service option
-				{StageNo: 1, IsSvc: true},
-				{StageNo: 1, Str: testutil.Ptr("a3api")},
-				// parse option e
-				{StageNo: 1, IsOpt: true},
-				{StageNo: 1, Str: testutil.Ptr("e")},
-				// parse value for option e
-				{StageNo: 1, IsValue: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
-				{StageNo: 1, Str: testutil.Ptr("eeee")},
-				// parse option f
-				{StageNo: 1, IsOpt: true},
-				{StageNo: 1, Str: testutil.Ptr("f")},
-				// parse value for option f
-				{StageNo: 1, IsValue: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
-				{StageNo: 1, Str: testutil.Ptr("ffff")},
-				// parse argument svcsvcsvc1
-				{StageNo: 1, IsArg: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
-				{StageNo: 1, Str: testutil.Ptr("svcsvcsvc1")},
-				// parse argument svcsvcsvc2
-				{StageNo: 1, IsArg: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
-				{StageNo: 1, Str: testutil.Ptr("svcsvcsvc2")},
-				// parse action option
-				{StageNo: 1, IsAct: true},
-				{StageNo: 1, Str: testutil.Ptr("list-objects")},
-				// parse long option s
-				{StageNo: 1, IsLopt: true},
-				{StageNo: 1, Str: testutil.Ptr("s")},
-				// parse value for long option s
-				{StageNo: 1, IsValue: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
-				{StageNo: 1, Str: testutil.Ptr("sss")},
-				// parse long option t
-				{StageNo: 1, IsLopt: true},
-				{StageNo: 1, Str: testutil.Ptr("t")},
-				// parse value for long option t
-				{StageNo: 1, IsValue: true},
-				{StageNo: 1, QuoteTypeSignal: argtables.NoQuote},
-				{StageNo: 1, Str: testutil.Ptr("ttt")},
 				// parse raw argument 1
 				{StageNo: 1, IsArg: true},
 				{StageNo: 1, Str: testutil.Ptr("agagagaga1")},

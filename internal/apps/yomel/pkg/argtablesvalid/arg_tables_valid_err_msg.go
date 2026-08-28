@@ -25,10 +25,8 @@ const (
 	errLogFilterWithQuote = "'" + argtables.ErrLogFilterOpSignal + "'"
 
 	cmdOpNameWithQuote = "'" + argtables.CmdOpSignal + "'"
-	svcOpNameWithQuote = "'" + argtables.SvcOpSignal + "'"
-	actOpNameWithQuote = "'" + argtables.ActOpSignal + "'"
 
-	cmdSvcActOpNameWithAnd = cmdOpNameWithQuote + " and " + svcOpNameWithQuote + " and " + actOpNameWithQuote
+	cmdSvcActOpNameWithAnd = cmdOpNameWithQuote
 
 	argOpSignalWithQuote     = "'" + argtables.ArgOpSignal + "'"
 	valueOpSignalWithQuote   = "'" + argtables.ValueOptSignal + "'"
@@ -62,8 +60,6 @@ const (
 	ctrlParameterSpecifyInStageErrMsg = "must be specified" + ctrlParameterWithAnd + ctrlFieldSuffix + stageNoSuffix
 
 	onlyOneErrMsg = "%s" + onlyOneStr + " in each stage field" + stageNoSuffix
-
-	cmdSvcActOrdrerIrregularErrMsg = cmdSvcActOpNameWithAnd + " must be" + cmdOpNameWithQuote + " -> " + svcOpNameWithQuote + " -> " + actOpNameWithQuote + " order " + stageNoSuffix
 
 	quoteOptionIrregularPositionErrMsg = quoteSingnalWithAnd + " must be immediately after " + argValueWithAnd + stageNoSuffix
 

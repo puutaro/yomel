@@ -91,30 +91,12 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 		}
 		var stageCmd stageCommand
 		cmdStrList := makeStrListFromStr(stage.Cmd)
-		svcStrList := makeStrListFromStr(stage.Svc)
-		actStrList := makeStrListFromStr(stage.Act)
 		stageCmd.insertStageEl(
 			cmdStrList,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		stageCmd.insertStageEl(
 			stage.CmdOpArgs,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmd.insertStageEl(
-			svcStrList,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmd.insertStageEl(
-			stage.SvcOpArgs,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmd.insertStageEl(
-			actStrList,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmd.insertStageEl(
-			stage.ActOpArgs,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 
@@ -128,22 +110,6 @@ func genStageInfo(yomel domain.Yomel) []StageInfo {
 		)
 		stageCmdWithComment.insertStageEl(
 			stage.CmdOpArgsWithComment,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmdWithComment.insertStageEl(
-			svcStrList,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmdWithComment.insertStageEl(
-			stage.SvcOpArgsWithComment,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmdWithComment.insertStageEl(
-			actStrList,
-			domain.BackslashNewlineOpArgPrefix,
-		)
-		stageCmdWithComment.insertStageEl(
-			stage.ActOpArgsWithComment,
 			domain.BackslashNewlineOpArgPrefix,
 		)
 		yomelInfo.CmdStrsWithComment =
