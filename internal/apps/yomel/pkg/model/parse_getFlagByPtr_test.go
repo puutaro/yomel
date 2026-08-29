@@ -77,6 +77,16 @@ func Test_getFlagByPtr(t *testing.T) {
 			returnBool:     true,
 			want:           nil,
 		},
+		{
+			name:           "should return nil when nextStartIndex is out of range",
+			nextStartIndex: 5,
+			input: []argtables.ArgTable{
+				{IsLog: true},
+			},
+			isCheckFn:  func(t argtables.ArgTable) bool { return t.IsLog },
+			returnBool: true,
+			want:       nil,
+		},
 	}
 
 	for _, tt := range tests {

@@ -31,7 +31,7 @@ func Test_checkQuoteOptionIrregularPositionErr(t *testing.T) {
 				{StageNo: 1, IsOpt: true},
 				{StageNo: 1, QuoteTypeSignal: argtables.SingleQuote},
 			},
-			wantError: "'--s/--single' and '--n/--no-quote' must be immediately after '--arg' and '--val'\nstageNo: 1",
+			wantError: "'--s/--single' and '--n/--no-quote' must be immediately after '-a' and '-v'\nstageNo: 1",
 		},
 	}
 

@@ -28,12 +28,12 @@ func Test_checkIsStage(t *testing.T) {
 			input: []argtables.ArgTable{
 				{StageNo: 0, IsLog: true},
 			},
-			wantError: "'stage' not found",
+			wantError: "'//' not found",
 		},
 		{
 			name:      "should return error when input slice is empty",
 			input:     []argtables.ArgTable{},
-			wantError: "'stage' not found",
+			wantError: "'//' not found",
 		},
 	}
 

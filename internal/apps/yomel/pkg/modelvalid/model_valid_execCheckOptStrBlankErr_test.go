@@ -36,7 +36,7 @@ func Test_execCheckOptStrBlankErr(t *testing.T) {
 				{OptStr: ""},
 			},
 			stageNo:   1,
-			wantError: "'--opt' and '--lop' str must not be blank\nstageNo: 1",
+			wantError: "'-o' and '--o' str must not be blank\nstageNo: 1",
 		},
 	}
 

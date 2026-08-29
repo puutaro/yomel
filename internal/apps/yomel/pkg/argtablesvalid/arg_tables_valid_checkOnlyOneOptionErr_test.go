@@ -29,7 +29,7 @@ func Test_checkOnlyOneOptionErr(t *testing.T) {
 				{StageNo: 1, IsCmd: true},
 				{StageNo: 1, IsCmd: true},
 			},
-			wantError: "'-cmd' are only one in each stage field\nstageNo: 1",
+			wantError: "'-c' are only one in each stage field\nstageNo: 1",
 		},
 	}
 

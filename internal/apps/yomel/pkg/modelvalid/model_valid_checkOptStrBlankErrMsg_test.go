@@ -41,7 +41,7 @@ func Test_checkOptStrBlankErrMsg(t *testing.T) {
 					},
 				},
 			},
-			wantError: "'--opt' and '--lop' str must not be blank\nstageNo: 1",
+			wantError: "'-o' and '--o' str must not be blank\nstageNo: 1",
 		},
 		{
 			name:      "should return nil when stages slice is empty",

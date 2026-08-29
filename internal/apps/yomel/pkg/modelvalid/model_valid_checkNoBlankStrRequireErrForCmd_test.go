@@ -27,7 +27,7 @@ func Test_checkNoBlankStrRequireErrForCmd(t *testing.T) {
 				No:  1,
 				Cmd: "",
 			},
-			wantError: "'-cmd' no blank str is required\nstageNo: 1",
+			wantError: "'-c' no blank str is required\nstageNo: 1",
 		},
 	}
 

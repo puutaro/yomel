@@ -57,7 +57,7 @@ func Test_checkDescriptionSuffixErr(t *testing.T) {
 					Comment: "invalidPascal",
 				},
 			},
-			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 1",
+			wantError: "Description suffix of '-o' and '--o' and '-a' and '-v' must be alphanumeric pascalCase in \nstageNo: 1",
 		},
 		{
 			name: "should return error when comment suffix contains non-alphanumeric characters",
@@ -72,7 +72,7 @@ func Test_checkDescriptionSuffixErr(t *testing.T) {
 					Comment: "Invalid-Name",
 				},
 			},
-			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 2",
+			wantError: "Description suffix of '-o' and '--o' and '-a' and '-v' must be alphanumeric pascalCase in \nstageNo: 2",
 		},
 		{
 			name: "should return error when comment suffix consists of repeated single characters",
@@ -87,7 +87,7 @@ func Test_checkDescriptionSuffixErr(t *testing.T) {
 					Comment: "aaa",
 				},
 			},
-			wantError: "Description suffix of '--opt' and '--lop' and '--arg' and '--val' must be alphanumeric pascalCase in \nstageNo: 1",
+			wantError: "Description suffix of '-o' and '--o' and '-a' and '-v' must be alphanumeric pascalCase in \nstageNo: 1",
 		},
 	}
 

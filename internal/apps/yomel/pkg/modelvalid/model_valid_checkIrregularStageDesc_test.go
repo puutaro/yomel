@@ -29,7 +29,7 @@ func Test_checkIrregularStageDesc(t *testing.T) {
 				Desc: "",
 				Cmd:  "echo",
 			},
-			wantError: "'stage' description must be meaning sentence\nstageNo: 1\ndesc: ''",
+			wantError: "'//' description must be meaning sentence\nstageNo: 1\ndesc: ''",
 		},
 	}
 

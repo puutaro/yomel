@@ -27,7 +27,7 @@ func Test_checkIsCmd(t *testing.T) {
 			input: []argtables.ArgTable{
 				{StageNo: 1, IsStage: true},
 			},
-			wantError: "'-cmd' not found\nstageNo: 1",
+			wantError: "'-c' not found\nstageNo: 1",
 		},
 	}
 

@@ -28,7 +28,7 @@ func Test_ArgTableValidate(t *testing.T) {
 			input: []argtables.ArgTable{
 				{StageNo: 0, IsCmd: true},
 			},
-			wantError: "'-cmd' must be specfied in stage field",
+			wantError: "'-c' must be specfied in stage field",
 		},
 	}
 

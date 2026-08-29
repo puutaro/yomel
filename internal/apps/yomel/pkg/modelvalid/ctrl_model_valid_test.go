@@ -37,7 +37,7 @@ func Test_CtrlModeValidate(t *testing.T) {
 				Title: "aaa",
 			},
 			stageLen:  2,
-			wantError: "'title' must be meaning sentence if stage > 1\ntitle: 'aaa'",
+			wantError: "'///' must be meaning sentence if stage > 1\ntitle: 'aaa'",
 		},
 	}
 

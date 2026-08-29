@@ -32,7 +32,7 @@ func Test_ModelValidate(t *testing.T) {
 					Cmd: "",
 				},
 			},
-			wantError: "'stage' description must be meaning sentence\nstageNo: 1\ndesc: ''",
+			wantError: "'//' description must be meaning sentence\nstageNo: 1\ndesc: ''",
 		},
 	}
 

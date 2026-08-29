@@ -1,129 +1,123 @@
-// Package model provides parsing and data modeling for yomel arguments.
 package model
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
+	"github.com/puutaro/yomel/internal/pkg/testutil"
 )
 
-// TestParseOptions tests the parseOptions function with various argument tables and conditions.
-func TestParseOptions(t *testing.T) {
-	tests := []struct {
-		name              string
-		nextStartIndex    int
-		curStageArgTables []argtables.ArgTable
-		isTargetMainArg   func(t argtables.ArgTable) bool
-		isNextMainArg     func(t argtables.ArgTable) bool
-		isTargetOpt       func(argtables.ArgTable) bool
-		expectedOptParams []OptParam
-	}{
+func TestParseOptionsAndArgs(t *testing.T) {
+	// Prepare test arg tables simulating command line inputs for a stage
+	argTables := []argtables.ArgTable{
 		{
-			name:              "Empty argument tables",
-			nextStartIndex:    0,
-			curStageArgTables: []argtables.ArgTable{},
-			isTargetMainArg: func(t argtables.ArgTable) bool {
-				return t.IsCmd
-			},
-			isNextMainArg: func(t argtables.ArgTable) bool {
-				return t.IsStage
-			},
-			isTargetOpt: func(t argtables.ArgTable) bool {
-				return t.IsOpt
-			},
-			expectedOptParams: nil,
+			No:      1,
+			StageNo: 1,
+			IsStage: true,
+			Str:     testutil.Ptr("FirstStage"),
 		},
 		{
-			name:           "Parse single option without value parameter",
-			nextStartIndex: 0,
-			curStageArgTables: []argtables.ArgTable{
-				{IsCmd: true, StageNo: 1},
-				{Str: strPtr("echo"), StageNo: 1},
-				{IsOpt: true, Comment: "TestOpt", StageNo: 1},
-				{Str: strPtr("foo"), StageNo: 1},
-			},
-			isTargetMainArg: func(t argtables.ArgTable) bool {
-				return t.IsCmd
-			},
-			isNextMainArg: func(t argtables.ArgTable) bool {
-				return t.IsStage
-			},
-			isTargetOpt: func(t argtables.ArgTable) bool {
-				return t.IsOpt
-			},
-			expectedOptParams: []OptParam{
-				{
-					Index:   3,
-					OptStr:  "foo",
-					Comment: "TestOpt",
-					Param:   ParamType{},
-				},
-			},
+			No:      2,
+			StageNo: 1,
+			IsCmd:   true,
+			Str:     testutil.Ptr("echo"),
 		},
 		{
-			name:           "Parse option with value parameter and double quote",
-			nextStartIndex: 0,
-			curStageArgTables: []argtables.ArgTable{
-				{IsCmd: true, StageNo: 1},
-				{Str: strPtr("echo"), StageNo: 1},
-				{IsOpt: true, Comment: "TestOpt", StageNo: 1},
-				{Str: strPtr("foo"), StageNo: 1},
-				{IsValue: true, StageNo: 1},
-				{QuoteTypeSignal: argtables.DoubleQuote, Str: strPtr("bar_val"), StageNo: 1},
-			},
-			isTargetMainArg: func(t argtables.ArgTable) bool {
-				return t.IsCmd
-			},
-			isNextMainArg: func(t argtables.ArgTable) bool {
-				return t.IsStage
-			},
-			isTargetOpt: func(t argtables.ArgTable) bool {
-				return t.IsOpt
-			},
-			expectedOptParams: []OptParam{
-				{
-					Index:   3,
-					OptStr:  "foo",
-					Comment: "TestOpt",
-					Param: ParamType{
-						Str:       strPtr("bar_val"),
-						QuoteType: argtables.DoubleQuote,
-						Comment:   "",
-					},
-				},
-			},
+			No:      3,
+			StageNo: 1,
+			IsOpt:   true,
+			Comment: "OptA",
+		},
+		{
+			No:      4,
+			StageNo: 1,
+			Str:     testutil.Ptr("-n"),
+		},
+		{
+			No:      5,
+			StageNo: 1,
+			IsValue: true,
+			Comment: "ValueA",
+		},
+		{
+			No:              6,
+			StageNo:         1,
+			QuoteTypeSignal: argtables.DoubleQuote,
+			Str:             testutil.Ptr("hello"),
+		},
+		{
+			No:      7,
+			StageNo: 1,
+			IsArg:   true,
+			Comment: "ArgA",
+		},
+		{
+			No:              8,
+			StageNo:         1,
+			QuoteTypeSignal: argtables.DoubleQuote,
+			Str:             testutil.Ptr("world"),
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var gotOptParams []OptParam
-			appendFn := func(op OptParam) {
-				gotOptParams = append(gotOptParams, op)
-			}
+	// Test parseOptions for short options (-o)
+	t.Run("parseOptions with short option and value", func(t *testing.T) {
+		var opts []OptParam
+		parseOptions(
+			0,
+			argTables,
+			func(t argtables.ArgTable) bool { return t.IsCmd },
+			func(t argtables.ArgTable) bool { return t.IsOpt },
+			func(p OptParam) {
+				opts = append(opts, p)
+			},
+		)
 
-			parseOptions(
-				tt.nextStartIndex,
-				tt.curStageArgTables,
-				tt.isTargetMainArg,
-				tt.isNextMainArg,
-				tt.isTargetOpt,
-				appendFn,
-			)
+		if len(opts) != 1 {
+			iteratorErr := len(opts)
+			t.Fatalf("expected 1 option parsed, got %d", iteratorErr)
+		}
 
-			if len(gotOptParams) == 0 && len(tt.expectedOptParams) == 0 {
-				return
-			}
+		opt := opts[0]
+		if opt.OptStr != "-n" {
+			t.Errorf("expected OptStr to be '-n', got '%s'", opt.OptStr)
+		}
+		if opt.Comment != "OptA" {
+			t.Errorf("expected Comment to be 'OptA', got '%s'", opt.Comment)
+		}
+		if opt.Param.Str == nil || *opt.Param.Str != "hello" {
+			t.Errorf("expected Param.Str to be 'hello', got %v", opt.Param.Str)
+		}
+		if opt.Param.Comment != "ValueA" {
+			t.Errorf("expected Param.Comment to be 'ValueA', got '%s'", opt.Param.Comment)
+		}
+	})
 
-			if !reflect.DeepEqual(gotOptParams, tt.expectedOptParams) {
-				t.Errorf("parseOptions() got = %v, want %v", gotOptParams, tt.expectedOptParams)
-			}
-		})
-	}
-}
+	// Test parseArg for positional arguments (-a)
+	t.Run("parseArg with positional argument", func(t *testing.T) {
+		var args []ArgParam
+		parseArg(
+			0,
+			argTables,
+			func(t argtables.ArgTable) bool { return t.IsCmd },
+			func(ind int, p ParamType) {
+				args = append(args, ArgParam{
+					Index: ind,
+					Param: p,
+				})
+			},
+		)
 
-// strPtr is a helper function to return a pointer to a string literal.
-func strPtr(s string) *string {
-	return &s
+		if len(args) != 1 {
+			argLenErr := len(args)
+			t.Fatalf("expected 1 argument parsed, got %d", argLenErr)
+		}
+
+		arg := args[0]
+		if arg.Param.Str == nil || *arg.Param.Str != "world" {
+			t.Errorf("expected Param.Str to be 'world', got %v", arg.Param.Str)
+		}
+		if arg.Param.Comment != "ArgA" {
+			t.Errorf("expected Param.Comment to be 'ArgA', got '%s'", arg.Param.Comment)
+		}
+	})
 }

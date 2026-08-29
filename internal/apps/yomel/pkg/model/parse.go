@@ -278,6 +278,35 @@ func Parse(argTables []argtables.ArgTable) (ControlModel, []StageModel) {
 		); strPtr != nil {
 			stModel.CommentColorStr = *strPtr
 		}
+		parseOptions(
+			nextStartIndex,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsCmd },
+			func(t argtables.ArgTable) bool { return t.IsOpt },
+			func(p OptParam) { stModel.CmdOps = append(stModel.CmdOps, p) },
+		)
+		parseOptions(
+			nextStartIndex,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsCmd },
+			func(t argtables.ArgTable) bool { return t.IsLopt },
+			func(p OptParam) { stModel.CmdLops = append(stModel.CmdLops, p) },
+		)
+		nextStartIndex = parseArg(
+			nextStartIndex,
+			curStageArgTables,
+			func(t argtables.ArgTable) bool { return t.IsCmd },
+			func(ind int, p ParamType) {
+				stModel.CmdArgs = append(
+					stModel.CmdArgs,
+					ArgParam{
+						Index: ind,
+						Param: p,
+					},
+				)
+			},
+		)
+
 		stModels[stageNo-1] = stModel
 	}
 	return ctrl, stModels
@@ -339,7 +368,6 @@ func parseOptions(
 	nextStartIndex int,
 	curStageArgTables []argtables.ArgTable,
 	isTargetMainArg func(t argtables.ArgTable) bool,
-	isNextMainArg func(t argtables.ArgTable) bool,
 	isTargetOpt func(argtables.ArgTable) bool,
 	appendFn func(OptParam),
 ) {
@@ -351,18 +379,12 @@ func parseOptions(
 		if seekStartIndex == curStageArgTablesLastIndex {
 			return
 		}
-		if isNextMainArg(argTable) {
-			return
-		}
 		if isTargetMainArg(argTable) {
 			break
 		}
 	}
 	for j := seekStartIndex + 1; j < curStageArgTablesLen; j++ {
 		innerArgTable := curStageArgTables[j]
-		if isNextMainArg(innerArgTable) {
-			return
-		}
 		if !isTargetOpt(innerArgTable) {
 			continue
 		}
@@ -399,7 +421,6 @@ func parseOptions(
 func parseArg(
 	nextStartIndex int,
 	curStageArgTables []argtables.ArgTable,
-	isNextMainArg func(t argtables.ArgTable) bool,
 	isTargetMainArg func(t argtables.ArgTable) bool,
 	appendFn func(int, ParamType),
 ) int {
@@ -407,18 +428,11 @@ func parseArg(
 	returnNextStartIndex := nextStartIndex
 	for i := nextStartIndex; i < curStageArgTablesLen; i++ {
 		argTable := curStageArgTables[i]
-		if isNextMainArg(argTable) {
-			break
-		}
 		if !isTargetMainArg(argTable) {
 			continue
 		}
 		for j := i + 1; j < curStageArgTablesLen; j++ {
 			innerArgTable := curStageArgTables[j]
-
-			if isNextMainArg(innerArgTable) {
-				break
-			}
 			if !innerArgTable.IsArg {
 				continue
 			}

@@ -6,7 +6,6 @@ import (
 	"github.com/puutaro/yomel/internal/apps/yomel/pkg/argtables"
 )
 
-// TestCheckStageParameterSpecifyInCtrlErr tests validation for stage parameters specified in control section.
 func TestCheckStageParameterSpecifyInCtrlErr(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -15,27 +14,27 @@ func TestCheckStageParameterSpecifyInCtrlErr(t *testing.T) {
 	}{
 		{
 			name:      "Valid arg tables without stage parameters in ctrl section",
-			inputArgs: []string{"stage", "desc1", "-cmd", "echo 1"},
+			inputArgs: []string{"//", "desc1", "-c", "echo 1"},
 			wantErr:   false,
 		},
 		{
 			name:      "Invalid cmd parameter specified in ctrl section",
-			inputArgs: []string{"-cmd", "echo 1", "stage", "desc1", "-cmd", "echo 1"},
+			inputArgs: []string{"-c", "echo 1", "//", "desc1", "-c", "echo 1"},
 			wantErr:   true,
 		},
 		{
 			name:      "Invalid arg parameter specified in ctrl section",
-			inputArgs: []string{"--arg", "val1", "stage", "desc1", "-cmd", "echo 1"},
+			inputArgs: []string{"-a", "val1", "//", "desc1", "-c", "echo 1"},
 			wantErr:   true,
 		},
 		{
 			name:      "Invalid opt parameter specified in ctrl section",
-			inputArgs: []string{"--opt", "val1", "stage", "desc1", "-cmd", "echo 1"},
+			inputArgs: []string{"-o", "val1", "//", "desc1", "-c", "echo 1"},
 			wantErr:   true,
 		},
 		{
 			name:      "Invalid lopt parameter specified in ctrl section",
-			inputArgs: []string{"--lop", "val1", "stage", "desc1", "-cmd", "echo 1"},
+			inputArgs: []string{"--o", "val1", "//", "desc1", "-c", "echo 1"},
 			wantErr:   true,
 		},
 	}

@@ -27,7 +27,7 @@ func Test_checkStageDescriptionDuplicate(t *testing.T) {
 				{No: 1, Desc: "same-desc"},
 				{No: 2, Desc: "same-desc"},
 			},
-			wantError: "'stage' description must be unique across stages\nstageNo: 2\ndesc: 'same-desc'",
+			wantError: "'//' description must be unique across stages\nstageNo: 2\ndesc: 'same-desc'",
 		},
 	}
 
