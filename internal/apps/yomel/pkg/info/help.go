@@ -14,7 +14,7 @@ const detail = `Usage:
   yomel [flags] stage [desc] [cmd options/arguments...] [service options/arguments...] [action options/arguments...]
 
 Telemetry and Filter Options:
-  title "<pipeline_title>"    Specify a title for the overall pipeline
+  /// "<pipeline_title>"    Specify a title for the overall pipeline
   --no-live-stdout            Suppress real-time streaming of standard output (stdout)
   --no-live-stderr            Suppress real-time streaming of standard error (stderr)
   --log                       Activate the internal logging system
@@ -24,10 +24,8 @@ Telemetry and Filter Options:
   --err-log-filter "<shell_command>" Attaches an asynchronous log interceptor for standard error (stderr)
 
 Structural Stage Elements:
-  stage "<stage_name>"        Initializes a new execution boundary (pipeline stage)
-  -cmd "<binary>"             Specifies the main executable or binary command
-  -svc "<service_name>"       Declares a sub-service or second-level command hierarchy
-  -act "<action_name>"        Declares the operation, verb, or action to be performed
+  // "<stage_name>"        Initializes a new execution boundary (pipeline stage)
+  -c "<binary>"             Specifies the main executable or binary command
 
 Color Control Options:
   --color "<color_code>"          Specifies the foreground text color for the command body and logs
@@ -38,10 +36,10 @@ Color Control Options:
   --title-comment-color "<color_code>" Sets the comment color specifically for the total pipeline command section
 
 Option and Argument Value Modifiers:
-  --opt[PascalCase] "<flag>"  Generates a short-style option flag with an optional PascalCase description suffix
-  --lop[PascalCase] "<flag>"  Generates a long-style option flag with an optional PascalCase description suffix
-  --val[PascalCase]           Declares a value associated with the preceding option (must be followed by --s or --n)
-  --arg[PascalCase]           Appends a standalone, positional argument to the tail end (must be followed by --s or --n)
+  -o[PascalCase] "<flag>"  Generates a short-style option flag with an optional PascalCase description suffix
+  --o[PascalCase] "<flag>"  Generates a long-style option flag with an optional PascalCase description suffix
+  --v[PascalCase]           Declares a value associated with the preceding option (must be followed by --s or --n)
+  --a[PascalCase]           Appends a standalone, positional argument to the tail end (must be followed by --s or --n)
   --single, -s                Indicate single-quoted value or argument
   --no-quote, -n              Indicate unquoted value or argument
 

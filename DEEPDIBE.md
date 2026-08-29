@@ -40,7 +40,7 @@
 ## 1. Telemetry and Filter Options
 These options control debugging output and stream filtering. They do not alter the data passing through the core pipeline but manage what is written to `stderr`.
 
-### `title "<pipeline_title>"`
+### `/// "<pipeline_title>"`
 
   * **Meaning:** Sets a title for the overall pipeline. When multiple stages are executed and a title is specified, it displays a distinct header banner (`YOMEL-LOG-TITLE:`) showing the title and the total generated pipeline command.
 
@@ -81,21 +81,13 @@ These options control debugging output and stream filtering. They do not alter t
 ## 2. Structural Stage Elements
 These keywords separate different processes and define command parts.
 
-### `stage "<stage_name>"`
+### `// "<stage_name>"`
   * **Meaning:** Initializes a new execution boundary (a pipeline stage). All subsequent parameters (`-cmd`, `--opt`, etc.) are assigned to this stage until a new `stage` keyword appears.
   * **Usage:** `stage "fetch-data"` creates a clear logical separator for documentation and logging.
 
-### `-cmd "<binary>"`
+### `-c "<binary>"`
   * **Meaning:** Specifies the main executable or binary command to be run in the current stage.
   * **Usage:** `-cmd "aws"`, `-cmd "curl"`, or `-cmd "docker"`.
-
-### `-svc "<service_name>"`
-  * **Meaning:** Declares a sub-service or second-level command hierarchy. This is highly useful for modern cloud CLIs.
-  * **Usage:** In `aws s3api`, `s3api` is the service. Example: `-svc "s3api"`.
-
-### `-act "<action_name>"`
-  * **Meaning:** Declares the operation, verb, or action to be performed under the specified command or service.
-  * **Usage:** In `docker container run`, `run` is the action. Example: `-act "list-objects"`.
 
 ## 3. Color Control Options
 These options customize the color schemes of the log outputs and terminal headers. They can be applied globally in the control section or locally to individual stages.
@@ -125,29 +117,29 @@ These options customize the color schemes of the log outputs and terminal header
   * **Usage:** `--title-comment-color "blue"`.
 
 ## 4. Option and Argument Value Modifiers with PascalCase Suffixes
-Modifiers specify how parameters, options, and trailing arguments are constructed and quoted. You can append an optional Alphanumeric PascalCase description suffix to `--opt`, `--lop`, `--val`, and `--arg` to document the role of each argument clearly.
+Modifiers specify how parameters, options, and trailing arguments are constructed and quoted. You can append an optional Alphanumeric PascalCase description suffix to `-o`, `--o`, `-v`, and `-a` to document the role of each argument clearly.
 
-### `--opt[PascalCase] "<flag>"`
+### `-o[PascalCase] "<flag>"`
   * **Meaning:** Generates a short-style option flag (prefixed with a single dash `-`). An optional PascalCase suffix can be appended for documentation.
-  * **Usage:** `--optVerbose "v"` generates `-v`.
+  * **Usage:** `--oVerbose "v"` generates `-v`.
 
-### `--lop[PascalCase] "<flag>"`
+### `--o[PascalCase] "<flag>"`
   * **Meaning:** Generates a long-style option flag (prefixed with double dashes `--`). An optional PascalCase suffix can be appended for documentation.
-  * **Usage:** `--lopRegion "region"` generates `--region`.
+  * **Usage:** `--oRegion "region"` generates `--region`.
 
-### `--val[PascalCase]`
-  * **Meaning:** Declares a value associated with the preceding option (`--opt` or `--lop`). It **must** be immediately followed by a quote control flag (`--s` or `--n`), and can include an optional PascalCase description suffix.
+### `-v[PascalCase]`
+  * **Meaning:** Declares a value associated with the preceding option (`-o` or `--o`). It **must** be immediately followed by a quote control flag (`--s` or `--n`), and can include an optional PascalCase description suffix.
   * **Modifiers:**
-    * `--val[PascalCase] --s "<string>"`: Encloses the value in single quotes (`'value'`).
-    * `--val[PascalCase] --n "<string>"`: Emits the raw value without quotes (`value`), ideal for numbers or unquoted tokens.
-  * **Usage:** `--lopId --valId --s "123"` generates `--id '123'`. `--lopCount --valCount --n "5"` generates `--count 5`.
+    * `-v[PascalCase] --s "<string>"`: Encloses the value in single quotes (`'value'`).
+    * `-v[PascalCase] --n "<string>"`: Emits the raw value without quotes (`value`), ideal for numbers or unquoted tokens.
+  * **Usage:** `--oId --vId --s "123"` generates `--id '123'`. `--oCount -vCount --n "5"` generates `--count 5`.
 
-### `--arg[PascalCase]`
+### `--a[PascalCase]`
   * **Meaning:** Appends a standalone, positional argument to the tail end of the generated command string. It **must** be immediately followed by a quote control flag (`--s` or `--n`), and can include an optional PascalCase description suffix.
   * **Modifiers:**
-    * `--arg[PascalCase] --s "<string>"`: Appends a single-quoted positional argument.
-    * `--arg[PascalCase] --n "<string>"`: Appends an unquoted positional argument.
-  * **Usage:** `--argPattern --s "/pattern/d"` appends `'/pattern/d'`.
+    * `--a[PascalCase] --s "<string>"`: Appends a single-quoted positional argument.
+    * `--a[PascalCase] --n "<string>"`: Appends an unquoted positional argument.
+  * **Usage:** `--aPattern --s "/pattern/d"` appends `'/pattern/d'`.
 
 ## 5. Environment Variables and TOML Configuration
 `yomel` can be configured using environment variables and external TOML configuration files to control color themes, terminal settings, and stream filters.
