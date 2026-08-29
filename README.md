@@ -72,34 +72,32 @@ Because the code is extremely difficult to read as prose/text, and  debug logs a
 ```sh.sh
 step_num=$(\
 	yomel \
-		title "agregate py step count" \
-		stage "find py file" \
-		-cmd find  \
-		--argFindDir "/home/haumi/デスクトップ/share/temp/exp_py_for_yomel" \
-		--optFilterFileName name \
-		--valOnlyPyExtend "*.py" \
-		--optFilterType type \
-		--valFile f \
-		stage "count step num by each py file" \
-		-cmd xargs \
-		--argCountCmd  --n "wc -l" \
-		stage "sort numerically in descending order" \
+		/// "agregate py step count" \
+		// "find py file" \
+		-c find  \
+		-aFindDir "/home/haumi/デスクトップ/share/temp/exp_py_for_yomel" \
+		-oFilterFileName name \
+		-vOnlyPyExtend "*.py" \
+		-oFilterType type \
+		-vFile f \
+		// "count step num by each py file" \
+		-c xargs \
+		-aCountCmd  --n "wc -l" \
+		// "sort numerically in descending order" \
 		--log \
-		-cmd sort \
-		--optNumrically n \
-		--optDescendingOrder r \
-		stage "get only first total line" \
+		-c sort \
+		-oNumrically n \
+		-oDescendingOrder r \
+		// "get only first total line" \
 		--log \
-		-cmd head \
-		--optOnlyFirstLine 1 \
-		stage "get only step num" \
+		-c head \
+		-oOnlyFirstLine 1 \
+		// "get only step num" \
 		--log \
-		-cmd sed \
-		--argSubstitute --s 's/[^0-9]//g' \
+		-c sed \
+		-aSubstitute --s 's/[^0-9]//g' \
 );\
 echo "total ${step_num}"
-
-
 ```
 
 The above code is very long.  
@@ -137,7 +135,7 @@ Thanks to `yomel`, we can create a super readable and debuggable environment in 
 
 ## Demo
 
-![yomel_demo5](https://github.com/user-attachments/assets/f9cf9fbc-404c-4109-950c-bad3b5a464e1)
+![yomel_demo6](https://github.com/user-attachments/assets/11ee4403-5ded-4968-8776-1ada917b8a1a)
 
 
 ## Installation (Linux/Mac)
