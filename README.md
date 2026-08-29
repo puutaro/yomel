@@ -101,7 +101,7 @@ echo "total ${step_num}"
 ```
 
 The above code is very long.  
-But we can easily recognize the pipeline's purpose from the `title`, `stage`, and `--opt` , `--val`, `--arg` suffix description.  
+But we can easily recognize the pipeline's purpose from the `///`, `//`, and `-o` , `-v`, `-a` suffix description.  
 
 For a long time, I have been considering what's make a readable shell pipline.  
 Eventually, I realized that the key is being rich in notes. By heavily annotating it, we can reach a readable shellpipeline.  
